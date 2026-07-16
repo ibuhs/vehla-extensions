@@ -35,13 +35,17 @@ function parseRequest(value) {
   const [methodAndURL, body = "", rawHeaders = ""] = split(value);
   const match = methodAndURL.match(/^([A-Za-z]+)\s+(\S+)$/);
   if (!match) throw new Error("Start with METHOD URL, such as POST https://example.com/hook.");
-  const method = match[1].toUpperCase();
+  return requestFromParts(match[1], match[2], body, rawHeaders);
+}
+
+function requestFromParts(methodValue, urlValue, body = "", rawHeaders = "") {
+  const method = String(methodValue).toUpperCase();
   if (!["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"].includes(method)) {
     throw new Error(`Unsupported HTTP method: ${method}`);
   }
   let url;
   try {
-    url = new URL(match[2]);
+    url = new URL(urlValue);
   } catch {
     throw new Error("Enter a valid webhook URL.");
   }
@@ -110,15 +114,27 @@ async function send(request, authorizationHeader) {
   const displayBody = responseBody.length > 100_000
     ? `${responseBody.slice(0, 100_000)}\n\n[Truncated at 100 KB]`
     : responseBody;
-  return [
+  const safeBody = authorizationHeader
+    ? displayBody.replaceAll(authorizationHeader, "<redacted>")
+    : displayBody;
+  const report = [
     `${request.method} ${request.url}`,
     `Status: ${response.status} ${response.statusText}`,
     `Duration: ${duration} ms`,
     `Final URL: ${response.url}`,
     `Content-Type: ${response.headers.get("content-type") || "Unknown"}`,
     "",
-    displayBody,
+    safeBody,
   ].join("\n");
+  return {
+    report,
+    status: response.status,
+    statusText: response.statusText,
+    duration,
+    finalURL: response.url,
+    contentType: response.headers.get("content-type") || "Unknown",
+    body: safeBody,
+  };
 }
 
 function shellQuote(value) {
@@ -136,13 +152,91 @@ function curlCommand(request) {
 
 runStoreExtension(async (invocation) => {
   switch (invocation.commandID) {
+    case "compose": {
+      const values = invocation.context.formValues;
+      if (!values) {
+        throw new Error("Compose Webhook Request requires a newer version of Vehla.");
+      }
+      const request = requestFromParts(
+        values.method,
+        values.url,
+        values.body,
+        values.headers,
+      );
+      const oneTimeAuthorization = String(values.oneTimeAuthorization || "").trim();
+      const storedAuthorization = values.useStoredAuthorization
+        ? invocation.context.secrets?.authorizationHeader
+        : undefined;
+      const response = await send(
+        request,
+        oneTimeAuthorization || storedAuthorization,
+      );
+      return Store.view({
+        title: `${request.method} request completed`,
+        subtitle: request.url,
+        sections: [
+          {
+            title: "Request",
+            items: [
+              { type: "detail", label: "Method", value: request.method },
+              { type: "detail", label: "URL", value: request.url },
+              {
+                type: "detail",
+                label: "Authorization",
+                value: oneTimeAuthorization
+                  ? "One-time override"
+                  : storedAuthorization
+                    ? "Configured secret"
+                    : "Not used",
+              },
+            ],
+          },
+          {
+            title: "Response",
+            items: [
+              {
+                type: "detail",
+                label: "Status",
+                value: `${response.status} ${response.statusText}`,
+              },
+              {
+                type: "detail",
+                label: "Duration",
+                value: `${response.duration} ms`,
+              },
+              {
+                type: "detail",
+                label: "Content-Type",
+                value: response.contentType,
+              },
+              {
+                type: "code",
+                language: "text",
+                text: response.body || "(Empty response body)",
+              },
+            ],
+          },
+        ],
+        actions: [
+          {
+            type: "copyText",
+            value: response.report,
+            label: "Copy Report",
+            systemImage: "doc.on.doc",
+          },
+        ],
+      });
+    }
+
     case "send": {
       const request = parseRequest(
         requireInput(invocation, "webhook POST https://example.com/hook | {\"ok\":true}"),
       );
-      return Store.copyText(
-        await send(request, invocation.context.secrets?.authorizationHeader),
+      const response = await send(
+        request,
+        invocation.context.secrets?.authorizationHeader,
       );
+      return Store.copyText(response.report);
     }
 
     case "save": {
@@ -167,12 +261,11 @@ runStoreExtension(async (invocation) => {
       const name = requireInput(invocation, "webhookrun deploy").toLowerCase();
       const saved = await loadSaved(invocation);
       if (!saved[name]) throw new Error(`No saved webhook named “${name}”.`);
-      return Store.copyText(
-        await send(
-          saved[name].request,
-          invocation.context.secrets?.authorizationHeader,
-        ),
+      const response = await send(
+        saved[name].request,
+        invocation.context.secrets?.authorizationHeader,
       );
+      return Store.copyText(response.report);
     }
 
     case "list": {

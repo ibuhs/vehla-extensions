@@ -388,11 +388,94 @@
         "apiVersion": 1,
         "id": "com.vehla.examples.webhook-runner",
         "name": "Webhook Runner",
-        "version": "1.1.0",
+        "version": "1.2.0",
         "description": "Send, save, inspect, and reproduce HTTP webhook requests with optional secure authorization.",
         "author": "Vehla",
         "entrypoint": "index.js",
         "commands": [
+          {
+            "id": "compose",
+            "title": "Compose Webhook Request",
+            "subtitle": "Use a native form and inspect a structured response",
+            "keywords": [
+              "webhookform"
+            ],
+            "systemImage": "square.and.pencil",
+            "form": {
+              "title": "Webhook Request Builder",
+              "description": "Build a request without compact palette syntax. Form values are used only for this invocation.",
+              "submitLabel": "Send Request",
+              "fields": [
+                {
+                  "id": "method",
+                  "type": "select",
+                  "label": "Method",
+                  "required": true,
+                  "defaultValue": "POST",
+                  "options": [
+                    {
+                      "id": "GET",
+                      "label": "GET"
+                    },
+                    {
+                      "id": "POST",
+                      "label": "POST"
+                    },
+                    {
+                      "id": "PUT",
+                      "label": "PUT"
+                    },
+                    {
+                      "id": "PATCH",
+                      "label": "PATCH"
+                    },
+                    {
+                      "id": "DELETE",
+                      "label": "DELETE"
+                    },
+                    {
+                      "id": "HEAD",
+                      "label": "HEAD"
+                    }
+                  ]
+                },
+                {
+                  "id": "url",
+                  "type": "text",
+                  "label": "URL",
+                  "placeholder": "https://api.example.com/webhook",
+                  "required": true
+                },
+                {
+                  "id": "body",
+                  "type": "multilineText",
+                  "label": "Request body",
+                  "description": "JSON is validated when Content-Type is application/json.",
+                  "placeholder": "{\"event\":\"deploy\"}"
+                },
+                {
+                  "id": "headers",
+                  "type": "multilineText",
+                  "label": "Headers",
+                  "description": "Separate headers with semicolons.",
+                  "placeholder": "X-Environment: staging; X-Source: Vehla"
+                },
+                {
+                  "id": "useStoredAuthorization",
+                  "type": "toggle",
+                  "label": "Use configured Authorization secret",
+                  "defaultValue": true
+                },
+                {
+                  "id": "oneTimeAuthorization",
+                  "type": "secureText",
+                  "label": "One-time Authorization override",
+                  "description": "Optional complete header value. It is never saved and overrides the configured secret.",
+                  "placeholder": "Bearer temporary-token"
+                }
+              ]
+            }
+          },
           {
             "id": "send",
             "title": "Send Webhook",
@@ -464,8 +547,8 @@
           }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/webhook-runner-1.1.0.zip",
-      "sha256": "044e8c6331bac83713019fb9367466abd461b263687208aad6d08b1aeeda54b3",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/webhook-runner-1.2.0.zip",
+      "sha256": "432e021bcadf0febe72fdb2e583995b7fac67929a301a9d32190ead001fd32cc",
       "archiveRoot": "webhook-runner"
     }
   ]

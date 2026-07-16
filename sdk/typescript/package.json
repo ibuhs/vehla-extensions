@@ -1,6 +1,6 @@
 {
   "name": "@vehla/store-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Types and runtime helpers for Vehla Store command packages",
   "type": "module",
   "main": "./index.js",

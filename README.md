@@ -29,6 +29,8 @@ Supported:
 - Network requests.
 - Private persistent storage.
 - Keychain-backed extension secrets.
+- Declarative native command forms.
+- Structured native result views and brokered action buttons.
 - Browser handoff.
 - Structured validation and errors.
 - A separate process per invocation.
@@ -37,7 +39,7 @@ Supported:
 
 Not yet supported:
 
-- Custom embedded SwiftUI or web views.
+- Arbitrary extension-defined SwiftUI or web views.
 - Long-running background processes.
 - Scheduled commands.
 - Extension-defined global hotkeys.
@@ -276,6 +278,13 @@ Every package must contain `extension.json`.
 - Defaults to `shippingbox`.
 - Use symbols available on Vehla’s macOS deployment target.
 
+`form`
+
+- Optional declarative form displayed before the command runs.
+- Vehla owns rendering, validation, keyboard behavior, and value collection.
+- Supported field types are `text`, `secureText`, `multilineText`, `toggle`, and `select`.
+- Extensions cannot inject arbitrary SwiftUI, HTML, or JavaScript into the form.
+
 ## Capabilities
 
 Capabilities communicate intent and gate Vehla-provided context or actions.
@@ -378,6 +387,7 @@ interface StoreInvocation {
     frontmostApplication?: string;
     dataDirectory?: string;
     secrets: Readonly<Record<string, string>>;
+    formValues: Readonly<Record<string, string | boolean>>;
   };
 }
 ```
@@ -417,6 +427,85 @@ interface StoreInvocation {
 - Optional unconfigured secrets are omitted.
 - A command is not launched when a required secret is missing.
 - Treat values as transient credentials: do not log, copy, persist, or include them in errors.
+
+`formValues`
+
+- Contains values submitted through the command’s manifest form.
+- Text, secure text, multiline text, and select fields are strings.
+- Toggle fields are Booleans.
+- Secure text values are never persisted and are redacted from runtime diagnostics.
+
+## Declarative command forms
+
+Add a `form` to a command:
+
+```json
+{
+  "id": "request",
+  "title": "Run API Request",
+  "keywords": ["request"],
+  "systemImage": "paperplane",
+  "form": {
+    "title": "API Request",
+    "description": "Configure the request before it runs.",
+    "submitLabel": "Send",
+    "fields": [
+      {
+        "id": "method",
+        "type": "select",
+        "label": "Method",
+        "defaultValue": "GET",
+        "options": [
+          {"id": "GET", "label": "GET"},
+          {"id": "POST", "label": "POST"}
+        ]
+      },
+      {
+        "id": "url",
+        "type": "text",
+        "label": "URL",
+        "placeholder": "https://api.example.com/items",
+        "required": true
+      },
+      {
+        "id": "body",
+        "type": "multilineText",
+        "label": "JSON body"
+      },
+      {
+        "id": "confirm",
+        "type": "toggle",
+        "label": "Confirm request",
+        "defaultValue": false
+      },
+      {
+        "id": "oneTimeToken",
+        "type": "secureText",
+        "label": "One-time token",
+        "description": "Transient input for this invocation only."
+      }
+    ]
+  }
+}
+```
+
+Read submitted values:
+
+```js
+const { method, url, body, confirm, oneTimeToken } =
+  invocation.context.formValues;
+```
+
+Rules:
+
+- Form and field IDs are validated when the package is installed.
+- A form supports up to 24 fields.
+- Field IDs must be unique within the form.
+- Required text and select fields must have a non-empty value.
+- A required toggle must be enabled.
+- Select defaults must match a declared option ID.
+- Closing or cancelling the form does not launch the extension process.
+- `secureText` is for one-time input. Use manifest secrets for credentials that must persist.
 
 ## Input precedence
 
@@ -491,6 +580,46 @@ return {
   },
 };
 ```
+
+## Rich result views
+
+Use `Store.view` to display a structured native result:
+
+```js
+return Store.view({
+  title: "Request completed",
+  subtitle: "https://api.example.com/items",
+  sections: [
+    {
+      title: "Response",
+      items: [
+        { type: "detail", label: "Status", value: "200 OK" },
+        { type: "markdown", text: "**3 records** returned." },
+        { type: "code", language: "json", text: JSON.stringify(data, null, 2) }
+      ]
+    }
+  ],
+  actions: [
+    {
+      type: "copyText",
+      value: JSON.stringify(data, null, 2),
+      label: "Copy JSON",
+      systemImage: "doc.on.doc"
+    }
+  ]
+});
+```
+
+Supported item types:
+
+- `text` — selectable plain text.
+- `markdown` — native inline Markdown.
+- `code` — selectable monospaced content with horizontal scrolling.
+- `detail` — a label/value row.
+
+Result actions use the existing `copyText`, `openURL`, and `showMessage` broker. Capability checks still apply when a user selects an action. A result can contain at most 20 sections, 100 total items, and 8 actions.
+
+Vehla validates the schema and renders native controls. Extensions cannot return arbitrary views, scripts, event handlers, or remote HTML.
 
 ## Asynchronous commands
 
@@ -706,6 +835,10 @@ It sends one newline-terminated request:
       "dataDirectory": "optional",
       "secrets": {
         "apiToken": "test-only-placeholder"
+      },
+      "formValues": {
+        "url": "https://example.com",
+        "confirm": true
       }
     }
   }
@@ -789,6 +922,7 @@ Current protections:
 - Ask, Allow, and Deny decisions.
 - Keychain-backed storage for declared secrets.
 - Required-secret launch checks and runtime diagnostic redaction.
+- Validation and native rendering of declarative forms and rich results.
 - HTTP/HTTPS restriction for brokered URL opening.
 
 Current limitation:

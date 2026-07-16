@@ -13,6 +13,8 @@ This extension is a reference for:
 - Persisting named requests.
 - Atomic JSON file updates.
 - Injecting a Keychain-backed authorization value at send time.
+- Collecting structured input with a native declarative form.
+- Presenting response metadata and bodies in a rich native result.
 - Generating shell-safe cURL commands.
 
 ## Install
@@ -55,6 +57,23 @@ Content-Type: application/json
 If Content-Type contains `application/json`, the body must parse as valid JSON.
 
 ## Commands
+
+### Compose Webhook Request
+
+Keyword: `webhookform`
+
+Selecting the command opens a native request builder with:
+
+- An HTTP method picker.
+- A required URL field.
+- A multiline request body.
+- Multiline semicolon-separated headers.
+- A toggle for the configured Authorization secret.
+- A secure one-time Authorization override.
+
+Choose **Send Request** to run it. Vehla passes the submitted values through `invocation.context.formValues`. The secure override is transient, is redacted from runtime errors, and takes precedence over the configured secret.
+
+The response opens in a native result view containing request metadata, status, duration, content type, and a selectable response body. Choose **Copy Report** to use the brokered clipboard action.
 
 ### Send Webhook
 
@@ -178,6 +197,8 @@ Generating cURL does not send the request.
 
 The generated command intentionally excludes the configured Authorization secret. Only headers typed directly into the request syntax appear in cURL output.
 
+The form command also redacts a directly echoed Authorization value from the displayed response body and copied report.
+
 ## Input fallback
 
 Request text is resolved in this order:
@@ -203,6 +224,8 @@ The package also declares one optional secret:
 - `authorizationHeader` — the complete value for the HTTP `Authorization` header.
 
 Vehla stores it in the macOS Keychain. The extension receives it for an invocation but never writes it to `webhooks.json`.
+
+The form’s secure one-time override is not a persisted secret. Use it only when a credential should apply to one invocation.
 
 ## Persistent data
 

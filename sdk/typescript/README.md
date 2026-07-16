@@ -66,3 +66,21 @@ const token = context.secrets.apiToken;
 ```
 
 Required secrets prevent invocation until configured. Never log, persist, return, or embed secret values in source or manifests.
+
+## Forms and rich results
+
+Commands may declare a native form in `extension.json`. Submitted text, secure text, multiline text, toggle, and select values are available through `context.formValues`. Secure text is transient and is redacted from runtime diagnostics.
+
+Return `Store.view(...)` for a native structured result containing text, Markdown, code, detail rows, and brokered action buttons:
+
+```js
+return Store.view({
+  title: "Completed",
+  sections: [{
+    title: "Response",
+    items: [{ type: "code", language: "json", text: "{}" }],
+  }],
+});
+```
+
+Vehla validates and renders the schema. Packages cannot inject arbitrary UI code.

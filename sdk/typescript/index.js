@@ -12,6 +12,10 @@ export const Store = {
   showMessage(value) {
     return { action: { type: "showMessage", value } };
   },
+
+  view(value) {
+    return { view: value };
+  },
 };
 
 export function runStoreExtension(handler) {
