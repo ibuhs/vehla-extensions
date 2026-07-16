@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import VehlaStoreSDK
 
@@ -23,7 +24,7 @@ struct SwiftHelloExtension {
             case "greet":
                 return try greeting(for: invocation)
             case "runtime":
-                return runtimeDetails()
+                return await runtimeDetails()
             default:
                 throw SwiftHelloError.unknownCommand(
                     invocation.commandID
@@ -78,8 +79,13 @@ struct SwiftHelloExtension {
         return StoreResult(action: notification, view: view)
     }
 
-    private static func runtimeDetails() -> StoreResult {
+    private static func runtimeDetails() async -> StoreResult {
         let process = ProcessInfo.processInfo
+        let activationIsProhibited = await MainActor.run {
+            NSApplication.shared.activationPolicy() == .prohibited
+        }
+        let backgroundEnvironmentIsSet =
+            process.environment["VEHLA_EXTENSION_BACKGROUND"] == "1"
         return Store.view(
             StoreRichView(
                 title: "Swift Runtime",
@@ -91,6 +97,14 @@ struct SwiftHelloExtension {
                             .detail("Operating system", value: process.operatingSystemVersionString),
                             .detail("Processors", value: "\(process.processorCount)"),
                             .detail("Architecture", value: architecture),
+                            .detail(
+                                "App activation",
+                                value: activationIsProhibited ? "Prohibited" : "Allowed"
+                            ),
+                            .detail(
+                                "Background environment",
+                                value: backgroundEnvironmentIsSet ? "Enabled" : "Missing"
+                            ),
                             .detail("Swift", value: "Compiled native executable"),
                         ]
                     ),
