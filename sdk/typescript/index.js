@@ -13,6 +13,10 @@ export const Store = {
     return { action: { type: "showMessage", value } };
   },
 
+  notify(title, body) {
+    return { action: { type: "notify", title, value: body } };
+  },
+
   view(value) {
     return { view: value };
   },

@@ -31,6 +31,8 @@ Supported:
 - Keychain-backed extension secrets.
 - Declarative native command forms.
 - Structured native result views and brokered action buttons.
+- Native single and multiple file selection.
+- Brokered macOS notifications.
 - Browser handoff.
 - Structured validation and errors.
 - A separate process per invocation.
@@ -282,7 +284,7 @@ Every package must contain `extension.json`.
 
 - Optional declarative form displayed before the command runs.
 - Vehla owns rendering, validation, keyboard behavior, and value collection.
-- Supported field types are `text`, `secureText`, `multilineText`, `toggle`, and `select`.
+- Supported field types are `text`, `secureText`, `multilineText`, `toggle`, `select`, `file`, and `files`.
 - Extensions cannot inject arbitrary SwiftUI, HTML, or JavaScript into the form.
 
 ## Capabilities
@@ -321,11 +323,11 @@ Use it for extension-owned settings, caches, and records. Vehla removes this dir
 
 ### `notifications`
 
-Reserved for notification APIs. Declaring it documents intent, but a notification helper is not yet part of API version 1.
+Allows `notify` result actions. Vehla requests macOS notification authorization before delivery.
 
 ### `userSelectedFiles`
 
-Reserved for security-scoped file selection APIs. It is not yet exposed to command handlers in API version 1.
+Allows commands to declare native `file` and `files` form fields. Vehla asks for capability approval before presenting the picker and supplies metadata only for paths chosen in that form.
 
 ## Permission behavior
 
@@ -387,7 +389,10 @@ interface StoreInvocation {
     frontmostApplication?: string;
     dataDirectory?: string;
     secrets: Readonly<Record<string, string>>;
-    formValues: Readonly<Record<string, string | boolean>>;
+    formValues: Readonly<Record<
+      string,
+      string | boolean | StoreSelectedFile | StoreSelectedFile[]
+    >>;
   };
 }
 ```
@@ -434,6 +439,7 @@ interface StoreInvocation {
 - Text, secure text, multiline text, and select fields are strings.
 - Toggle fields are Booleans.
 - Secure text values are never persisted and are redacted from runtime diagnostics.
+- Single file fields contain a `StoreSelectedFile`; multiple file fields contain an array.
 
 ## Declarative command forms
 
@@ -483,6 +489,13 @@ Add a `form` to a command:
         "type": "secureText",
         "label": "One-time token",
         "description": "Transient input for this invocation only."
+      },
+      {
+        "id": "attachments",
+        "type": "files",
+        "label": "Attachments",
+        "allowedFileTypes": ["json", "public.image"],
+        "maximumSelection": 10
       }
     ]
   }
@@ -492,9 +505,23 @@ Add a `form` to a command:
 Read submitted values:
 
 ```js
-const { method, url, body, confirm, oneTimeToken } =
+const { method, url, body, confirm, oneTimeToken, attachments } =
   invocation.context.formValues;
 ```
+
+Selected file metadata:
+
+```ts
+interface StoreSelectedFile {
+  path: string;
+  name: string;
+  isDirectory: boolean;
+  size?: number;
+  contentType?: string;
+}
+```
+
+`allowedFileTypes` accepts filename extensions or Uniform Type Identifiers. Set `allowsDirectories` to permit folders. A `file` field returns one metadata object; a `files` field returns an array and may set `maximumSelection` from 1 through 100.
 
 Rules:
 
@@ -503,9 +530,11 @@ Rules:
 - Field IDs must be unique within the form.
 - Required text and select fields must have a non-empty value.
 - A required toggle must be enabled.
+- Required file fields must contain at least one selection.
 - Select defaults must match a declared option ID.
 - Closing or cancelling the form does not launch the extension process.
 - `secureText` is for one-time input. Use manifest secrets for credentials that must persist.
+- File fields require the package to declare `userSelectedFiles`.
 
 ## Input precedence
 
@@ -567,6 +596,28 @@ return Store.showMessage("Operation completed.");
 
 Use messages for short confirmations. Prefer clipboard output for reports and substantial content.
 
+### Deliver a notification
+
+Requires `notifications`.
+
+```js
+return Store.notify("Export complete", "12 files were processed.");
+```
+
+Equivalent action:
+
+```json
+{
+  "action": {
+    "type": "notify",
+    "title": "Export complete",
+    "value": "12 files were processed."
+  }
+}
+```
+
+Vehla checks the package capability and requests macOS authorization. Use notifications for completion events that remain useful after the command window closes, not as a replacement for errors or rich results.
+
 ### Message plus action
 
 The protocol supports both fields:
@@ -617,7 +668,7 @@ Supported item types:
 - `code` — selectable monospaced content with horizontal scrolling.
 - `detail` — a label/value row.
 
-Result actions use the existing `copyText`, `openURL`, and `showMessage` broker. Capability checks still apply when a user selects an action. A result can contain at most 20 sections, 100 total items, and 8 actions.
+Result actions use the `copyText`, `openURL`, `showMessage`, and `notify` broker. Capability checks still apply when a user selects an action. A result can contain at most 20 sections, 100 total items, and 8 actions.
 
 Vehla validates the schema and renders native controls. Extensions cannot return arbitrary views, scripts, event handlers, or remote HTML.
 
@@ -923,6 +974,8 @@ Current protections:
 - Keychain-backed storage for declared secrets.
 - Required-secret launch checks and runtime diagnostic redaction.
 - Validation and native rendering of declarative forms and rich results.
+- Explicit user selection before file metadata is shared.
+- Capability and macOS authorization checks for notifications.
 - HTTP/HTTPS restriction for brokered URL opening.
 
 Current limitation:

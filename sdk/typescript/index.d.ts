@@ -15,13 +15,23 @@ export interface StoreFormOption {
 
 export interface StoreFormField {
   id: string;
-  type: "text" | "secureText" | "multilineText" | "toggle" | "select";
+  type:
+    | "text"
+    | "secureText"
+    | "multilineText"
+    | "toggle"
+    | "select"
+    | "file"
+    | "files";
   label: string;
   description?: string;
   placeholder?: string;
   required?: boolean;
   defaultValue?: string | boolean;
   options?: StoreFormOption[];
+  allowedFileTypes?: string[];
+  allowsDirectories?: boolean;
+  maximumSelection?: number;
 }
 
 export interface StoreCommandForm {
@@ -31,13 +41,23 @@ export interface StoreCommandForm {
   fields: StoreFormField[];
 }
 
+export interface StoreSelectedFile {
+  path: string;
+  name: string;
+  isDirectory: boolean;
+  size?: number;
+  contentType?: string;
+}
+
 export interface StoreInvocationContext {
   selectedText?: string;
   clipboardText?: string;
   frontmostApplication?: string;
   dataDirectory?: string;
   secrets: Readonly<Record<string, string>>;
-  formValues: Readonly<Record<string, string | boolean>>;
+  formValues: Readonly<
+    Record<string, string | boolean | StoreSelectedFile | StoreSelectedFile[]>
+  >;
 }
 
 export interface StoreInvocation {
@@ -50,7 +70,14 @@ export interface StoreInvocation {
 export type StoreAction =
   | { type: "copyText"; value: string; label?: string; systemImage?: string }
   | { type: "openURL"; value: string; label?: string; systemImage?: string }
-  | { type: "showMessage"; value: string; label?: string; systemImage?: string };
+  | { type: "showMessage"; value: string; label?: string; systemImage?: string }
+  | {
+      type: "notify";
+      value: string;
+      title?: string;
+      label?: string;
+      systemImage?: string;
+    };
 
 export type StoreRichItem =
   | { type: "text" | "markdown" | "code"; text: string; language?: string }
@@ -82,6 +109,7 @@ export declare const Store: {
   copyText(value: string): StoreResult;
   openURL(value: string): StoreResult;
   showMessage(value: string): StoreResult;
+  notify(title: string, body: string): StoreResult;
   view(value: StoreRichView): StoreResult;
 };
 

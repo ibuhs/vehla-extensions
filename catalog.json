@@ -97,6 +97,144 @@
     {
       "manifest": {
         "apiVersion": 1,
+        "id": "com.vehla.examples.file-toolkit",
+        "name": "File Toolkit",
+        "version": "1.0.0",
+        "description": "Inspect, hash, and format files chosen through Vehla\u2019s native file picker.",
+        "author": "Vehla",
+        "entrypoint": "index.js",
+        "commands": [
+          {
+            "id": "inspect-files",
+            "title": "Inspect Files",
+            "subtitle": "Review metadata for files and folders",
+            "keywords": [
+              "fileinspect"
+            ],
+            "systemImage": "doc.text.magnifyingglass",
+            "form": {
+              "title": "Inspect Files",
+              "description": "Choose up to 15 files or folders. Vehla shares only the selected paths with this invocation.",
+              "submitLabel": "Inspect",
+              "fields": [
+                {
+                  "id": "files",
+                  "type": "files",
+                  "label": "Files and folders",
+                  "required": true,
+                  "allowsDirectories": true,
+                  "maximumSelection": 15
+                },
+                {
+                  "id": "notifyWhenComplete",
+                  "type": "toggle",
+                  "label": "Notify when complete",
+                  "defaultValue": false
+                }
+              ]
+            }
+          },
+          {
+            "id": "hash-file",
+            "title": "Hash File",
+            "subtitle": "Calculate a streaming SHA-256 or SHA-512 digest",
+            "keywords": [
+              "filehash"
+            ],
+            "systemImage": "number",
+            "form": {
+              "title": "Hash File",
+              "submitLabel": "Calculate Hash",
+              "fields": [
+                {
+                  "id": "file",
+                  "type": "file",
+                  "label": "File",
+                  "required": true
+                },
+                {
+                  "id": "algorithm",
+                  "type": "select",
+                  "label": "Algorithm",
+                  "required": true,
+                  "defaultValue": "sha256",
+                  "options": [
+                    {
+                      "id": "sha256",
+                      "label": "SHA-256"
+                    },
+                    {
+                      "id": "sha512",
+                      "label": "SHA-512"
+                    }
+                  ]
+                },
+                {
+                  "id": "notifyWhenComplete",
+                  "type": "toggle",
+                  "label": "Notify when complete",
+                  "defaultValue": false
+                }
+              ]
+            }
+          },
+          {
+            "id": "format-json",
+            "title": "Format JSON File",
+            "subtitle": "Validate and pretty-print a selected JSON file",
+            "keywords": [
+              "jsonfile"
+            ],
+            "systemImage": "curlybraces",
+            "form": {
+              "title": "Format JSON File",
+              "description": "The source file is read but never modified.",
+              "submitLabel": "Format JSON",
+              "fields": [
+                {
+                  "id": "file",
+                  "type": "file",
+                  "label": "JSON file",
+                  "required": true,
+                  "allowedFileTypes": [
+                    "json",
+                    "public.json"
+                  ]
+                },
+                {
+                  "id": "indentation",
+                  "type": "select",
+                  "label": "Indentation",
+                  "required": true,
+                  "defaultValue": "twoSpaces",
+                  "options": [
+                    {
+                      "id": "twoSpaces",
+                      "label": "2 spaces"
+                    },
+                    {
+                      "id": "fourSpaces",
+                      "label": "4 spaces"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "capabilities": [
+          "clipboardWrite",
+          "notifications",
+          "userSelectedFiles"
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/file-toolkit-1.0.0.zip",
+      "sha256": "1d392aa7ba13e42e2bc791391afad109fbeb2ffca5d827fbc5fea2e339cbf7d9",
+      "archiveRoot": "file-toolkit"
+    },
+    {
+      "manifest": {
+        "apiVersion": 1,
         "id": "com.vehla.examples.github-workflow",
         "name": "GitHub Workflow",
         "version": "1.1.0",

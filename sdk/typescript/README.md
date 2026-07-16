@@ -83,4 +83,8 @@ return Store.view({
 });
 ```
 
+`file` and `files` form fields open Vehla’s native picker and return `StoreSelectedFile` metadata. Packages using them must declare `userSelectedFiles`.
+
+Return `Store.notify(title, body)` to request a brokered macOS notification after declaring the `notifications` capability.
+
 Vehla validates and renders the schema. Packages cannot inject arbitrary UI code.
