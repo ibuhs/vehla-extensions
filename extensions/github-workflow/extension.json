@@ -1,0 +1,67 @@
+{
+  "apiVersion": 1,
+  "id": "com.vehla.examples.github-workflow",
+  "name": "GitHub Workflow",
+  "version": "1.0.0",
+  "description": "Search GitHub, open repositories and pull requests, draft issues, compare branches, and inspect public repository metadata.",
+  "author": "Vehla",
+  "entrypoint": "index.js",
+  "commands": [
+    {
+      "id": "search",
+      "title": "Search GitHub",
+      "subtitle": "Search repositories, code, issues, and users",
+      "keywords": ["ghsearch"],
+      "systemImage": "magnifyingglass"
+    },
+    {
+      "id": "open-repository",
+      "title": "Open GitHub Repository",
+      "subtitle": "Open owner/repository in your browser",
+      "keywords": ["ghrepo"],
+      "systemImage": "folder.badge.gearshape"
+    },
+    {
+      "id": "repository-summary",
+      "title": "Copy Repository Summary",
+      "subtitle": "Fetch public metadata for owner/repository",
+      "keywords": ["ghsummary"],
+      "systemImage": "doc.text.magnifyingglass"
+    },
+    {
+      "id": "create-issue",
+      "title": "Draft GitHub Issue",
+      "subtitle": "Use owner/repo | title | body",
+      "keywords": ["ghissue"],
+      "systemImage": "exclamationmark.circle"
+    },
+    {
+      "id": "open-pull-request",
+      "title": "Open GitHub Pull Request",
+      "subtitle": "Use owner/repo | pull request number",
+      "keywords": ["ghpr"],
+      "systemImage": "arrow.triangle.branch"
+    },
+    {
+      "id": "compare-branches",
+      "title": "Compare GitHub Branches",
+      "subtitle": "Use owner/repo | base | head",
+      "keywords": ["ghcompare"],
+      "systemImage": "arrow.left.arrow.right"
+    },
+    {
+      "id": "open-profile",
+      "title": "Open GitHub Profile",
+      "subtitle": "Open a GitHub username",
+      "keywords": ["ghuser"],
+      "systemImage": "person.crop.circle"
+    }
+  ],
+  "capabilities": [
+    "clipboardRead",
+    "clipboardWrite",
+    "selectedText",
+    "openURL",
+    "networkAccess"
+  ]
+}

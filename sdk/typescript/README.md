@@ -1,0 +1,58 @@
+# Vehla Store SDK
+
+Store packages are directories containing an `extension.json` manifest and a JavaScript entrypoint. Vehla launches the entrypoint in a separate Node.js process and sends one newline-delimited JSON-RPC invocation through standard input.
+
+## Try the example
+
+Requirements: Node.js 20 or newer.
+
+```sh
+cd extensions/hello-store
+npm install --install-links
+```
+
+Open Vehla Settings → Store → Install Local Package, select `extensions/hello-store`, and enable the permissions required by the commands. Search the palette for `hello`, `greet`, or `storecopy`.
+
+`--install-links` copies the local SDK into `node_modules` so the installed package remains self-contained.
+
+## Package shape
+
+```text
+my-package/
+  extension.json
+  index.js
+  node_modules/
+  package.json
+```
+
+The manifest declares an API version, package identity, entrypoint, commands, and capabilities. Command IDs are namespaced by Vehla using the package ID.
+
+The entrypoint should call `runStoreExtension` once:
+
+```js
+import { Store, runStoreExtension } from "@vehla/store-sdk";
+
+runStoreExtension(async ({ commandID, query, context }) => {
+  if (commandID === "copy") {
+    return Store.copyText(query || context.selectedText || "");
+  }
+  return Store.showMessage("Done");
+});
+```
+
+Write diagnostics to standard error. Standard output is reserved for the protocol response and is limited to 1 MB. A command has 15 seconds to finish.
+
+## Capabilities
+
+Capabilities must be declared in `extension.json` and allowed by the user in Store settings. API version 1 recognizes:
+
+- `clipboardRead`
+- `clipboardWrite`
+- `openURL`
+- `notifications`
+- `selectedText`
+- `userSelectedFiles`
+- `networkAccess`
+- `persistentStorage`
+
+The current command API implements clipboard input/output, selected-text input, HTTP/HTTPS URL opening, message display, explicit network launch consent, and a private persistent data directory. Additional broker APIs can be added without changing the package process boundary.

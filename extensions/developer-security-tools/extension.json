@@ -1,0 +1,72 @@
+{
+  "apiVersion": 1,
+  "id": "com.vehla.examples.developer-security-tools",
+  "name": "Developer Security Tools",
+  "version": "1.0.0",
+  "description": "Hash and encode text, inspect JWTs, generate secure passwords and tokens, and create HMAC signatures.",
+  "author": "Vehla",
+  "entrypoint": "index.js",
+  "commands": [
+    {
+      "id": "sha256",
+      "title": "SHA-256 Hash",
+      "subtitle": "Hash text and copy the hexadecimal digest",
+      "keywords": ["sha256"],
+      "systemImage": "number.square"
+    },
+    {
+      "id": "sha512",
+      "title": "SHA-512 Hash",
+      "subtitle": "Hash text and copy the hexadecimal digest",
+      "keywords": ["sha512"],
+      "systemImage": "number.square.fill"
+    },
+    {
+      "id": "base64-encode",
+      "title": "Base64 Encode",
+      "subtitle": "Encode UTF-8 text as Base64",
+      "keywords": ["b64encode"],
+      "systemImage": "textformat.abc"
+    },
+    {
+      "id": "base64-decode",
+      "title": "Base64 Decode",
+      "subtitle": "Decode Base64 into UTF-8 text",
+      "keywords": ["b64decode"],
+      "systemImage": "textformat"
+    },
+    {
+      "id": "jwt-decode",
+      "title": "Decode JWT",
+      "subtitle": "Inspect header, payload, and expiry without verification",
+      "keywords": ["jwt"],
+      "systemImage": "key.horizontal"
+    },
+    {
+      "id": "password",
+      "title": "Generate Secure Password",
+      "subtitle": "Generate a password; optionally provide a length",
+      "keywords": ["password"],
+      "systemImage": "lock.rotation"
+    },
+    {
+      "id": "token",
+      "title": "Generate Random Token",
+      "subtitle": "Generate a URL-safe token; optionally provide byte length",
+      "keywords": ["token"],
+      "systemImage": "key.viewfinder"
+    },
+    {
+      "id": "hmac",
+      "title": "Create HMAC-SHA256",
+      "subtitle": "Use secret | message to create a signature",
+      "keywords": ["hmac"],
+      "systemImage": "signature"
+    }
+  ],
+  "capabilities": [
+    "clipboardRead",
+    "clipboardWrite",
+    "selectedText"
+  ]
+}

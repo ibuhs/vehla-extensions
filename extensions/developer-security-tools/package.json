@@ -1,0 +1,9 @@
+{
+  "name": "vehla-developer-security-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vehla/store-sdk": "file:../../sdk/typescript"
+  }
+}

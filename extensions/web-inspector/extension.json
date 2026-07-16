@@ -1,0 +1,59 @@
+{
+  "apiVersion": 1,
+  "id": "com.vehla.examples.web-inspector",
+  "name": "Web Inspector",
+  "version": "1.0.0",
+  "description": "Inspect HTTP responses, redirects, metadata, DNS records, response headers, and TLS certificates.",
+  "author": "Vehla",
+  "entrypoint": "index.js",
+  "commands": [
+    {
+      "id": "status",
+      "title": "Check URL Status",
+      "subtitle": "Copy HTTP status, timing, and final URL",
+      "keywords": ["httpstatus"],
+      "systemImage": "waveform.path.ecg"
+    },
+    {
+      "id": "redirects",
+      "title": "Trace URL Redirects",
+      "subtitle": "Copy every redirect hop",
+      "keywords": ["redirects"],
+      "systemImage": "arrow.triangle.turn.up.right.diamond"
+    },
+    {
+      "id": "metadata",
+      "title": "Extract Page Metadata",
+      "subtitle": "Copy title, description, canonical URL, and social tags",
+      "keywords": ["metadata"],
+      "systemImage": "doc.text.magnifyingglass"
+    },
+    {
+      "id": "headers",
+      "title": "Inspect Response Headers",
+      "subtitle": "Copy sorted HTTP response headers",
+      "keywords": ["headers"],
+      "systemImage": "list.bullet.rectangle"
+    },
+    {
+      "id": "dns",
+      "title": "Inspect DNS Records",
+      "subtitle": "Resolve A, AAAA, MX, NS, CNAME, and TXT records",
+      "keywords": ["dns"],
+      "systemImage": "network"
+    },
+    {
+      "id": "tls",
+      "title": "Inspect TLS Certificate",
+      "subtitle": "Copy certificate subject, issuer, validity, and fingerprint",
+      "keywords": ["tls", "certificate"],
+      "systemImage": "checkmark.shield"
+    }
+  ],
+  "capabilities": [
+    "clipboardRead",
+    "clipboardWrite",
+    "selectedText",
+    "networkAccess"
+  ]
+}
