@@ -99,8 +99,8 @@
         "apiVersion": 1,
         "id": "com.vehla.examples.github-workflow",
         "name": "GitHub Workflow",
-        "version": "1.0.0",
-        "description": "Search GitHub, open repositories and pull requests, draft issues, compare branches, and inspect public repository metadata.",
+        "version": "1.1.0",
+        "description": "Search GitHub, open repositories and pull requests, draft issues, compare branches, and inspect public or private repository metadata.",
         "author": "Vehla",
         "entrypoint": "index.js",
         "commands": [
@@ -174,10 +174,18 @@
           "selectedText",
           "openURL",
           "networkAccess"
+        ],
+        "secrets": [
+          {
+            "id": "githubToken",
+            "label": "GitHub Personal Access Token",
+            "description": "Optional token for private repositories and higher API rate limits.",
+            "required": false
+          }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/github-workflow-1.0.0.zip",
-      "sha256": "2b26f10840d604183f3bbf23922c12ebf2557736d6b58acc5eb62b866d3f02b1",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/github-workflow-1.1.0.zip",
+      "sha256": "ac0c5632ed3a7c3e0b041670d7a25084d00f71915c0a3693a18a47eac182027e",
       "archiveRoot": "github-workflow"
     },
     {
@@ -380,8 +388,8 @@
         "apiVersion": 1,
         "id": "com.vehla.examples.webhook-runner",
         "name": "Webhook Runner",
-        "version": "1.0.0",
-        "description": "Send, save, inspect, and reproduce HTTP webhook requests from the palette.",
+        "version": "1.1.0",
+        "description": "Send, save, inspect, and reproduce HTTP webhook requests with optional secure authorization.",
         "author": "Vehla",
         "entrypoint": "index.js",
         "commands": [
@@ -446,10 +454,18 @@
           "selectedText",
           "networkAccess",
           "persistentStorage"
+        ],
+        "secrets": [
+          {
+            "id": "authorizationHeader",
+            "label": "Authorization Header",
+            "description": "Optional full Authorization value, such as Bearer <token>. It is injected only when a request does not provide its own Authorization header.",
+            "required": false
+          }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/webhook-runner-1.0.0.zip",
-      "sha256": "b024281cbaf007ec80efcb17f7f04be3125f3edbc871e05dc5b5820ce374246a",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/webhook-runner-1.1.0.zip",
+      "sha256": "044e8c6331bac83713019fb9367466abd461b263687208aad6d08b1aeeda54b3",
       "archiveRoot": "webhook-runner"
     }
   ]

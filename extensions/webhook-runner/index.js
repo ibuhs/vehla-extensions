@@ -85,14 +85,22 @@ async function saveAll(invocation, webhooks) {
   await fs.rename(temporary, file);
 }
 
-async function send(request) {
+async function send(request, authorizationHeader) {
+  const headers = {
+    "User-Agent": "Vehla-Store-Webhook-Runner/1.1",
+    ...request.headers,
+  };
+  if (
+    authorizationHeader &&
+    !Object.keys(headers).some((name) => name.toLowerCase() === "authorization")
+  ) {
+    headers.Authorization = authorizationHeader;
+  }
+
   const started = performance.now();
   const response = await fetch(request.url, {
     method: request.method,
-    headers: {
-      "User-Agent": "Vehla-Store-Webhook-Runner/1.0",
-      ...request.headers,
-    },
+    headers,
     body: ["GET", "HEAD"].includes(request.method) ? undefined : request.body,
     redirect: "follow",
     signal: AbortSignal.timeout(15_000),
@@ -132,7 +140,9 @@ runStoreExtension(async (invocation) => {
       const request = parseRequest(
         requireInput(invocation, "webhook POST https://example.com/hook | {\"ok\":true}"),
       );
-      return Store.copyText(await send(request));
+      return Store.copyText(
+        await send(request, invocation.context.secrets?.authorizationHeader),
+      );
     }
 
     case "save": {
@@ -157,7 +167,12 @@ runStoreExtension(async (invocation) => {
       const name = requireInput(invocation, "webhookrun deploy").toLowerCase();
       const saved = await loadSaved(invocation);
       if (!saved[name]) throw new Error(`No saved webhook named “${name}”.`);
-      return Store.copyText(await send(saved[name].request));
+      return Store.copyText(
+        await send(
+          saved[name].request,
+          invocation.context.secrets?.authorizationHeader,
+        ),
+      );
     }
 
     case "list": {

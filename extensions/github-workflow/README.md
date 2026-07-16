@@ -1,8 +1,8 @@
 # GitHub Workflow
 
-GitHub navigation and public repository utilities for Vehla.
+GitHub navigation and repository utilities for Vehla.
 
-The extension opens repository workflows in your browser and fetches public repository metadata without requiring a GitHub token.
+The extension opens repository workflows in your browser and fetches public repository metadata anonymously. An optional Keychain-backed token enables private repository summaries and higher API rate limits.
 
 It demonstrates:
 
@@ -11,6 +11,7 @@ It demonstrates:
 - Repository URL normalization and validation.
 - Browser actions.
 - Asynchronous public API requests.
+- Secure optional authentication with a manifest-declared secret.
 - HTTP and rate-limit error handling.
 - Markdown report generation.
 
@@ -25,6 +26,8 @@ npm --prefix extensions/github-workflow install --install-links
 ```
 
 Then install `extensions/github-workflow` as a local package.
+
+To configure authentication, open the installed package in Store settings and save a fine-grained token under **GitHub Personal Access Token**. The extension works without it for public repositories.
 
 ## Input behavior
 
@@ -109,7 +112,7 @@ Result: fetches `https://api.github.com/repos/apple/swift` and copies a Markdown
 - Last push time
 - Repository URL
 
-This command uses GitHub’s unauthenticated REST API.
+This command uses GitHub’s REST API. It sends `Authorization: Bearer <token>` only when the optional `githubToken` secret is configured.
 
 ### Draft GitHub Issue
 
@@ -168,15 +171,19 @@ The optional leading `@` is removed. Usernames may contain letters, numbers, and
 - `openURL` — opens GitHub pages.
 - `networkAccess` — permits the package to launch when using GitHub’s API.
 
-The package does not store data or credentials.
+The package declares one optional secret:
+
+- `githubToken` — a GitHub personal access token stored by Vehla in the macOS Keychain.
+
+The settings UI never reveals an existing value. The extension receives it only in the invocation context.
 
 ## API behavior and rate limits
 
 Only **Copy Repository Summary** calls the GitHub API. Other commands construct URLs locally and ask Vehla to open them.
 
-Unauthenticated GitHub API requests have a low per-IP rate limit. When GitHub returns a failed response, the extension reports the HTTP status. If `X-RateLimit-Remaining` is zero, the error explains that the public limit was reached.
+Unauthenticated GitHub API requests have a low per-IP rate limit. Authenticated requests receive a higher limit and can read repositories the token can access. When GitHub returns a failed response, the extension reports the HTTP status. If `X-RateLimit-Remaining` is zero, the error explains that the limit was reached.
 
-This example intentionally does not accept personal access tokens because Store API version 1 does not provide Keychain-backed secret storage.
+Use a fine-grained, read-only token restricted to the repositories required by this command. Browser commands do not use the token.
 
 ## Security notes
 
@@ -184,7 +191,8 @@ This example intentionally does not accept personal access tokens because Store 
 - Repository and username input is validated before URL construction.
 - Query values are encoded with `URLSearchParams`.
 - No shell commands are executed.
-- Do not modify this example to place access tokens directly in source or manifests.
+- Token values are never placed in source, manifests, persistent files, action output, or error text.
+- Keychain storage protects the token at rest, but the trusted extension process receives it while the command runs.
 
 ## Test outside Vehla
 
@@ -208,7 +216,7 @@ printf '%s\n' \
 
 - Add release and tag navigation.
 - Build commit or blame URLs from selected file paths.
-- Add authenticated operations after a secrets API exists.
+- Add authenticated issue and pull-request API operations with narrowly scoped tokens.
 - Save frequently used repositories with persistent storage.
 - Add organization and contributor summaries.
 

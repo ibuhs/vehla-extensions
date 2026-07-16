@@ -13,6 +13,7 @@ export interface StoreInvocationContext {
   clipboardText?: string;
   frontmostApplication?: string;
   dataDirectory?: string;
+  secrets: Readonly<Record<string, string>>;
 }
 
 export interface StoreInvocation {

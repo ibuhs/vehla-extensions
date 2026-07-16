@@ -28,6 +28,7 @@ Supported:
 - Clipboard and selected-text context.
 - Network requests.
 - Private persistent storage.
+- Keychain-backed extension secrets.
 - Browser handoff.
 - Structured validation and errors.
 - A separate process per invocation.
@@ -40,7 +41,6 @@ Not yet supported:
 - Long-running background processes.
 - Scheduled commands.
 - Extension-defined global hotkeys.
-- Secret storage through Vehla’s Keychain.
 - A security sandbox for JavaScript.
 - In-process Swift extension bundles.
 
@@ -178,6 +178,14 @@ Every package must contain `extension.json`.
   ],
   "capabilities": [
     "clipboardWrite"
+  ],
+  "secrets": [
+    {
+      "id": "apiToken",
+      "label": "API Token",
+      "description": "Token used to authenticate API requests.",
+      "required": true
+    }
   ]
 }
 ```
@@ -230,6 +238,15 @@ Every package must contain `extension.json`.
 
 - Optional package capability declarations.
 - Undeclared broker actions are denied.
+
+`secrets`
+
+- Optional declarations for credentials configured by the user in Store settings.
+- Each declaration requires a unique `id` and non-empty `label`.
+- `description` explains where the value comes from and how the extension uses it.
+- Set `required` to `true` to prevent command execution until the value is configured.
+- Declarations never contain the secret value.
+- Values are stored in the macOS Keychain, scoped to the package ID, and removed when the package is uninstalled.
 
 ### Command fields
 
@@ -360,6 +377,7 @@ interface StoreInvocation {
     clipboardText?: string;
     frontmostApplication?: string;
     dataDirectory?: string;
+    secrets: Readonly<Record<string, string>>;
   };
 }
 ```
@@ -392,6 +410,13 @@ interface StoreInvocation {
 `dataDirectory`
 
 - Present when persistent storage was declared and approved.
+
+`secrets`
+
+- Contains only values declared by the installed manifest and configured in Store settings.
+- Optional unconfigured secrets are omitted.
+- A command is not launched when a required secret is missing.
+- Treat values as transient credentials: do not log, copy, persist, or include them in errors.
 
 ## Input precedence
 
@@ -521,7 +546,50 @@ async function saveState(invocation, state) {
 
 Use atomic temporary-file replacement to reduce corruption risk.
 
-Do not store passwords, API keys, OAuth tokens, or production webhook secrets in plain JSON. API version 1 does not yet expose Keychain-backed secret storage.
+Do not store passwords, API keys, OAuth tokens, or production webhook secrets in plain JSON. Declare them in the manifest and read them from `invocation.context.secrets`.
+
+## Secure secrets
+
+Declare credentials in `extension.json`:
+
+```json
+{
+  "secrets": [
+    {
+      "id": "apiToken",
+      "label": "API Token",
+      "description": "Create a read-only token in the service dashboard.",
+      "required": true
+    }
+  ]
+}
+```
+
+Read the value only when handling a command:
+
+```js
+const token = invocation.context.secrets.apiToken;
+
+const response = await fetch("https://api.example.com/v1/items", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+```
+
+Vehla stores configured values in the macOS Keychain, never in Store state or the extension directory. Runtime diagnostics and protocol error messages are redacted before Vehla displays them when they contain an injected value.
+
+The extension process receives declared values for the duration of each invocation. Because JavaScript packages are not sandboxed, install only trusted source. Keychain storage protects credentials at rest; it cannot make a malicious extension safe.
+
+Guidelines:
+
+- Request the narrowest token scopes the service supports.
+- Prefer optional secrets when commands can work anonymously.
+- Never put a real value in `extension.json`, source, query text, saved data, or generated cURL output.
+- Never include a secret in thrown errors, logs, reports, or action values.
+- Do not use secret values as URLs because they can appear in server and proxy logs.
+- Replacing a secret updates the Keychain item without exposing the old value to the settings UI.
+
 
 ## Design multiple commands
 
@@ -635,7 +703,10 @@ It sends one newline-terminated request:
       "selectedText": "optional",
       "clipboardText": "optional",
       "frontmostApplication": "optional",
-      "dataDirectory": "optional"
+      "dataDirectory": "optional",
+      "secrets": {
+        "apiToken": "test-only-placeholder"
+      }
     }
   }
 }
@@ -716,6 +787,8 @@ Current protections:
 - Timeout and output limits.
 - Declared broker capabilities.
 - Ask, Allow, and Deny decisions.
+- Keychain-backed storage for declared secrets.
+- Required-secret launch checks and runtime diagnostic redaction.
 - HTTP/HTTPS restriction for brokered URL opening.
 
 Current limitation:
@@ -728,6 +801,7 @@ Therefore:
 - Do not install unknown packages.
 - Do not embed secrets in manifests.
 - Do not commit credentials.
+- Do not mistake Keychain storage for extension sandboxing.
 - Do not assume `networkAccess` is a network firewall.
 - Do not spawn arbitrary shell commands in community packages.
 

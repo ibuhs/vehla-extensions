@@ -12,6 +12,7 @@ This extension is a reference for:
 - Truncating large responses.
 - Persisting named requests.
 - Atomic JSON file updates.
+- Injecting a Keychain-backed authorization value at send time.
 - Generating shell-safe cURL commands.
 
 ## Install
@@ -25,6 +26,8 @@ npm --prefix extensions/webhook-runner install --install-links
 ```
 
 Then install `extensions/webhook-runner` as a local package.
+
+For authenticated endpoints, save the complete header value—such as `Bearer <token>`—under **Authorization Header** in the package’s Store settings.
 
 ## Request syntax
 
@@ -75,11 +78,13 @@ Custom headers:
 webhook POST https://httpbin.org/anything | {"event":"deploy"} | X-Environment: staging; X-Source: Vehla
 ```
 
-Headers with authorization:
+An explicit authorization header is supported:
 
 ```text
 webhook POST https://example.com/hook | {"ok":true} | Authorization: Bearer TOKEN
 ```
+
+For real credentials, use the Store secret instead of query text. When configured, it is injected as the `Authorization` header unless the request syntax already contains that header.
 
 Result: a response report is copied to the clipboard:
 
@@ -123,7 +128,7 @@ Keyword: `webhookrun`
 webhookrun deploy
 ```
 
-The stored request is sent and its response report is copied.
+The stored request is sent and its response report is copied. A configured Authorization secret is injected at send time and is not added to the saved request.
 
 ### List Saved Webhooks
 
@@ -171,6 +176,8 @@ Arguments are single-quoted for a POSIX-compatible shell, including safe handlin
 
 Generating cURL does not send the request.
 
+The generated command intentionally excludes the configured Authorization secret. Only headers typed directly into the request syntax appear in cURL output.
+
 ## Input fallback
 
 Request text is resolved in this order:
@@ -190,6 +197,12 @@ For predictable behavior, use explicit query text for save, run, list, and delet
 - `persistentStorage` — supplies the directory used for `webhooks.json`.
 
 Vehla asks for persistent storage before every command because the package declares it and Store API version 1 grants storage at package launch. Even commands that do not save data may therefore require the permission.
+
+The package also declares one optional secret:
+
+- `authorizationHeader` — the complete value for the HTTP `Authorization` header.
+
+Vehla stores it in the macOS Keychain. The extension receives it for an invocation but never writes it to `webhooks.json`.
 
 ## Persistent data
 
@@ -211,7 +224,7 @@ Uninstalling the package removes its private data directory.
 
 ## Important security warning
 
-Saved requests are plain JSON. Do not save:
+Saved requests are plain JSON. Do not put these values in request syntax or saved headers:
 
 - Production API tokens.
 - Passwords.
@@ -219,9 +232,9 @@ Saved requests are plain JSON. Do not save:
 - Session cookies.
 - Confidential payloads.
 
-Store API version 1 does not provide Keychain-backed secret storage. URLs can also contain sensitive path tokens or query parameters.
+Use the Store’s Keychain-backed **Authorization Header** field instead. URLs can still contain sensitive path tokens or query parameters and are not protected by the secret store.
 
-The extension follows redirects and forwards the configured headers using `fetch`. Review target URLs carefully before sending authorization headers.
+The extension follows redirects using `fetch`. Review target URLs carefully before injecting credentials. Keychain storage protects the value at rest; the extension process and destination server still receive it while the command runs.
 
 ## Parser limitations
 
@@ -270,7 +283,6 @@ Delete the temporary directory after testing.
 
 ## Production hardening ideas
 
-- Add Keychain-backed secrets when supported.
 - Restrict allowed destination hosts.
 - Disable cross-origin forwarding of authorization headers.
 - Add configurable response-size limits.

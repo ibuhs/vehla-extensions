@@ -41,13 +41,16 @@ function githubURL(path, query = {}) {
   return url.toString();
 }
 
-async function repositorySummary(repository) {
+async function repositorySummary(repository, githubToken) {
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "Vehla-Store-GitHub-Workflow",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+  if (githubToken) headers.Authorization = `Bearer ${githubToken}`;
+
   const response = await fetch(`https://api.github.com/repos/${repository}`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "User-Agent": "Vehla-Store-GitHub-Workflow",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
+    headers,
   });
   if (!response.ok) {
     const remaining = response.headers.get("x-ratelimit-remaining");
@@ -99,7 +102,9 @@ runStoreExtension(async (invocation) => {
 
     case "repository-summary": {
       const repository = repositoryFrom(requireInput(invocation, "ghsummary apple/swift"));
-      return Store.copyText(await repositorySummary(repository));
+      return Store.copyText(
+        await repositorySummary(repository, invocation.context.secrets?.githubToken),
+      );
     }
 
     case "create-issue": {

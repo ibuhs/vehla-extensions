@@ -25,7 +25,7 @@ my-package/
   package.json
 ```
 
-The manifest declares an API version, package identity, entrypoint, commands, and capabilities. Command IDs are namespaced by Vehla using the package ID.
+The manifest declares an API version, package identity, entrypoint, commands, capabilities, and optional secrets. Command IDs are namespaced by Vehla using the package ID.
 
 The entrypoint should call `runStoreExtension` once:
 
@@ -56,3 +56,13 @@ Capabilities must be declared in `extension.json` and allowed by the user in Sto
 - `persistentStorage`
 
 The current command API implements clipboard input/output, selected-text input, HTTP/HTTPS URL opening, message display, explicit network launch consent, and a private persistent data directory. Additional broker APIs can be added without changing the package process boundary.
+
+## Secrets
+
+Declare credentials by ID, label, description, and whether they are required in `extension.json`. Users configure values in Store settings; Vehla stores them in the macOS Keychain and passes configured values through `context.secrets`.
+
+```js
+const token = context.secrets.apiToken;
+```
+
+Required secrets prevent invocation until configured. Never log, persist, return, or embed secret values in source or manifests.
