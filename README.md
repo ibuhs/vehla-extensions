@@ -297,7 +297,7 @@ Every package must contain `extension.json`.
 - Optional runtime identifier.
 - Defaults to `node` for backward compatibility.
 - Use `executable` for Swift and other compiled native command extensions.
-- Native executable packages must include a code-signed arm64-only Mach-O binary before installation.
+- Native executable packages must include a code-signed arm64-only Mach-O binary. Catalog delivery additionally requires a valid Ed25519 publisher signature; unsigned native catalog packages are blocked.
 
 `entrypoint`
 
@@ -1056,6 +1056,7 @@ Current protections:
 - Explicit first-use trust for new publisher keys.
 - Persisted publisher-key continuity for updates.
 - Blocking of unsigned catalog updates over verified packages.
+- Blocking of every unsigned native executable delivered through the catalog.
 
 Current limitation:
 
@@ -1284,7 +1285,7 @@ python3 scripts/build-catalog.py
 unset VEHLA_PUBLISHER_PRIVATE_KEY
 ```
 
-All four variables are required for a signed build. If none are set, the script emits backward-compatible unsigned entries. A partial signing configuration fails closed.
+All four variables are required for a signed build. A Node.js-only catalog may omit them, but any catalog containing a native package fails unless signing is configured. Vehla also rejects unsigned native catalog packages at validation and installation time. A partial signing configuration fails closed.
 
 The signing script derives the public key from the private key, signs each final ZIP byte-for-byte, and writes the base64 signature and publisher identity into that package’s catalog entry. Vehla verifies both the existing SHA-256 checksum and the Ed25519 signature before extraction.
 

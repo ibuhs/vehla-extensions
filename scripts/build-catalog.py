@@ -76,6 +76,18 @@ def main() -> None:
     catalog_packages = []
     package_ids = set()
     publisher = signing_publisher()
+    catalog_path = ROOT / "catalog.json"
+    existing_packages = {}
+    if catalog_path.is_file():
+        existing_catalog = json.loads(catalog_path.read_text())
+        existing_packages = {
+            (
+                package["manifest"]["id"],
+                package["manifest"]["version"],
+                package["sha256"],
+            ): package
+            for package in existing_catalog.get("packages", [])
+        }
 
     extension_roots = sorted(
         path for path in EXTENSIONS.iterdir()
@@ -88,6 +100,10 @@ def main() -> None:
         manifest = json.loads((extension_root / "extension.json").read_text())
         package_id = manifest["id"]
         version = manifest["version"]
+        if manifest.get("runtime") == "executable" and publisher is None:
+            raise SystemExit(
+                f"{extension_root.name} is native and requires publisher signing."
+            )
         if package_id in package_ids:
             raise SystemExit(f"Duplicate package ID: {package_id}")
         package_ids.add(package_id)
@@ -158,12 +174,22 @@ def main() -> None:
             "archiveRoot": extension_root.name,
         }
         if publisher is not None:
-            signature = subprocess.run(
-                ["swift", str(SIGNING_SCRIPT), "sign", str(archive)],
-                check=True,
-                capture_output=True,
-                text=True,
-            ).stdout.strip()
+            existing = existing_packages.get(
+                (package_id, version, catalog_package["sha256"])
+            )
+            if (
+                existing is not None
+                and existing.get("publisher") == publisher
+                and existing.get("signature")
+            ):
+                signature = existing["signature"]
+            else:
+                signature = subprocess.run(
+                    ["swift", str(SIGNING_SCRIPT), "sign", str(archive)],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                ).stdout.strip()
             catalog_package["publisher"] = publisher
             catalog_package["signature"] = signature
         catalog_packages.append(catalog_package)
@@ -172,7 +198,7 @@ def main() -> None:
         "schemaVersion": 1,
         "packages": catalog_packages,
     }
-    (ROOT / "catalog.json").write_text(json.dumps(catalog, indent=2) + "\n")
+    catalog_path.write_text(json.dumps(catalog, indent=2) + "\n")
     print(f"Built {len(catalog_packages)} Store packages.")
 
 
