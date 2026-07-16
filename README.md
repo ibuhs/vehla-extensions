@@ -15,37 +15,6 @@ An extension can contain one command or an entire toolkit. Commands can:
 
 This repository contains the TypeScript/JavaScript SDK and complete example extensions.
 
-## Current platform scope
-
-The current Store API is optimized for command-driven extensions.
-
-Supported:
-
-- Multiple commands per package.
-- Keyword invocation and palette discovery.
-- Node.js 20 or newer.
-- Asynchronous handlers.
-- Clipboard and selected-text context.
-- Network requests.
-- Private persistent storage.
-- Browser handoff.
-- Structured validation and errors.
-- A separate process per invocation.
-- A 15-second execution limit.
-- A 1 MB protocol output limit.
-
-Not yet supported:
-
-- Custom embedded SwiftUI or web views.
-- Long-running background processes.
-- Scheduled commands.
-- Extension-defined global hotkeys.
-- Secret storage through Vehla’s Keychain.
-- A security sandbox for JavaScript.
-- In-process Swift extension bundles.
-
-“Complex extension” currently means complex command logic, integrations, data processing, and persistent workflows. Custom visual interfaces and continuous services require future Store API versions.
-
 ## Repository layout
 
 ```text
@@ -899,9 +868,11 @@ The build script:
 
 1. Finds every directory under `extensions/` containing `extension.json`.
 2. Runs `npm install --install-links` so local SDK dependencies are physically included.
-3. Creates `packages/<directory>-<version>.zip`.
+3. Reuses an immutable matching archive or creates `packages/<directory>-<version>.zip`.
 4. Calculates each archive’s SHA-256 checksum.
 5. Rebuilds `catalog.json` from the extension manifests.
+
+Package-specific `README.md` files are source documentation and are excluded from runtime archives. If an existing versioned archive differs from the remaining package contents, the build fails and requires a manifest version increment.
 
 Before publishing:
 

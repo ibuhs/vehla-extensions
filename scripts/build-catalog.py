@@ -5,6 +5,7 @@ import json
 import pathlib
 import shutil
 import subprocess
+import tempfile
 
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -13,6 +14,19 @@ PACKAGES = ROOT / "packages"
 ARCHIVE_BASE_URL = (
     "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages"
 )
+
+
+def package_digest(root: pathlib.Path) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(item for item in root.rglob("*") if item.is_file()):
+        if path.name in {"README.md", ".DS_Store"}:
+            continue
+        relative = path.relative_to(root).as_posix()
+        digest.update(relative.encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def main() -> None:
@@ -52,19 +66,39 @@ def main() -> None:
         )
 
         archive = PACKAGES / f"{extension_root.name}-{version}.zip"
-        archive.unlink(missing_ok=True)
-        subprocess.run(
-            [
-                "/usr/bin/ditto",
-                "-c",
-                "-k",
-                "--sequesterRsrc",
-                "--keepParent",
-                str(extension_root),
-                str(archive),
-            ],
-            check=True,
-        )
+        if archive.exists():
+            with tempfile.TemporaryDirectory() as temporary:
+                extracted = pathlib.Path(temporary)
+                subprocess.run(
+                    ["/usr/bin/ditto", "-x", "-k", str(archive), str(extracted)],
+                    check=True,
+                )
+                archived_root = extracted / extension_root.name
+                if package_digest(extension_root) != package_digest(archived_root):
+                    raise SystemExit(
+                        f"{archive.name} already exists with different package contents. "
+                        "Increment the manifest version before rebuilding."
+                    )
+        else:
+            with tempfile.TemporaryDirectory() as temporary:
+                staged_root = pathlib.Path(temporary) / extension_root.name
+                shutil.copytree(
+                    extension_root,
+                    staged_root,
+                    ignore=shutil.ignore_patterns("README.md", ".DS_Store"),
+                )
+                subprocess.run(
+                    [
+                        "/usr/bin/ditto",
+                        "-c",
+                        "-k",
+                        "--sequesterRsrc",
+                        "--keepParent",
+                        str(staged_root),
+                        str(archive),
+                    ],
+                    check=True,
+                )
 
         catalog_packages.append(
             {
