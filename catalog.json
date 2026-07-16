@@ -92,7 +92,14 @@
       },
       "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/developer-security-tools-1.0.0.zip",
       "sha256": "69e3371c348d783aa12b671d6c15d2a2ed30cf835afd8fdb4b925e06817678c4",
-      "archiveRoot": "developer-security-tools"
+      "archiveRoot": "developer-security-tools",
+      "publisher": {
+        "id": "com.vehla.publisher",
+        "name": "Vehla",
+        "keyID": "release-2026-07",
+        "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
+      },
+      "signature": "vcGVyuTfNGx843Rh3ixJzhfgnkboN69nCwbmw/KkqNJwMBQFDr2Wrd+tz8SdgtmXk/oC3vefdIenz2/aYPLTCw=="
     },
     {
       "manifest": {
@@ -230,7 +237,14 @@
       },
       "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/file-toolkit-1.0.0.zip",
       "sha256": "1d392aa7ba13e42e2bc791391afad109fbeb2ffca5d827fbc5fea2e339cbf7d9",
-      "archiveRoot": "file-toolkit"
+      "archiveRoot": "file-toolkit",
+      "publisher": {
+        "id": "com.vehla.publisher",
+        "name": "Vehla",
+        "keyID": "release-2026-07",
+        "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
+      },
+      "signature": "F6S7uXWQGRc02zKzg8BA/v+eWrNiE8Y68vNxW9yYFTFuKNvm602Ssv8c1lvpmRNPBQQMK4JensvPgGoc14KTBA=="
     },
     {
       "manifest": {
@@ -324,7 +338,14 @@
       },
       "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/github-workflow-1.1.0.zip",
       "sha256": "ac0c5632ed3a7c3e0b041670d7a25084d00f71915c0a3693a18a47eac182027e",
-      "archiveRoot": "github-workflow"
+      "archiveRoot": "github-workflow",
+      "publisher": {
+        "id": "com.vehla.publisher",
+        "name": "Vehla",
+        "keyID": "release-2026-07",
+        "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
+      },
+      "signature": "tZLtmlg1Z+4pshYrXrYkvQ7n/K770sqgCxp/Q+8sy6y+gzAOXRT1s8PZAXj15sgsmp2LRxXNOo0kN7EXmEqsBQ=="
     },
     {
       "manifest": {
@@ -364,7 +385,14 @@
       },
       "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/hello-store-1.1.0.zip",
       "sha256": "7a0b838718d224a0515bc46164b1a633541793c1126ab92b61ff45c55d55d1d5",
-      "archiveRoot": "hello-store"
+      "archiveRoot": "hello-store",
+      "publisher": {
+        "id": "com.vehla.publisher",
+        "name": "Vehla",
+        "keyID": "release-2026-07",
+        "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
+      },
+      "signature": "pT6cg3FCR4aRynNgrFEgJ0Pd+CqAdmLlqybygxANOhl4NTxH6ndYBG/CKT6GuOR+9RIWXpuKfPzZIYz13RpRAA=="
     },
     {
       "manifest": {
@@ -442,7 +470,14 @@
       },
       "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/text-toolkit-1.0.0.zip",
       "sha256": "a7f451190dc4472084e93621eae3a6098103475a9b3aa7bd8914e53732118932",
-      "archiveRoot": "text-toolkit"
+      "archiveRoot": "text-toolkit",
+      "publisher": {
+        "id": "com.vehla.publisher",
+        "name": "Vehla",
+        "keyID": "release-2026-07",
+        "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
+      },
+      "signature": "12YRyGsejwTp7tngr/f61jqpCZ4S8uYbMBVJpBREOP9kJSaJR6wZ7jDWYbkby2U3mdEjQz55Oc3PutDPs/RrAA=="
     },
     {
       "manifest": {
@@ -519,7 +554,14 @@
       },
       "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/web-inspector-1.0.0.zip",
       "sha256": "f284695fc887a71e41f59eda0c3b3b53deabfe296e2150c942a2a514a7e463d2",
-      "archiveRoot": "web-inspector"
+      "archiveRoot": "web-inspector",
+      "publisher": {
+        "id": "com.vehla.publisher",
+        "name": "Vehla",
+        "keyID": "release-2026-07",
+        "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
+      },
+      "signature": "4DBiHWboA6cfYFF/w63cOOgrQ6xmTepabV7uHVilPY2bmFSm39UbWrMHsN8jwXaNpaWj8ChYrcZ2GuDl/prDBQ=="
     },
     {
       "manifest": {
@@ -687,7 +729,14 @@
       },
       "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/webhook-runner-1.2.0.zip",
       "sha256": "432e021bcadf0febe72fdb2e583995b7fac67929a301a9d32190ead001fd32cc",
-      "archiveRoot": "webhook-runner"
+      "archiveRoot": "webhook-runner",
+      "publisher": {
+        "id": "com.vehla.publisher",
+        "name": "Vehla",
+        "keyID": "release-2026-07",
+        "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
+      },
+      "signature": "84Lf5CqItlLnVxD3usQP9IoC9V0wbVGI7DRFPJQQwJvKkWlHSdVjNO5j2hbLAwb78s6GM9YKrFLmk98HPUPBBw=="
     }
   ]
 }

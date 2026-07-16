@@ -101,7 +101,7 @@ Published extensions are available directly in Vehla:
 
 When a newer catalog version is available, the Install button becomes **Update**. Updating replaces the installed package while preserving its enabled state, permission decisions, and private data.
 
-Every catalog archive has a SHA-256 checksum. Vehla verifies the downloaded archive against `catalog.json` before extracting or installing it.
+Every catalog archive has a SHA-256 checksum. Vehla verifies the downloaded archive against `catalog.json` before extracting or installing it. Signed entries also carry an Ed25519 publisher identity and archive signature. Vehla shows the signing-key fingerprint before first trust and blocks silent key changes.
 
 ## Try a local development extension
 
@@ -977,6 +977,10 @@ Current protections:
 - Explicit user selection before file metadata is shared.
 - Capability and macOS authorization checks for notifications.
 - HTTP/HTTPS restriction for brokered URL opening.
+- Optional Ed25519 archive signatures.
+- Explicit first-use trust for new publisher keys.
+- Persisted publisher-key continuity for updates.
+- Blocking of unsigned catalog updates over verified packages.
 
 Current limitation:
 
@@ -1149,6 +1153,7 @@ Catalog entries contain:
 - An HTTPS URL for a self-contained ZIP archive.
 - The archive’s SHA-256 checksum.
 - The relative package root inside the archive.
+- For signed packages, the publisher ID, display name, key ID, Ed25519 public key, and archive signature.
 
 Build all archives and regenerate `catalog.json`:
 
@@ -1162,9 +1167,48 @@ The build script:
 2. Runs `npm install --install-links` so local SDK dependencies are physically included.
 3. Reuses an immutable matching archive or creates `packages/<directory>-<version>.zip`.
 4. Calculates each archive’s SHA-256 checksum.
-5. Rebuilds `catalog.json` from the extension manifests.
+5. Optionally signs the exact archive bytes with an Ed25519 publisher key.
+6. Rebuilds `catalog.json` from the extension manifests.
 
 Package-specific `README.md` files are source documentation and are excluded from runtime archives. If an existing versioned archive differs from the remaining package contents, the build fails and requires a manifest version increment.
+
+### Sign catalog packages
+
+Generate an Ed25519 publisher keypair once:
+
+```sh
+swift scripts/publisher-signing.swift generate
+```
+
+The command prints base64-encoded `privateKey` and `publicKey` values. Store the private key in a password manager or CI secret immediately. Never commit it, place it in an extension directory, or include it in an archive. The public key can be shared and independently compared with the fingerprint Vehla displays.
+
+Configure a signed catalog build:
+
+```sh
+export VEHLA_PUBLISHER_ID="com.example.publisher"
+export VEHLA_PUBLISHER_NAME="Example Publisher"
+export VEHLA_PUBLISHER_KEY_ID="release-2026"
+export VEHLA_PUBLISHER_PRIVATE_KEY="<base64 privateKey>"
+python3 scripts/build-catalog.py
+unset VEHLA_PUBLISHER_PRIVATE_KEY
+```
+
+All four variables are required for a signed build. If none are set, the script emits backward-compatible unsigned entries. A partial signing configuration fails closed.
+
+The signing script derives the public key from the private key, signs each final ZIP byte-for-byte, and writes the base64 signature and publisher identity into that package’s catalog entry. Vehla verifies both the existing SHA-256 checksum and the Ed25519 signature before extraction.
+
+On first install, Vehla displays:
+
+- Publisher name and stable ID.
+- Key ID.
+- SHA-256 fingerprint of the raw public key.
+- An explicit **Trust and Install** decision.
+
+Future updates using the same publisher ID and public key are marked verified. A changed publisher ID or public key triggers a critical warning and requires explicit trust. Verify a rotated key fingerprint through a separate trusted channel before accepting it.
+
+Users can revoke a remembered key from the installed package’s menu with **Forget Publisher Trust**. The installed bytes remain unchanged, but later catalog installs from that publisher require first-use trust again.
+
+For CI, store `VEHLA_PUBLISHER_PRIVATE_KEY` as an encrypted repository or organization secret. Keep the non-secret publisher ID, name, and key ID in protected workflow configuration. Restrict release workflow approval and secret access to trusted maintainers.
 
 Before publishing:
 
@@ -1188,6 +1232,10 @@ Publishing rules:
 
 - Increment the manifest version whenever archive contents change.
 - Never replace a published version with different bytes.
+- Sign the final immutable archive, not its source directory.
+- Keep publisher IDs stable across releases.
+- Treat key rotation as a security event and announce the new fingerprint separately.
+- Never reuse a compromised signing key.
 - Commit the extension source, archive, and catalog update together.
 - Keep archive URLs immutable and HTTPS-only.
 - Do not add a catalog entry for an extension that has not been source-reviewed.
