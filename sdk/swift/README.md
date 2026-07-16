@@ -14,6 +14,9 @@ The SDK gives Swift extension authors:
 - Declarative form values.
 - Native file-picker metadata.
 - Private persistent-data directory metadata.
+- Confined atomic file storage and typed preferences.
+- Structured logging with automatic secret redaction.
+- Permission-aware bounded HTTP networking.
 - Brokered clipboard, URL, message, and notification actions.
 - Structured native result views.
 - Async and throwing command handlers.
@@ -121,7 +124,7 @@ Create a ZIP after validation:
 
 ```sh
 swift run --package-path sdk/swift \
-  vehla-swift package extensions/swift-hello swift-hello-1.1.0.zip
+  vehla-swift package extensions/swift-hello swift-hello-1.2.0.zip
 ```
 
 Code-sign the entrypoint. Omitting the identity uses an ad hoc signature:
@@ -366,6 +369,89 @@ guard let token = invocation.context.secrets["apiToken"],
 ```
 
 Required secrets prevent invocation until configured. Never print, persist, embed, or return secret values.
+
+## Service APIs
+
+Vehla includes the capabilities granted for the current invocation in `context.grantedCapabilities`. Service constructors reject access when their required capability was not granted.
+
+### Private storage
+
+Declare `persistentStorage`, then use package-confined atomic storage:
+
+```swift
+let storage = try invocation.storage()
+try storage.write("hello", to: "notes/latest.txt")
+let text = try storage.readString("notes/latest.txt")
+
+struct Record: Codable {
+    let title: String
+    let count: Int
+}
+
+try storage.write(
+    Record(title: "Vehla", count: 1),
+    to: "records/latest.json"
+)
+let record = try storage.read(
+    Record.self,
+    from: "records/latest.json"
+)
+```
+
+Absolute paths, traversal components, empty components, backslashes, and symlink escapes are rejected. Other operations include `exists`, `list`, `createDirectory`, and `remove`.
+
+### Typed preferences
+
+Preferences store independently encoded `Codable` values:
+
+```swift
+let preferences = try invocation.preferences()
+let count = try await preferences.value(
+    forKey: "runCount",
+    as: Int.self
+) ?? 0
+try await preferences.set(count + 1, forKey: "runCount")
+```
+
+`StorePreferences` is an actor and also provides `contains`, `allKeys`, `removeValue`, and `removeAll`.
+
+### Structured logging
+
+```swift
+let logger = invocation.logger(category: "sync")
+logger.info("Sync started", metadata: ["records": "12"])
+logger.error("Sync failed")
+```
+
+Logs are JSON records written to standard error. The invocation logger automatically redacts every configured secret value. Do not intentionally log credentials; redaction is defense in depth.
+
+### Permission-aware HTTP
+
+Declare `networkAccess`, then create a client:
+
+```swift
+let client = try invocation.httpClient()
+let response = try await client.get(
+    URL(string: "https://api.example.com/status")!,
+    headers: ["Accept": "application/json"],
+    timeout: 10
+).requireSuccess()
+
+let payload = try response.decode(StatusPayload.self)
+```
+
+For a JSON request body:
+
+```swift
+let request = try StoreHTTPRequest.json(
+    method: .post,
+    url: URL(string: "https://api.example.com/items")!,
+    body: NewItem(name: "Vehla")
+)
+let response = try await client.send(request).requireSuccess()
+```
+
+The client permits only HTTP and HTTPS, limits timeouts to 15 seconds, limits request bodies to 1 MB, and limits response bodies to 5 MB by default. Native code is not sandboxed and can bypass SDK helpers; these checks provide a safe default API, not an operating-system security boundary.
 
 ## Return brokered actions
 

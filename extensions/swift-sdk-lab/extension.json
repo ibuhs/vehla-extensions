@@ -1,0 +1,51 @@
+{
+  "apiVersion": 1,
+  "id": "com.vehla.examples.swift-sdk-lab",
+  "name": "Swift SDK Lab",
+  "version": "1.0.0",
+  "description": "A complete Swift example for storage, typed preferences, redacted logging, and permission-aware HTTP.",
+  "author": "Vehla",
+  "runtime": "executable",
+  "entrypoint": "bin/swift-sdk-lab",
+  "commands": [
+    {
+      "id": "run-demo",
+      "title": "Run Swift SDK Service Demo",
+      "subtitle": "Persist data, log safely, and fetch an HTTP endpoint",
+      "keywords": ["swiftsdklab", "sdklab"],
+      "systemImage": "shippingbox.and.arrow.backward.fill",
+      "form": {
+        "title": "Swift SDK Lab",
+        "submitLabel": "Run Demo",
+        "fields": [
+          {
+            "id": "note",
+            "type": "multilineText",
+            "label": "Persistent note",
+            "required": true,
+            "defaultValue": "Created by the Vehla Swift SDK."
+          },
+          {
+            "id": "endpoint",
+            "type": "text",
+            "label": "HTTP or HTTPS endpoint",
+            "required": true,
+            "defaultValue": "https://api.github.com/zen"
+          }
+        ]
+      }
+    }
+  ],
+  "capabilities": [
+    "networkAccess",
+    "persistentStorage"
+  ],
+  "secrets": [
+    {
+      "id": "apiToken",
+      "label": "Optional API token",
+      "description": "Sent as a Bearer token and automatically redacted from StoreLogger output.",
+      "required": false
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "apiVersion": 1,
   "id": "com.vehla.examples.swift-hello",
   "name": "Swift Hello",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Native Swift commands demonstrating forms, rich results, and notifications.",
   "author": "Vehla",
   "runtime": "executable",

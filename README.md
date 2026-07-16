@@ -29,6 +29,9 @@ Supported:
 - Clipboard and selected-text context.
 - Network requests.
 - Private persistent storage.
+- Typed Swift storage and preferences APIs.
+- Structured Swift logging with secret redaction.
+- Permission-aware bounded Swift HTTP requests.
 - Keychain-backed extension secrets.
 - Declarative native command forms.
 - Structured native result views and brokered action buttons.
@@ -71,6 +74,7 @@ vehla-extensions/
 │   └── swift/
 │       ├── Package.swift
 │       ├── Sources/VehlaStoreSDK/
+│       ├── Sources/VehlaSwiftCLI/
 │       ├── Tests/VehlaStoreSDKTests/
 │       └── README.md
 └── extensions/
@@ -81,7 +85,8 @@ vehla-extensions/
     ├── webhook-runner/
     ├── developer-security-tools/
     ├── notification-lab/
-    └── swift-hello/
+    ├── swift-hello/
+    └── swift-sdk-lab/
 ```
 
 ## Prerequisites
@@ -173,6 +178,17 @@ swift run --package-path sdk/swift vehla-swift help
 swift run --package-path sdk/swift vehla-swift validate extensions/swift-hello
 swift run --package-path sdk/swift vehla-swift test extensions/swift-hello runtime
 ```
+
+Run the comprehensive service API example:
+
+```sh
+swift run --package-path sdk/swift \
+  vehla-swift build extensions/swift-sdk-lab
+swift run --package-path sdk/swift \
+  vehla-swift test extensions/swift-sdk-lab run-demo
+```
+
+Swift SDK Lab demonstrates atomic private storage, typed Codable preferences, structured secret-redacting logs, invocation capability grants, and bounded HTTP networking. See [`extensions/swift-sdk-lab/README.md`](extensions/swift-sdk-lab/README.md).
 
 ## Create a JavaScript package
 
@@ -1194,6 +1210,10 @@ Immediate and delayed brokered notifications, native form input, asynchronous ha
 ### Swift Hello
 
 Native executable runtime, background-only execution, typed Swift handlers, code-signed arm64 builds, declarative form values, structured results, brokered actions, and process diagnostics.
+
+### Swift SDK Lab
+
+Invocation capability grants, confined atomic storage, typed Codable preferences, structured redacted logs, permission-aware HTTP requests, secret-backed authentication, and rich native result views.
 
 ## Publishing checklist
 

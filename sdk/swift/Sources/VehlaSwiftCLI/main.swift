@@ -14,6 +14,7 @@ private struct ExtensionManifest: Decodable {
     let runtime: String?
     let entrypoint: String
     let commands: [Command]
+    let capabilities: [StoreCapability]?
 }
 
 private struct InvocationRequest: Encodable {
@@ -322,13 +323,37 @@ private struct VehlaSwiftCLI {
         commandID: String,
         query: String
     ) throws {
+        let capabilities = package.manifest.capabilities ?? []
+        var temporaryDataDirectory: URL?
+        if capabilities.contains(.persistentStorage) {
+            let directory = FileManager.default.temporaryDirectory
+                .appendingPathComponent(
+                    "vehla-swift-\(UUID().uuidString)",
+                    isDirectory: true
+                )
+            try FileManager.default.createDirectory(
+                at: directory,
+                withIntermediateDirectories: true
+            )
+            temporaryDataDirectory = directory
+        }
+        defer {
+            if let temporaryDataDirectory {
+                try? FileManager.default.removeItem(
+                    at: temporaryDataDirectory
+                )
+            }
+        }
         let request = InvocationRequest(
             id: "vehla-swift-\(UUID().uuidString)",
             params: StoreInvocation(
                 packageID: package.manifest.id,
                 commandID: commandID,
                 query: query,
-                context: StoreInvocationContext()
+                context: StoreInvocationContext(
+                    dataDirectory: temporaryDataDirectory?.path,
+                    grantedCapabilities: capabilities
+                )
             )
         )
         var payload = try JSONEncoder().encode(request)

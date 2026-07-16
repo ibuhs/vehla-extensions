@@ -2,6 +2,17 @@ import AppKit
 import Darwin
 import Foundation
 
+public enum StoreCapability: String, Codable, CaseIterable, Hashable, Sendable {
+    case clipboardRead
+    case clipboardWrite
+    case openURL
+    case notifications
+    case selectedText
+    case userSelectedFiles
+    case networkAccess
+    case persistentStorage
+}
+
 public struct StoreSelectedFile: Codable, Hashable, Sendable {
     public let path: String
     public let name: String
@@ -82,6 +93,7 @@ public struct StoreInvocationContext: Codable, Sendable {
     public let clipboardText: String?
     public let frontmostApplication: String?
     public let dataDirectory: String?
+    public let grantedCapabilities: [StoreCapability]
     public let secrets: [String: String]
     public let formValues: [String: StoreFormValue]
 
@@ -90,6 +102,7 @@ public struct StoreInvocationContext: Codable, Sendable {
         clipboardText: String? = nil,
         frontmostApplication: String? = nil,
         dataDirectory: String? = nil,
+        grantedCapabilities: [StoreCapability] = [],
         secrets: [String: String] = [:],
         formValues: [String: StoreFormValue] = [:]
     ) {
@@ -97,13 +110,14 @@ public struct StoreInvocationContext: Codable, Sendable {
         self.clipboardText = clipboardText
         self.frontmostApplication = frontmostApplication
         self.dataDirectory = dataDirectory
+        self.grantedCapabilities = grantedCapabilities
         self.secrets = secrets
         self.formValues = formValues
     }
 
     private enum CodingKeys: String, CodingKey {
         case selectedText, clipboardText, frontmostApplication
-        case dataDirectory, secrets, formValues
+        case dataDirectory, grantedCapabilities, secrets, formValues
     }
 
     public init(from decoder: Decoder) throws {
@@ -124,6 +138,10 @@ public struct StoreInvocationContext: Codable, Sendable {
             String.self,
             forKey: .dataDirectory
         )
+        grantedCapabilities = try container.decodeIfPresent(
+            [StoreCapability].self,
+            forKey: .grantedCapabilities
+        ) ?? []
         secrets = try container.decodeIfPresent(
             [String: String].self,
             forKey: .secrets
@@ -132,6 +150,10 @@ public struct StoreInvocationContext: Codable, Sendable {
             [String: StoreFormValue].self,
             forKey: .formValues
         ) ?? [:]
+    }
+
+    public func grants(_ capability: StoreCapability) -> Bool {
+        grantedCapabilities.contains(capability)
     }
 }
 
