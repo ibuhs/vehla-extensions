@@ -37,12 +37,27 @@ Each command invocation follows this lifecycle:
 
 Standard output belongs exclusively to the SDK protocol. Write diagnostics to standard error.
 
+## Background-only execution guarantee
+
+All Store command extensions execute outside Vehla’s process. Swift SDK extensions additionally enforce background-only application behavior:
+
+- Vehla launches the executable as a child process without activating it.
+- Vehla performs process waiting and pipe reads outside the app’s main actor.
+- The runtime sets `VEHLA_EXTENSION_BACKGROUND=1`.
+- The Swift SDK sets the process activation policy to `prohibited`.
+- Extensions cannot create a Dock icon, menu bar, or independently activated app UI through the supported SDK lifecycle.
+- Forms, permission prompts, and results are presented by Vehla.
+
+Background-only does not mean persistent. The process starts for one user-requested command and must finish within 15 seconds. Long-running daemons, scheduled jobs, and always-on background services are not currently supported.
+
 ## Requirements
 
 - macOS 14 or newer.
+- An Apple Silicon Mac. Intel executables are not supported.
 - Swift 6 or newer.
 - A manifest with `"runtime": "executable"`.
 - A compiled executable included inside the installed package.
+- A valid Mach-O code signature. Ad hoc signing is supported for local development.
 - A Vehla build that supports the executable Store runtime.
 
 ## Quick start
@@ -63,6 +78,66 @@ Install it locally:
 4. Select the `extensions/swift-hello` directory.
 5. Confirm that the package appears as a native executable.
 6. Run `swifthello` or `swiftruntime` from the palette.
+
+## Developer CLI
+
+The SDK package includes `vehla-swift`, a zero-dependency command-line tool:
+
+```sh
+swift run --package-path sdk/swift vehla-swift help
+```
+
+Validate a package:
+
+```sh
+swift run --package-path sdk/swift \
+  vehla-swift validate extensions/swift-hello
+```
+
+Validation checks:
+
+- Store API and manifest identity.
+- `runtime: executable`.
+- Command IDs and titles.
+- Entrypoint containment and executable permissions.
+- An arm64-only Mach-O architecture.
+- Code-signature validity.
+
+Build through the package’s `build.sh`, then validate:
+
+```sh
+swift run --package-path sdk/swift \
+  vehla-swift build extensions/swift-hello
+```
+
+Invoke a command with the same timeout and output constraints as Vehla:
+
+```sh
+swift run --package-path sdk/swift \
+  vehla-swift test extensions/swift-hello runtime
+```
+
+Create a ZIP after validation:
+
+```sh
+swift run --package-path sdk/swift \
+  vehla-swift package extensions/swift-hello swift-hello-1.1.0.zip
+```
+
+Code-sign the entrypoint. Omitting the identity uses an ad hoc signature:
+
+```sh
+swift run --package-path sdk/swift \
+  vehla-swift sign extensions/swift-hello
+```
+
+For Developer ID signing:
+
+```sh
+swift run --package-path sdk/swift \
+  vehla-swift sign extensions/swift-hello \
+  "Developer ID Application: Example Company (TEAMID)"
+```
 
 ## Recommended package layout
 
@@ -386,9 +461,9 @@ func log(_ message: String) {
 
 Vehla captures bounded diagnostic output and includes it in actionable process errors.
 
-## Build a universal executable
+## Build an arm64 executable
 
-Catalog packages should support both Apple Silicon and Intel Macs. Build each architecture and combine them:
+Vehla’s native extension runtime supports Apple Silicon only:
 
 ```sh
 swift build \
@@ -396,32 +471,23 @@ swift build \
   --triple arm64-apple-macosx14.0 \
   --scratch-path .build/arm64
 
-swift build \
-  --configuration release \
-  --triple x86_64-apple-macosx14.0 \
-  --scratch-path .build/x86_64
-
 arm64_bin="$(swift build \
   --configuration release \
   --triple arm64-apple-macosx14.0 \
   --scratch-path .build/arm64 \
   --show-bin-path)"
 
-x86_64_bin="$(swift build \
-  --configuration release \
-  --triple x86_64-apple-macosx14.0 \
-  --scratch-path .build/x86_64 \
-  --show-bin-path)"
-
 mkdir -p bin
-lipo -create \
-  "$arm64_bin/MyExtension" \
-  "$x86_64_bin/MyExtension" \
-  -output bin/my-extension
-chmod 755 bin/my-extension
+install -m 755 "$arm64_bin/MyExtension" bin/my-extension
+codesign \
+  --force \
+  --sign - \
+  --timestamp=none \
+  --identifier com.example.swift-extension \
+  bin/my-extension
 ```
 
-Confirm both architectures:
+Confirm the architecture:
 
 ```sh
 lipo -archs bin/my-extension
@@ -430,7 +496,7 @@ lipo -archs bin/my-extension
 Expected output:
 
 ```text
-x86_64 arm64
+arm64
 ```
 
 ## Test without Vehla
@@ -477,7 +543,7 @@ Local packages intentionally show as local or unsigned because they were not ins
 Before publishing:
 
 1. Increment the manifest version when source or binary bytes change.
-2. Produce the universal release binary.
+2. Produce the arm64 release binary.
 3. Test both the executable directly and the installed package.
 4. Include source, `Package.swift`, `build.sh`, and the release binary.
 5. Run the signed catalog builder.
@@ -516,9 +582,20 @@ chmod 755 bin/my-extension
 
 Reinstall the package because Vehla copies local packages during installation.
 
+### Code signature is invalid
+
+Sign the final arm64 binary after copying it into the package:
+
+```sh
+swift run --package-path sdk/swift \
+  vehla-swift sign path/to/extension
+```
+
+Signing must be the final binary build step.
+
 ### Bad CPU type in executable
 
-The package does not include the current Mac architecture. Rebuild as a universal binary.
+The package is not arm64-only. Rebuild it for `arm64-apple-macosx14.0`.
 
 ### Command timed out
 

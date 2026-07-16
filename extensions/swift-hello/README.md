@@ -10,20 +10,28 @@ It demonstrates:
 - Native rich result views and actions.
 - Optional brokered notifications.
 - Out-of-process crash isolation.
+- Background-only execution without a Dock icon or app activation.
 
 ## Build
 
-From the Vehla repository:
+From the `vehla-extensions` repository:
 
 ```sh
-zsh examples/swift-hello/build.sh
+zsh extensions/swift-hello/build.sh
 ```
 
-The script uses scratch directories under `DerivedData`, creates optimized Apple Silicon and Intel executables, combines them into a universal binary, and writes `examples/swift-hello/bin/swift-hello` with executable permissions.
+The script creates an optimized Apple Silicon executable, writes `extensions/swift-hello/bin/swift-hello` with executable permissions, and applies an ad hoc code signature.
+
+Validate or test it with the included CLI:
+
+```sh
+swift run --package-path sdk/swift vehla-swift validate extensions/swift-hello
+swift run --package-path sdk/swift vehla-swift test extensions/swift-hello runtime
+```
 
 ## Install
 
-Open **Vehla Settings → Store → Install Local Package** and choose `examples/swift-hello`.
+Open **Vehla Settings → Store → Install Local Package** and choose `extensions/swift-hello`.
 
 Run:
 
@@ -32,6 +40,6 @@ Run:
 
 ## Distribution
 
-The build script produces a universal `arm64` and `x86_64` executable suitable for catalog distribution.
+The build script produces an arm64-only executable suitable for catalog distribution. Intel and universal native packages are intentionally unsupported.
 
-Native extensions run with the user’s macOS privileges. Process isolation protects Vehla from extension crashes but does not sandbox extension code.
+Native extensions run with the user’s macOS privileges. Vehla requires a valid arm64 Mach-O binary and code signature and runs commands as background-only processes. Process isolation protects Vehla from extension crashes but does not sandbox extension code.

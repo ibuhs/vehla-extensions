@@ -37,6 +37,7 @@ Supported:
 - Browser handoff.
 - Structured validation and errors.
 - A separate process per invocation.
+- Background-only command execution without extension-owned app UI.
 - A 15-second execution limit.
 - A 1 MB protocol output limit.
 
@@ -87,7 +88,7 @@ vehla-extensions/
 
 - macOS with Vehla’s Store feature.
 - Node.js 20 or newer.
-- Swift 6 or newer for native extensions.
+- An Apple Silicon Mac and Swift 6 or newer for native extensions.
 - Basic JavaScript, TypeScript, or Swift knowledge.
 
 Confirm Node is available:
@@ -142,7 +143,7 @@ Then:
 
 ## Try the native Swift extension
 
-Build the included universal executable:
+Build the included arm64 executable:
 
 ```sh
 git clone https://github.com/ibuhs/vehla-extensions.git
@@ -159,9 +160,19 @@ Then:
 5. Run `swifthello` to test forms, rich results, actions, and notifications.
 6. Run `swiftruntime` to inspect the isolated native process.
 
-The build script compiles optimized `arm64` and `x86_64` executables and combines them into `extensions/swift-hello/bin/swift-hello`.
+The build script compiles an optimized arm64 executable at `extensions/swift-hello/bin/swift-hello` and applies an ad hoc code signature.
 
 For the complete Swift package layout, API reference, build process, diagnostics, publishing instructions, security model, and troubleshooting guide, read [`sdk/swift/README.md`](sdk/swift/README.md).
+
+Every Store invocation runs in a separate background process. The Swift SDK also prohibits AppKit activation, so SDK-based extensions cannot become foreground applications. This guarantee is distinct from a persistent background service: each command still has a 15-second execution limit.
+
+Use the included Swift developer CLI to validate, build, test, package, or code-sign an extension:
+
+```sh
+swift run --package-path sdk/swift vehla-swift help
+swift run --package-path sdk/swift vehla-swift validate extensions/swift-hello
+swift run --package-path sdk/swift vehla-swift test extensions/swift-hello runtime
+```
 
 ## Create a JavaScript package
 
@@ -270,7 +281,7 @@ Every package must contain `extension.json`.
 - Optional runtime identifier.
 - Defaults to `node` for backward compatibility.
 - Use `executable` for Swift and other compiled native command extensions.
-- Native executable packages must include a compiled binary before installation.
+- Native executable packages must include a code-signed arm64-only Mach-O binary before installation.
 
 `entrypoint`
 
@@ -1113,7 +1124,7 @@ Check:
 
 ### `node` cannot be launched
 
-Install Node.js 20 or newer. Apple Silicon Homebrew commonly installs it at `/opt/homebrew/bin/node`; Intel Homebrew commonly uses `/usr/local/bin/node`.
+Install Node.js 20 or newer. Apple Silicon Homebrew commonly installs it at `/opt/homebrew/bin/node`.
 
 ### Module cannot be found
 
@@ -1182,7 +1193,7 @@ Immediate and delayed brokered notifications, native form input, asynchronous ha
 
 ### Swift Hello
 
-Native executable runtime, typed Swift handlers, universal binary builds, declarative form values, structured results, brokered actions, and process diagnostics.
+Native executable runtime, background-only execution, typed Swift handlers, code-signed arm64 builds, declarative form values, structured results, brokered actions, and process diagnostics.
 
 ## Publishing checklist
 

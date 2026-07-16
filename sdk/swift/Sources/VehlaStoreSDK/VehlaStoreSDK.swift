@@ -1,3 +1,4 @@
+import AppKit
 import Darwin
 import Foundation
 
@@ -322,6 +323,9 @@ private struct StoreResponse: Encodable {
 public func runStoreExtension(
     _ handler: @escaping StoreCommandHandler
 ) async {
+    await MainActor.run {
+        _ = NSApplication.shared.setActivationPolicy(.prohibited)
+    }
     _ = Darwin.signal(SIGPIPE, SIG_IGN)
     let decoder = JSONDecoder()
     let encoder = JSONEncoder()
