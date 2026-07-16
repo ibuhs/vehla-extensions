@@ -15,6 +15,37 @@ An extension can contain one command or an entire toolkit. Commands can:
 
 This repository contains the TypeScript/JavaScript SDK and complete example extensions.
 
+## Current platform scope
+
+The current Store API is optimized for command-driven extensions.
+
+Supported:
+
+- Multiple commands per package.
+- Keyword invocation and palette discovery.
+- Node.js 20 or newer.
+- Asynchronous handlers.
+- Clipboard and selected-text context.
+- Network requests.
+- Private persistent storage.
+- Browser handoff.
+- Structured validation and errors.
+- A separate process per invocation.
+- A 15-second execution limit.
+- A 1 MB protocol output limit.
+
+Not yet supported:
+
+- Custom embedded SwiftUI or web views.
+- Long-running background processes.
+- Scheduled commands.
+- Extension-defined global hotkeys.
+- Secret storage through Vehla’s Keychain.
+- A security sandbox for JavaScript.
+- In-process Swift extension bundles.
+
+
+
 ## Repository layout
 
 ```text
