@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "manifest": {
+        "apiVersion": 1,
+        "id": "com.vehla.examples.developer-security-tools",
+        "name": "Developer Security Tools",
+        "version": "1.0.0",
+        "description": "Hash and encode text, inspect JWTs, generate secure passwords and tokens, and create HMAC signatures.",
+        "author": "Vehla",
+        "entrypoint": "index.js",
+        "commands": [
+          {
+            "id": "sha256",
+            "title": "SHA-256 Hash",
+            "subtitle": "Hash text and copy the hexadecimal digest",
+            "keywords": [
+              "sha256"
+            ],
+            "systemImage": "number.square"
+          },
+          {
+            "id": "sha512",
+            "title": "SHA-512 Hash",
+            "subtitle": "Hash text and copy the hexadecimal digest",
+            "keywords": [
+              "sha512"
+            ],
+            "systemImage": "number.square.fill"
+          },
+          {
+            "id": "base64-encode",
+            "title": "Base64 Encode",
+            "subtitle": "Encode UTF-8 text as Base64",
+            "keywords": [
+              "b64encode"
+            ],
+            "systemImage": "textformat.abc"
+          },
+          {
+            "id": "base64-decode",
+            "title": "Base64 Decode",
+            "subtitle": "Decode Base64 into UTF-8 text",
+            "keywords": [
+              "b64decode"
+            ],
+            "systemImage": "textformat"
+          },
+          {
+            "id": "jwt-decode",
+            "title": "Decode JWT",
+            "subtitle": "Inspect header, payload, and expiry without verification",
+            "keywords": [
+              "jwt"
+            ],
+            "systemImage": "key.horizontal"
+          },
+          {
+            "id": "password",
+            "title": "Generate Secure Password",
+            "subtitle": "Generate a password; optionally provide a length",
+            "keywords": [
+              "password"
+            ],
+            "systemImage": "lock.rotation"
+          },
+          {
+            "id": "token",
+            "title": "Generate Random Token",
+            "subtitle": "Generate a URL-safe token; optionally provide byte length",
+            "keywords": [
+              "token"
+            ],
+            "systemImage": "key.viewfinder"
+          },
+          {
+            "id": "hmac",
+            "title": "Create HMAC-SHA256",
+            "subtitle": "Use secret | message to create a signature",
+            "keywords": [
+              "hmac"
+            ],
+            "systemImage": "signature"
+          }
+        ],
+        "capabilities": [
+          "clipboardRead",
+          "clipboardWrite",
+          "selectedText"
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/developer-security-tools-1.0.0.zip",
+      "sha256": "69e3371c348d783aa12b671d6c15d2a2ed30cf835afd8fdb4b925e06817678c4",
+      "archiveRoot": "developer-security-tools"
+    },
+    {
+      "manifest": {
+        "apiVersion": 1,
+        "id": "com.vehla.examples.github-workflow",
+        "name": "GitHub Workflow",
+        "version": "1.0.0",
+        "description": "Search GitHub, open repositories and pull requests, draft issues, compare branches, and inspect public repository metadata.",
+        "author": "Vehla",
+        "entrypoint": "index.js",
+        "commands": [
+          {
+            "id": "search",
+            "title": "Search GitHub",
+            "subtitle": "Search repositories, code, issues, and users",
+            "keywords": [
+              "ghsearch"
+            ],
+            "systemImage": "magnifyingglass"
+          },
+          {
+            "id": "open-repository",
+            "title": "Open GitHub Repository",
+            "subtitle": "Open owner/repository in your browser",
+            "keywords": [
+              "ghrepo"
+            ],
+            "systemImage": "folder.badge.gearshape"
+          },
+          {
+            "id": "repository-summary",
+            "title": "Copy Repository Summary",
+            "subtitle": "Fetch public metadata for owner/repository",
+            "keywords": [
+              "ghsummary"
+            ],
+            "systemImage": "doc.text.magnifyingglass"
+          },
+          {
+            "id": "create-issue",
+            "title": "Draft GitHub Issue",
+            "subtitle": "Use owner/repo | title | body",
+            "keywords": [
+              "ghissue"
+            ],
+            "systemImage": "exclamationmark.circle"
+          },
+          {
+            "id": "open-pull-request",
+            "title": "Open GitHub Pull Request",
+            "subtitle": "Use owner/repo | pull request number",
+            "keywords": [
+              "ghpr"
+            ],
+            "systemImage": "arrow.triangle.branch"
+          },
+          {
+            "id": "compare-branches",
+            "title": "Compare GitHub Branches",
+            "subtitle": "Use owner/repo | base | head",
+            "keywords": [
+              "ghcompare"
+            ],
+            "systemImage": "arrow.left.arrow.right"
+          },
+          {
+            "id": "open-profile",
+            "title": "Open GitHub Profile",
+            "subtitle": "Open a GitHub username",
+            "keywords": [
+              "ghuser"
+            ],
+            "systemImage": "person.crop.circle"
+          }
+        ],
+        "capabilities": [
+          "clipboardRead",
+          "clipboardWrite",
+          "selectedText",
+          "openURL",
+          "networkAccess"
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/github-workflow-1.0.0.zip",
+      "sha256": "2b26f10840d604183f3bbf23922c12ebf2557736d6b58acc5eb62b866d3f02b1",
+      "archiveRoot": "github-workflow"
+    },
+    {
+      "manifest": {
+        "apiVersion": 1,
+        "id": "com.vehla.examples.hello",
+        "name": "Hello Store",
+        "version": "1.0.0",
+        "description": "Example commands for the Vehla Store SDK.",
+        "author": "Vehla",
+        "entrypoint": "index.js",
+        "commands": [
+          {
+            "id": "greet",
+            "title": "Greet from Store",
+            "subtitle": "Show a greeting using your query",
+            "keywords": [
+              "hello",
+              "greet"
+            ],
+            "systemImage": "hand.wave.fill"
+          },
+          {
+            "id": "copy",
+            "title": "Copy from Store",
+            "subtitle": "Copy your query to the clipboard",
+            "keywords": [
+              "storecopy"
+            ],
+            "systemImage": "doc.on.doc.fill"
+          }
+        ],
+        "capabilities": [
+          "clipboardWrite",
+          "selectedText"
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/hello-store-1.0.0.zip",
+      "sha256": "3efdca1fcc25ae30fab5909dec940707db84fad9388e8cb4fb4360963c46d1e6",
+      "archiveRoot": "hello-store"
+    },
+    {
+      "manifest": {
+        "apiVersion": 1,
+        "id": "com.vehla.examples.text-toolkit",
+        "name": "Text Toolkit",
+        "version": "1.0.0",
+        "description": "Format, transform, and generate developer-friendly text from the palette.",
+        "author": "Vehla",
+        "entrypoint": "index.js",
+        "commands": [
+          {
+            "id": "format-json",
+            "title": "Format JSON",
+            "subtitle": "Pretty-print JSON and copy the result",
+            "keywords": [
+              "jsonfmt",
+              "formatjson"
+            ],
+            "systemImage": "curlybraces"
+          },
+          {
+            "id": "slugify",
+            "title": "Create URL Slug",
+            "subtitle": "Convert text into a lowercase URL slug",
+            "keywords": [
+              "slug",
+              "slugify"
+            ],
+            "systemImage": "link"
+          },
+          {
+            "id": "encode-url",
+            "title": "URL Encode",
+            "subtitle": "Percent-encode text and copy the result",
+            "keywords": [
+              "urlencode"
+            ],
+            "systemImage": "percent"
+          },
+          {
+            "id": "decode-url",
+            "title": "URL Decode",
+            "subtitle": "Decode percent-encoded text",
+            "keywords": [
+              "urldecode"
+            ],
+            "systemImage": "textformat"
+          },
+          {
+            "id": "uuid",
+            "title": "Generate UUID",
+            "subtitle": "Generate and copy a new UUID",
+            "keywords": [
+              "uuid"
+            ],
+            "systemImage": "number"
+          },
+          {
+            "id": "timestamp",
+            "title": "Convert Timestamp",
+            "subtitle": "Convert Unix timestamps and date strings",
+            "keywords": [
+              "timestamp",
+              "unixtime"
+            ],
+            "systemImage": "clock.arrow.2.circlepath"
+          }
+        ],
+        "capabilities": [
+          "clipboardRead",
+          "clipboardWrite",
+          "selectedText"
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/text-toolkit-1.0.0.zip",
+      "sha256": "a7f451190dc4472084e93621eae3a6098103475a9b3aa7bd8914e53732118932",
+      "archiveRoot": "text-toolkit"
+    },
+    {
+      "manifest": {
+        "apiVersion": 1,
+        "id": "com.vehla.examples.web-inspector",
+        "name": "Web Inspector",
+        "version": "1.0.0",
+        "description": "Inspect HTTP responses, redirects, metadata, DNS records, response headers, and TLS certificates.",
+        "author": "Vehla",
+        "entrypoint": "index.js",
+        "commands": [
+          {
+            "id": "status",
+            "title": "Check URL Status",
+            "subtitle": "Copy HTTP status, timing, and final URL",
+            "keywords": [
+              "httpstatus"
+            ],
+            "systemImage": "waveform.path.ecg"
+          },
+          {
+            "id": "redirects",
+            "title": "Trace URL Redirects",
+            "subtitle": "Copy every redirect hop",
+            "keywords": [
+              "redirects"
+            ],
+            "systemImage": "arrow.triangle.turn.up.right.diamond"
+          },
+          {
+            "id": "metadata",
+            "title": "Extract Page Metadata",
+            "subtitle": "Copy title, description, canonical URL, and social tags",
+            "keywords": [
+              "metadata"
+            ],
+            "systemImage": "doc.text.magnifyingglass"
+          },
+          {
+            "id": "headers",
+            "title": "Inspect Response Headers",
+            "subtitle": "Copy sorted HTTP response headers",
+            "keywords": [
+              "headers"
+            ],
+            "systemImage": "list.bullet.rectangle"
+          },
+          {
+            "id": "dns",
+            "title": "Inspect DNS Records",
+            "subtitle": "Resolve A, AAAA, MX, NS, CNAME, and TXT records",
+            "keywords": [
+              "dns"
+            ],
+            "systemImage": "network"
+          },
+          {
+            "id": "tls",
+            "title": "Inspect TLS Certificate",
+            "subtitle": "Copy certificate subject, issuer, validity, and fingerprint",
+            "keywords": [
+              "tls",
+              "certificate"
+            ],
+            "systemImage": "checkmark.shield"
+          }
+        ],
+        "capabilities": [
+          "clipboardRead",
+          "clipboardWrite",
+          "selectedText",
+          "networkAccess"
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/web-inspector-1.0.0.zip",
+      "sha256": "f284695fc887a71e41f59eda0c3b3b53deabfe296e2150c942a2a514a7e463d2",
+      "archiveRoot": "web-inspector"
+    },
+    {
+      "manifest": {
+        "apiVersion": 1,
+        "id": "com.vehla.examples.webhook-runner",
+        "name": "Webhook Runner",
+        "version": "1.0.0",
+        "description": "Send, save, inspect, and reproduce HTTP webhook requests from the palette.",
+        "author": "Vehla",
+        "entrypoint": "index.js",
+        "commands": [
+          {
+            "id": "send",
+            "title": "Send Webhook",
+            "subtitle": "Use METHOD URL | JSON body | Header: value; ...",
+            "keywords": [
+              "webhook"
+            ],
+            "systemImage": "paperplane"
+          },
+          {
+            "id": "save",
+            "title": "Save Webhook",
+            "subtitle": "Use name | METHOD URL | JSON body | headers",
+            "keywords": [
+              "webhooksave"
+            ],
+            "systemImage": "square.and.arrow.down"
+          },
+          {
+            "id": "run-saved",
+            "title": "Run Saved Webhook",
+            "subtitle": "Run a saved request by name",
+            "keywords": [
+              "webhookrun"
+            ],
+            "systemImage": "play.circle"
+          },
+          {
+            "id": "list",
+            "title": "List Saved Webhooks",
+            "subtitle": "Copy a summary of saved requests",
+            "keywords": [
+              "webhooklist"
+            ],
+            "systemImage": "list.bullet"
+          },
+          {
+            "id": "delete",
+            "title": "Delete Saved Webhook",
+            "subtitle": "Delete a saved request by name",
+            "keywords": [
+              "webhookdelete"
+            ],
+            "systemImage": "trash"
+          },
+          {
+            "id": "curl",
+            "title": "Generate cURL Command",
+            "subtitle": "Convert request syntax into a shell-safe cURL command",
+            "keywords": [
+              "webhookcurl"
+            ],
+            "systemImage": "terminal"
+          }
+        ],
+        "capabilities": [
+          "clipboardRead",
+          "clipboardWrite",
+          "selectedText",
+          "networkAccess",
+          "persistentStorage"
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/webhook-runner-1.0.0.zip",
+      "sha256": "b024281cbaf007ec80efcb17f7f04be3125f3edbc871e05dc5b5820ce374246a",
+      "archiveRoot": "webhook-runner"
+    }
+  ]
+}

@@ -52,6 +52,11 @@ Not yet supported:
 vehla-extensions/
 ├── README.md
 ├── LICENSE
+├── catalog.json
+├── packages/
+│   └── <self-contained versioned archives>
+├── scripts/
+│   └── build-catalog.py
 ├── sdk/
 │   └── typescript/
 │       ├── package.json
@@ -78,7 +83,23 @@ Confirm Node is available:
 node --version
 ```
 
-## Try an included extension
+## Install from Vehla
+
+Published extensions are available directly in Vehla:
+
+1. Open Vehla Settings.
+2. Select Store.
+3. Choose **Refresh Catalog**.
+4. Review an extension’s commands and requested capabilities.
+5. Choose **Install**.
+6. Set each permission to Ask, Allow, or Deny.
+7. Invoke one of the displayed keywords from the palette.
+
+When a newer catalog version is available, the Install button becomes **Update**. Updating replaces the installed package while preserving its enabled state, permission decisions, and private data.
+
+Every catalog archive has a SHA-256 checksum. Vehla verifies the downloaded archive against `catalog.json` before extracting or installing it.
+
+## Try a local development extension
 
 Install its local SDK dependency:
 
@@ -858,6 +879,56 @@ Before sharing a package:
 - State whether remote data leaves the Mac.
 - State where persistent data is stored.
 - Include a license.
+
+## Publish to the catalog
+
+Catalog entries contain:
+
+- The complete validated extension manifest.
+- An HTTPS URL for a self-contained ZIP archive.
+- The archive’s SHA-256 checksum.
+- The relative package root inside the archive.
+
+Build all archives and regenerate `catalog.json`:
+
+```sh
+python3 scripts/build-catalog.py
+```
+
+The build script:
+
+1. Finds every directory under `extensions/` containing `extension.json`.
+2. Runs `npm install --install-links` so local SDK dependencies are physically included.
+3. Creates `packages/<directory>-<version>.zip`.
+4. Calculates each archive’s SHA-256 checksum.
+5. Rebuilds `catalog.json` from the extension manifests.
+
+Before publishing:
+
+```sh
+git diff --check
+git status
+```
+
+Test an archive independently:
+
+```sh
+temporary_directory="$(mktemp -d)"
+ditto -x -k packages/my-extension-1.0.0.zip "$temporary_directory"
+printf '%s\n' \
+  '{"jsonrpc":"2.0","id":"test","method":"store.invoke","params":{"packageID":"com.example.my-extension","commandID":"hello","query":"world","context":{}}}' \
+  | node "$temporary_directory/my-extension/index.js"
+rm -rf "$temporary_directory"
+```
+
+Publishing rules:
+
+- Increment the manifest version whenever archive contents change.
+- Never replace a published version with different bytes.
+- Commit the extension source, archive, and catalog update together.
+- Keep archive URLs immutable and HTTPS-only.
+- Do not add a catalog entry for an extension that has not been source-reviewed.
+- Verify installation and invocation from Vehla after publication.
 
 ## Contributing
 
