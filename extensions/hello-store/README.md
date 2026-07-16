@@ -6,7 +6,7 @@ Use this example to learn:
 
 - How `extension.json` declares package metadata and commands.
 - How palette keywords become `query`.
-- How selected text can be used as fallback input.
+- How selected text and clipboard text can be used as fallback input.
 - How to return message and clipboard actions.
 - How the SDK handles JSON-RPC input and output.
 
@@ -37,7 +37,8 @@ Input precedence:
 
 1. Text following the keyword.
 2. Selected text.
-3. The default subject `there`.
+3. Clipboard text.
+4. The default subject `there`.
 
 Result: Vehla displays an informational message such as:
 
@@ -57,7 +58,8 @@ Input precedence:
 
 1. Text following the keyword.
 2. Selected text.
-3. The default text `Hello from Vehla Store`.
+3. Clipboard text.
+4. The default text `Hello from Vehla Store`.
 
 Result: the selected value is copied to the clipboard.
 
@@ -65,10 +67,13 @@ Result: the selected value is copied to the clipboard.
 
 The package declares:
 
+- `clipboardRead` — allows both commands to use clipboard text when no query or selection exists.
 - `clipboardWrite` — required by **Copy from Store**.
 - `selectedText` — allows both commands to use selected text when no explicit query is supplied.
 
-The greeting command does not require clipboard access. Permissions are package-wide in Store API version 1, so Vehla shows every declared capability for the package.
+Version 1.1.0 adds `clipboardRead`. Updating from 1.0.0 demonstrates Vehla’s capability-escalation review: the new permission is shown before installation and reset to Ask, while existing decisions are preserved.
+
+Permissions are package-wide in Store API version 1, so Vehla shows every declared capability for the package.
 
 ## Package structure
 
@@ -88,11 +93,18 @@ The complete handler is intentionally small:
 ```js
 runStoreExtension(async ({ commandID, query, context }) => {
   if (commandID === "copy") {
-    return Store.copyText(query || context.selectedText || "Hello from Vehla Store");
+    return Store.copyText(
+      query ||
+      context.selectedText ||
+      context.clipboardText ||
+      "Hello from Vehla Store"
+    );
   }
 
   if (commandID === "greet") {
-    return Store.showMessage(`Hello, ${query || context.selectedText || "there"}!`);
+    const subject =
+      query || context.selectedText || context.clipboardText || "there";
+    return Store.showMessage(`Hello, ${subject}!`);
   }
 
   throw new Error(`Unknown command: ${commandID}`);
@@ -139,14 +151,21 @@ printf '%s\n' \
   | node extensions/hello-store/index.js
 ```
 
+Test clipboard fallback:
+
+```sh
+printf '%s\n' \
+  '{"jsonrpc":"2.0","id":"clipboard-test","method":"store.invoke","params":{"packageID":"com.vehla.examples.hello","commandID":"greet","query":"","context":{"clipboardText":"Clipboard value"}}}' \
+  | node extensions/hello-store/index.js
+```
+
 ## Extend this example
 
 Good next exercises:
 
 1. Add a command to uppercase input.
-2. Declare `clipboardRead` and add clipboard fallback.
-3. Return a `message` together with a `copyText` action.
-4. Add input validation and intentionally test the error response.
-5. Split command handlers into a lookup object instead of `if` statements.
+2. Return a `message` together with a `copyText` action.
+3. Add input validation and intentionally test the error response.
+4. Split command handlers into a lookup object instead of `if` statements.
 
 For the complete platform contract, see the repository-level README.

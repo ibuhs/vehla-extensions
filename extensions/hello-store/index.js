@@ -2,12 +2,20 @@ import { Store, runStoreExtension } from "@vehla/store-sdk";
 
 runStoreExtension(async ({ commandID, query, context }) => {
   if (commandID === "copy") {
-    const text = query || context.selectedText || "Hello from Vehla Store";
+    const text =
+      query ||
+      context.selectedText ||
+      context.clipboardText ||
+      "Hello from Vehla Store";
     return Store.copyText(text);
   }
 
   if (commandID === "greet") {
-    const subject = query || context.selectedText || "there";
+    const subject =
+      query ||
+      context.selectedText ||
+      context.clipboardText ||
+      "there";
     return Store.showMessage(`Hello, ${subject}!`);
   }
 

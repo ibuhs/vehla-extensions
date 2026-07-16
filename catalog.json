@@ -185,7 +185,7 @@
         "apiVersion": 1,
         "id": "com.vehla.examples.hello",
         "name": "Hello Store",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "Example commands for the Vehla Store SDK.",
         "author": "Vehla",
         "entrypoint": "index.js",
@@ -211,12 +211,13 @@
           }
         ],
         "capabilities": [
+          "clipboardRead",
           "clipboardWrite",
           "selectedText"
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/hello-store-1.0.0.zip",
-      "sha256": "3efdca1fcc25ae30fab5909dec940707db84fad9388e8cb4fb4360963c46d1e6",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/hello-store-1.1.0.zip",
+      "sha256": "7a0b838718d224a0515bc46164b1a633541793c1126ab92b61ff45c55d55d1d5",
       "archiveRoot": "hello-store"
     },
     {
