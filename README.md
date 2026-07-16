@@ -5,7 +5,7 @@ Build command packages that add new capabilities to Vehla’s Store.
 An extension can contain one command or an entire toolkit. Commands can:
 
 - Accept palette arguments, selected text, and clipboard text.
-- Perform synchronous or asynchronous JavaScript work.
+- Perform synchronous or asynchronous JavaScript or Swift work.
 - Call public or private HTTP APIs.
 - read and write extension-owned persistent data.
 - Copy generated output to the clipboard.
@@ -13,7 +13,7 @@ An extension can contain one command or an entire toolkit. Commands can:
 - Display a message.
 - Report useful errors without destabilizing Vehla.
 
-This repository contains the TypeScript/JavaScript SDK and complete example extensions.
+This repository contains TypeScript/JavaScript and Swift SDKs with complete example extensions.
 
 ## Current platform scope
 
@@ -24,6 +24,7 @@ Supported:
 - Multiple commands per package.
 - Keyword invocation and palette discovery.
 - Node.js 20 or newer.
+- Native Swift executable extensions built with Swift 6.
 - Asynchronous handlers.
 - Clipboard and selected-text context.
 - Network requests.
@@ -62,29 +63,43 @@ vehla-extensions/
 ├── scripts/
 │   └── build-catalog.py
 ├── sdk/
-│   └── typescript/
-│       ├── package.json
-│       ├── index.js
-│       └── index.d.ts
+│   ├── typescript/
+│   │   ├── package.json
+│   │   ├── index.js
+│   │   └── index.d.ts
+│   └── swift/
+│       ├── Package.swift
+│       ├── Sources/VehlaStoreSDK/
+│       ├── Tests/VehlaStoreSDKTests/
+│       └── README.md
 └── extensions/
     ├── hello-store/
     ├── text-toolkit/
     ├── github-workflow/
     ├── web-inspector/
     ├── webhook-runner/
-    └── developer-security-tools/
+    ├── developer-security-tools/
+    ├── notification-lab/
+    └── swift-hello/
 ```
 
 ## Prerequisites
 
 - macOS with Vehla’s Store feature.
 - Node.js 20 or newer.
-- Basic JavaScript or TypeScript knowledge.
+- Swift 6 or newer for native extensions.
+- Basic JavaScript, TypeScript, or Swift knowledge.
 
 Confirm Node is available:
 
 ```sh
 node --version
+```
+
+For native extensions, confirm Swift is available:
+
+```sh
+swift --version
 ```
 
 ## Install from Vehla
@@ -125,7 +140,30 @@ Then:
 
 `--install-links` is important for local SDK development. It places a self-contained SDK copy inside the extension’s `node_modules` directory. Vehla rejects symbolic links that escape an installed package.
 
-## Create a package
+## Try the native Swift extension
+
+Build the included universal executable:
+
+```sh
+git clone https://github.com/ibuhs/vehla-extensions.git
+cd vehla-extensions
+zsh extensions/swift-hello/build.sh
+```
+
+Then:
+
+1. Open **Vehla Settings → Store**.
+2. Choose **Install Local Package**.
+3. Select `extensions/swift-hello`.
+4. Confirm the package shows **Native executable**.
+5. Run `swifthello` to test forms, rich results, actions, and notifications.
+6. Run `swiftruntime` to inspect the isolated native process.
+
+The build script compiles optimized `arm64` and `x86_64` executables and combines them into `extensions/swift-hello/bin/swift-hello`.
+
+For the complete Swift package layout, API reference, build process, diagnostics, publishing instructions, security model, and troubleshooting guide, read [`sdk/swift/README.md`](sdk/swift/README.md).
+
+## Create a JavaScript package
 
 Create this structure:
 
@@ -227,9 +265,19 @@ Every package must contain `extension.json`.
 
 - Optional author or organization.
 
+`runtime`
+
+- Optional runtime identifier.
+- Defaults to `node` for backward compatibility.
+- Use `executable` for Swift and other compiled native command extensions.
+- Native executable packages must include a compiled binary before installation.
+
 `entrypoint`
 
-- Required relative JavaScript path.
+- Required relative path inside the package.
+- For `node`, this is the JavaScript module launched with Node.js.
+- For `executable`, this is the native binary launched directly.
+- Executable entrypoints must have executable file permissions.
 - Absolute paths and `..` path traversal are rejected.
 - The resolved entrypoint must remain inside the package.
 
@@ -984,7 +1032,7 @@ Current protections:
 
 Current limitation:
 
-JavaScript is not executed in a security sandbox. The process runs under the user’s macOS account and may access resources independently of Vehla’s broker. Capability declarations do not contain arbitrary Node.js filesystem or network APIs.
+JavaScript and native executables are not executed in a security sandbox. Processes run under the user’s macOS account and may access resources independently of Vehla’s broker. Capability declarations do not contain arbitrary Node.js or native system APIs.
 
 Therefore:
 
@@ -1131,6 +1179,10 @@ Native file selection, selected-file metadata, streaming hashes, bounded reads, 
 ### Notification Lab
 
 Immediate and delayed brokered notifications, native form input, asynchronous handlers, foreground delivery, and package/system permission testing.
+
+### Swift Hello
+
+Native executable runtime, typed Swift handlers, universal binary builds, declarative form values, structured results, brokered actions, and process diagnostics.
 
 ## Publishing checklist
 

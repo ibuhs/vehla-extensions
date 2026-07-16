@@ -92,16 +92,29 @@ def main() -> None:
             raise SystemExit(f"Duplicate package ID: {package_id}")
         package_ids.add(package_id)
 
-        subprocess.run(
-            [
-                "npm",
-                "--prefix",
-                str(extension_root),
-                "install",
-                "--install-links",
-            ],
-            check=True,
-        )
+        if (extension_root / "package.json").is_file():
+            subprocess.run(
+                [
+                    "npm",
+                    "--prefix",
+                    str(extension_root),
+                    "install",
+                    "--install-links",
+                ],
+                check=True,
+            )
+        elif manifest.get("runtime") == "executable":
+            build_script = extension_root / "build.sh"
+            if not build_script.is_file():
+                raise SystemExit(
+                    f"{extension_root.name} requires build.sh for its executable runtime."
+                )
+            subprocess.run(["/bin/zsh", str(build_script)], check=True)
+            entrypoint = extension_root / manifest["entrypoint"]
+            if not entrypoint.is_file() or not os.access(entrypoint, os.X_OK):
+                raise SystemExit(
+                    f"{extension_root.name} did not build an executable entrypoint."
+                )
 
         archive = PACKAGES / f"{extension_root.name}-{version}.zip"
         if archive.exists():

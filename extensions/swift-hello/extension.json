@@ -1,0 +1,48 @@
+{
+  "apiVersion": 1,
+  "id": "com.vehla.examples.swift-hello",
+  "name": "Swift Hello",
+  "version": "1.0.0",
+  "description": "Native Swift commands demonstrating forms, rich results, and notifications.",
+  "author": "Vehla",
+  "runtime": "executable",
+  "entrypoint": "bin/swift-hello",
+  "commands": [
+    {
+      "id": "greet",
+      "title": "Greet from Swift",
+      "subtitle": "Render a native result from a Swift executable",
+      "keywords": ["swifthello"],
+      "systemImage": "swift",
+      "form": {
+        "title": "Swift Greeting",
+        "submitLabel": "Greet",
+        "fields": [
+          {
+            "id": "name",
+            "type": "text",
+            "label": "Name",
+            "required": true,
+            "defaultValue": "Vehla"
+          },
+          {
+            "id": "notify",
+            "type": "toggle",
+            "label": "Send a completion notification",
+            "defaultValue": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "runtime",
+      "title": "Inspect Swift Runtime",
+      "subtitle": "Show native process and operating-system details",
+      "keywords": ["swiftruntime"],
+      "systemImage": "gearshape.2.fill"
+    }
+  ],
+  "capabilities": [
+    "notifications"
+  ]
+}

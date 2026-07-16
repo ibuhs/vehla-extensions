@@ -1,0 +1,539 @@
+# Vehla Store Swift SDK
+
+Build native command extensions as standalone Swift executables. Vehla launches each invocation out of process, sends one request through standard input, and reads one structured response from standard output.
+
+Native extensions are not loaded into Vehla’s process. A crash terminates only the extension invocation.
+
+## What this SDK provides
+
+The SDK gives Swift extension authors:
+
+- Typed command invocations.
+- Selected-text and clipboard context.
+- Keychain-backed secret values.
+- Declarative form values.
+- Native file-picker metadata.
+- Private persistent-data directory metadata.
+- Brokered clipboard, URL, message, and notification actions.
+- Structured native result views.
+- Async and throwing command handlers.
+- Protocol framing and error responses hidden behind `runStoreExtension`.
+
+Vehla still owns command discovery, permission prompts, forms, result rendering, process limits, and catalog verification.
+
+## Runtime architecture
+
+Each command invocation follows this lifecycle:
+
+1. Vehla finds the command in `extension.json`.
+2. Vehla asks for required package permissions.
+3. Vehla presents the command’s declarative form, if any.
+4. Vehla starts the package’s executable in a separate process.
+5. The Swift SDK decodes the invocation and calls your handler.
+6. Your handler returns a `StoreResult` or throws an error.
+7. The SDK encodes the result for Vehla.
+8. Vehla validates and renders the result or performs its brokered action.
+9. Vehla terminates the extension process.
+
+Standard output belongs exclusively to the SDK protocol. Write diagnostics to standard error.
+
+## Requirements
+
+- macOS 14 or newer.
+- Swift 6 or newer.
+- A manifest with `"runtime": "executable"`.
+- A compiled executable included inside the installed package.
+- A Vehla build that supports the executable Store runtime.
+
+## Quick start
+
+Use `extensions/swift-hello` as the complete reference package.
+
+Build it:
+
+```sh
+zsh extensions/swift-hello/build.sh
+```
+
+Install it locally:
+
+1. Open **Vehla Settings**.
+2. Select **Store**.
+3. Choose **Install Local Package**.
+4. Select the `extensions/swift-hello` directory.
+5. Confirm that the package appears as a native executable.
+6. Run `swifthello` or `swiftruntime` from the palette.
+
+## Recommended package layout
+
+```text
+my-swift-extension/
+├── extension.json
+├── Package.swift
+├── build.sh
+├── Sources/
+│   └── MyExtension/
+│       └── main.swift
+└── bin/
+    └── my-extension
+```
+
+The installed package must contain `bin/my-extension`. Source files alone are not enough because Vehla does not compile extensions during installation.
+
+## Add the SDK dependency
+
+```swift
+dependencies: [
+    .package(path: "../../sdk/swift"),
+]
+```
+
+Add `VehlaStoreSDK` to the executable target:
+
+```swift
+.executableTarget(
+    name: "MyExtension",
+    dependencies: [
+        .product(name: "VehlaStoreSDK", package: "swift"),
+    ]
+)
+```
+
+The package identity for a local dependency is normally its directory name, `swift`. A complete `Package.swift` looks like this:
+
+```swift
+// swift-tools-version: 6.0
+
+import PackageDescription
+
+let package = Package(
+    name: "MyExtension",
+    platforms: [.macOS(.v14)],
+    products: [
+        .executable(name: "MyExtension", targets: ["MyExtension"]),
+    ],
+    dependencies: [
+        .package(path: "../../sdk/swift"),
+    ],
+    targets: [
+        .executableTarget(
+            name: "MyExtension",
+            dependencies: [
+                .product(
+                    name: "VehlaStoreSDK",
+                    package: "swift"
+                ),
+            ]
+        ),
+    ]
+)
+```
+
+## Create the executable entrypoint
+
+```swift
+import VehlaStoreSDK
+
+@main
+struct MyExtension {
+    static func main() async {
+        await runStoreExtension { invocation in
+            switch invocation.commandID {
+            case "hello":
+                return Store.showMessage(
+                    "Hello, \(invocation.query)"
+                )
+            default:
+                throw ExtensionError.unknownCommand
+            }
+        }
+    }
+}
+```
+
+Use `LocalizedError` for clear messages:
+
+```swift
+enum ExtensionError: LocalizedError {
+    case missingInput
+    case unknownCommand(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .missingInput:
+            return "Enter a value before running this command."
+        case .unknownCommand(let command):
+            return "Unknown command: \(command)"
+        }
+    }
+}
+```
+
+Thrown error descriptions are returned to Vehla. Vehla redacts configured secrets and secure form values before displaying runtime diagnostics.
+
+## Manifest
+
+```json
+{
+  "apiVersion": 1,
+  "id": "com.example.swift-extension",
+  "name": "Swift Extension",
+  "version": "1.0.0",
+  "runtime": "executable",
+  "entrypoint": "bin/my-extension",
+  "commands": [
+    {
+      "id": "hello",
+      "title": "Hello from Swift",
+      "keywords": ["swifthello"]
+    }
+  ]
+}
+```
+
+Important manifest rules:
+
+- `runtime` must be `executable`.
+- `entrypoint` must be a relative path inside the package.
+- The entrypoint file must exist and have executable permissions.
+- Command and package IDs must be stable valid identifiers.
+- Every sensitive Vehla broker API must be declared in `capabilities`.
+- Native code is not technically prevented from calling system APIs directly; declarations remain a user-facing contract.
+
+Omitting `runtime` preserves the legacy `node` default.
+
+## Handle invocation input
+
+Every handler receives `StoreInvocation`:
+
+```swift
+public struct StoreInvocation {
+    public let packageID: String
+    public let commandID: String
+    public let query: String
+    public let context: StoreInvocationContext
+}
+```
+
+Read the command using `commandID`, not the display title:
+
+```swift
+switch invocation.commandID {
+case "format":
+    // Handle command.
+case "inspect":
+    // Handle command.
+default:
+    throw ExtensionError.unknownCommand(invocation.commandID)
+}
+```
+
+`query` contains the palette argument matched after a command keyword. It can be empty.
+
+## Read context safely
+
+Context values are present only when applicable and authorized:
+
+```swift
+let selectedText = invocation.context.selectedText
+let clipboardText = invocation.context.clipboardText
+let dataDirectory = invocation.context.dataDirectory
+let token = invocation.context.secrets["apiToken"]
+```
+
+Do not assume optional context is available. Ask for the narrowest capability and provide a useful missing-input error.
+
+## Read declarative form values
+
+Form values use `StoreFormValue`:
+
+```swift
+let name = invocation.context.formValues["name"]?.stringValue
+let enabled = invocation.context.formValues["enabled"]?.boolValue
+let file = invocation.context.formValues["file"]?.fileValue
+let files = invocation.context.formValues["files"]?.filesValue
+```
+
+Supported values:
+
+- `.string(String)` for text, secure text, multiline text, and select fields.
+- `.bool(Bool)` for toggle fields.
+- `.file(StoreSelectedFile)` for one selected file.
+- `.files([StoreSelectedFile])` for multiple selected files.
+
+Validate values again in the extension. The manifest controls presentation, but extension code remains responsible for command-specific requirements.
+
+## Work with selected files
+
+`StoreSelectedFile` contains:
+
+```swift
+public struct StoreSelectedFile {
+    public let path: String
+    public let name: String
+    public let isDirectory: Bool
+    public let size: Int64?
+    public let contentType: String?
+}
+```
+
+File fields require the `userSelectedFiles` capability. Selection records user intent but does not create a filesystem sandbox. Reject unexpected directories, types, or oversized files before reading.
+
+## Use secrets
+
+Declare secrets in `extension.json`, then read them by ID:
+
+```swift
+guard let token = invocation.context.secrets["apiToken"],
+      !token.isEmpty else {
+    throw ExtensionError.missingInput
+}
+```
+
+Required secrets prevent invocation until configured. Never print, persist, embed, or return secret values.
+
+## Return brokered actions
+
+Show a message:
+
+```swift
+return Store.showMessage("Finished")
+```
+
+Copy text:
+
+```swift
+return Store.copyText("Copied value")
+```
+
+Open an HTTP or HTTPS URL:
+
+```swift
+return Store.openURL("https://example.com")
+```
+
+Deliver a notification:
+
+```swift
+return Store.notify(
+    title: "Export complete",
+    body: "The Swift extension finished."
+)
+```
+
+The package must declare the corresponding capability. Vehla performs these actions after validating the response.
+
+## Return a rich native result
+
+```swift
+return Store.view(
+    StoreRichView(
+        title: "Repository",
+        subtitle: "Native Swift result",
+        sections: [
+            StoreRichSection(
+                title: "Summary",
+                items: [
+                    .text("Inspection completed."),
+                    .detail("Status", value: "Healthy"),
+                    .code(
+                        #"{"ok":true}"#,
+                        language: "json"
+                    ),
+                ]
+            ),
+        ],
+        actions: [
+            StoreAction(
+                type: .copyText,
+                value: "Healthy",
+                label: "Copy Status",
+                systemImage: "doc.on.doc"
+            ),
+        ]
+    )
+)
+```
+
+Vehla renders the result with native UI. Extensions do not inject SwiftUI views into the app.
+
+## Return a view and completion action
+
+Use `StoreResult` directly when one invocation needs both:
+
+```swift
+return StoreResult(
+    action: StoreAction(
+        type: .notify,
+        value: "The report is ready.",
+        title: "Swift extension completed"
+    ),
+    view: reportView
+)
+```
+
+## Diagnostics
+
+Never call `print`, because standard output is reserved for protocol responses. Write diagnostics to standard error:
+
+```swift
+func log(_ message: String) {
+    FileHandle.standardError.write(
+        Data("[MyExtension] \(message)\n".utf8)
+    )
+}
+```
+
+Vehla captures bounded diagnostic output and includes it in actionable process errors.
+
+## Build a universal executable
+
+Catalog packages should support both Apple Silicon and Intel Macs. Build each architecture and combine them:
+
+```sh
+swift build \
+  --configuration release \
+  --triple arm64-apple-macosx14.0 \
+  --scratch-path .build/arm64
+
+swift build \
+  --configuration release \
+  --triple x86_64-apple-macosx14.0 \
+  --scratch-path .build/x86_64
+
+arm64_bin="$(swift build \
+  --configuration release \
+  --triple arm64-apple-macosx14.0 \
+  --scratch-path .build/arm64 \
+  --show-bin-path)"
+
+x86_64_bin="$(swift build \
+  --configuration release \
+  --triple x86_64-apple-macosx14.0 \
+  --scratch-path .build/x86_64 \
+  --show-bin-path)"
+
+mkdir -p bin
+lipo -create \
+  "$arm64_bin/MyExtension" \
+  "$x86_64_bin/MyExtension" \
+  -output bin/my-extension
+chmod 755 bin/my-extension
+```
+
+Confirm both architectures:
+
+```sh
+lipo -archs bin/my-extension
+```
+
+Expected output:
+
+```text
+x86_64 arm64
+```
+
+## Test without Vehla
+
+The SDK transport can be smoke-tested from a terminal:
+
+```sh
+printf '%s\n' \
+  '{"jsonrpc":"2.0","id":"test","method":"store.invoke","params":{"packageID":"com.example.swift-extension","commandID":"hello","query":"Vehla","context":{"secrets":{},"formValues":{}}}}' \
+  | bin/my-extension
+```
+
+Expected response shape:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "test",
+  "result": {
+    "action": {
+      "type": "showMessage",
+      "value": "Hello, Vehla"
+    }
+  }
+}
+```
+
+This wire format is an internal runtime detail. Extension code should use the typed SDK APIs.
+
+## Install locally
+
+1. Build `bin/my-extension`.
+2. Confirm it is executable with `test -x bin/my-extension`.
+3. Open **Settings → Store**.
+4. Choose **Install Local Package**.
+5. Select the extension directory, not `bin` or `extension.json`.
+6. Confirm the installed package shows **Native executable**.
+7. Review permissions and run a command keyword.
+
+Local packages intentionally show as local or unsigned because they were not installed from a signed catalog archive.
+
+## Publish to the catalog
+
+Before publishing:
+
+1. Increment the manifest version when source or binary bytes change.
+2. Produce the universal release binary.
+3. Test both the executable directly and the installed package.
+4. Include source, `Package.swift`, `build.sh`, and the release binary.
+5. Run the signed catalog builder.
+6. Verify the resulting archive checksum and Ed25519 signature.
+7. Commit the source, immutable archive, and catalog entry together.
+
+Vehla records publisher provenance only when installation uses a verified signed catalog archive. Installing the source directory locally cannot establish that provenance.
+
+## Runtime limits
+
+Native extensions currently use the same command limits as Node extensions:
+
+- One process per invocation.
+- 15-second execution timeout.
+- 1 MB standard-output protocol limit.
+- Bounded diagnostic output.
+- No long-running background process.
+- No scheduled execution.
+- No extension-defined global hotkey.
+
+Move slow work behind a remote API or split it into bounded commands.
+
+## Troubleshooting
+
+### Entrypoint not found
+
+Build the executable before installation and ensure `entrypoint` exactly matches its relative path.
+
+### Entrypoint is not executable
+
+Run:
+
+```sh
+chmod 755 bin/my-extension
+```
+
+Reinstall the package because Vehla copies local packages during installation.
+
+### Bad CPU type in executable
+
+The package does not include the current Mac architecture. Rebuild as a universal binary.
+
+### Command timed out
+
+The handler exceeded 15 seconds. Reduce work, add explicit network timeouts, or split the operation.
+
+### Invalid response
+
+Do not write logs with `print`. Any non-protocol standard output corrupts the response. Use standard error.
+
+### Changes do not appear
+
+Rebuild the binary, then reinstall the local package. Vehla runs its installed copy, not the source directory.
+
+## Security
+
+An executable extension runs under the user’s macOS account. Out-of-process execution provides crash isolation, not a security sandbox. Native code can call system APIs without going through Vehla’s capability broker. Install only trusted, source-reviewed packages and cryptographically sign catalog archives.
+
+Treat manifest capabilities as a transparent user contract, not an operating-system enforcement boundary. Keep dependencies small, review transitive code, avoid shell execution, scope credentials narrowly, and publish reproducible source alongside every binary.

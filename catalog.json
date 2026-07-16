@@ -99,7 +99,7 @@
         "keyID": "release-2026-07",
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
-      "signature": "/ukW3mJxKfpx88rFOWng2vxfO6rbH2k2OHp5dyygjDDi1Q4U5kMg21oa1Z00J1o32QudLlm9XoK0wiGnfbV+Aw=="
+      "signature": "jRzEM1g/PZqsyq0MxmEel7vszvmvriApoS14bFGRGJb1QQVBjSCcrPcb7yV+daqOYcN6Uai33vVPsaJWN1HeDQ=="
     },
     {
       "manifest": {
@@ -244,7 +244,7 @@
         "keyID": "release-2026-07",
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
-      "signature": "8TB6cxkG3Tal++10faeve8hhwL8rH4E/RqrpQfCrmR9TKn6lLUiNSd0todarQnrQCuQs6knJM64MpQRgZmKjBg=="
+      "signature": "pfKLWft996UWRdXoHHG6Qo1fHeBPJ4T0U5AVbMHcpXq+HXVzXVfzHqbOpk5nq5jBSYAqShcZ+k77MBWLmpPSBA=="
     },
     {
       "manifest": {
@@ -345,7 +345,7 @@
         "keyID": "release-2026-07",
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
-      "signature": "0hC2KG0aktR8lUZ+thNnZabfmEs6mfY85v8BF68HZQQurPUmYe9UKBHsGk/s5jUDb8ZtFWG+9Lx8CM+DKuJRAA=="
+      "signature": "9YdbV67MQpxc0J9ybLINWxjZ8eYDD5+t2OVAuwscFRGsvebgTOvLmxeqSKC4BR5OKGj6EIrww28ZCGUHrDjHDA=="
     },
     {
       "manifest": {
@@ -392,7 +392,7 @@
         "keyID": "release-2026-07",
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
-      "signature": "qHV+D0qrDLH/uFbUaDQy68dlNplHlkad8pdd1kG1XCnis7bD4tvTKFwftwAPb1hjRea5eHGrUGmsmch/57FgAA=="
+      "signature": "jCmgeRig+HLXHUFG/RTkDIpAbVlwdZjtRr7aGtaDigkJoBe/6zlkqA1VYZZjzwGXc2ZB2dVCh4qK++uIwpN1Dw=="
     },
     {
       "manifest": {
@@ -478,7 +478,71 @@
         "keyID": "release-2026-07",
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
-      "signature": "hNkQyOyWMwPQp0NP9Ge55NbTZxHG9UByUF3x12eKcgJV6rW+bOu+xjA3XoPnEy1mSUW5Jq71VHsKkkHgPoFvAA=="
+      "signature": "eg/qDEASI/BvXISTkBAAVWFL+CFgRwaaVIT72ePfpEgo5uP1NsIO9+BRUvxIU9wUpw1lwLItkMK4NMrErADYBg=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 1,
+        "id": "com.vehla.examples.swift-hello",
+        "name": "Swift Hello",
+        "version": "1.0.0",
+        "description": "Native Swift commands demonstrating forms, rich results, and notifications.",
+        "author": "Vehla",
+        "runtime": "executable",
+        "entrypoint": "bin/swift-hello",
+        "commands": [
+          {
+            "id": "greet",
+            "title": "Greet from Swift",
+            "subtitle": "Render a native result from a Swift executable",
+            "keywords": [
+              "swifthello"
+            ],
+            "systemImage": "swift",
+            "form": {
+              "title": "Swift Greeting",
+              "submitLabel": "Greet",
+              "fields": [
+                {
+                  "id": "name",
+                  "type": "text",
+                  "label": "Name",
+                  "required": true,
+                  "defaultValue": "Vehla"
+                },
+                {
+                  "id": "notify",
+                  "type": "toggle",
+                  "label": "Send a completion notification",
+                  "defaultValue": false
+                }
+              ]
+            }
+          },
+          {
+            "id": "runtime",
+            "title": "Inspect Swift Runtime",
+            "subtitle": "Show native process and operating-system details",
+            "keywords": [
+              "swiftruntime"
+            ],
+            "systemImage": "gearshape.2.fill"
+          }
+        ],
+        "capabilities": [
+          "notifications"
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/swift-hello-1.0.0.zip",
+      "sha256": "836d04c833879f2e7e737291b2e91b5d8fac91c39d388701d0a32e47d071a31d",
+      "archiveRoot": "swift-hello",
+      "publisher": {
+        "id": "com.vehla.publisher",
+        "name": "Vehla",
+        "keyID": "release-2026-07",
+        "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
+      },
+      "signature": "4zC1qtB+B98LwNchW8tw6XN8cSbXjkRkDvLOQgqoKNPRCXn6kZCpOcwzXEw2sPZYkYPsmmw96A+7yez+34HTBA=="
     },
     {
       "manifest": {
@@ -563,7 +627,7 @@
         "keyID": "release-2026-07",
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
-      "signature": "Fv8YpHYUDBN3eT8HpWhDwvtEqlXIoaOkZhLVi5m3wVIFg63UX+MjRphmBfzv2BYMZqcNxwmgHkvMyvJRrQaFBA=="
+      "signature": "6BMKAxJBKO5XH/JRRy3W0WZ5xLu3aH/FarImmrtyWcCeSSFBky/KwEK2NsW6Faud9dy/Ox0gkZLJEtU6u9HADw=="
     },
     {
       "manifest": {
@@ -647,7 +711,7 @@
         "keyID": "release-2026-07",
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
-      "signature": "qSan5ZRZbI1z4dcDjS1g062cRLo84Hr0jBb91Pn0jannQj1oQIXktP64q/UezmhucP361OysQQcRYjUsMqU8CA=="
+      "signature": "ajfwq6QLfIM2Q3TMDGERlGdpzfvbbU0gOT8TpP3Tsr8ff/HyAhq8pC/TMDKhs7GEqwGeWWvlLHssvGTGao0aDg=="
     },
     {
       "manifest": {
@@ -822,7 +886,7 @@
         "keyID": "release-2026-07",
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
-      "signature": "fENci3VdtjSDHe33hzVSF1idcwihfGY0BzFBb6gCB6fV87RfbF0AcOW9XleHq1vUwAUVr3avZ0wHbxM1hoiIBQ=="
+      "signature": "OsCASVn0sQCvOYInTUWKtiCkhyJC2vYHh/EbOr8UPYtakMHS1y1v+KKWHDSE9CLrAcOzztdDQX1FAsOyd/7SAw=="
     }
   ]
 }

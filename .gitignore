@@ -1,3 +1,4 @@
 node_modules/
+DerivedData/
 .DS_Store
 *.log
