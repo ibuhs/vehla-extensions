@@ -1124,6 +1124,14 @@ HTTP requests, request syntax, persistent records, atomic writes, response trunc
 
 Cryptographic hashing, Base64, JWT inspection, secure randomness, numeric options, and HMAC generation.
 
+### File Toolkit
+
+Native file selection, selected-file metadata, streaming hashes, bounded reads, structured results, clipboard actions, and completion notifications.
+
+### Notification Lab
+
+Immediate and delayed brokered notifications, native form input, asynchronous handlers, foreground delivery, and package/system permission testing.
+
 ## Publishing checklist
 
 Before sharing a package:

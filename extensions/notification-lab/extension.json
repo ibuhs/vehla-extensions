@@ -1,0 +1,61 @@
+{
+  "apiVersion": 1,
+  "id": "com.vehla.examples.notification-lab",
+  "name": "Notification Lab",
+  "version": "1.0.0",
+  "description": "Test immediate and delayed brokered macOS notifications.",
+  "author": "Vehla",
+  "entrypoint": "index.js",
+  "commands": [
+    {
+      "id": "notify-now",
+      "title": "Send Test Notification",
+      "subtitle": "Deliver a notification immediately",
+      "keywords": ["notifynow"],
+      "systemImage": "bell.badge.fill"
+    },
+    {
+      "id": "notify-delayed",
+      "title": "Send Delayed Notification",
+      "subtitle": "Wait before delivering a custom notification",
+      "keywords": ["notifydelay"],
+      "systemImage": "clock.badge.checkmark",
+      "form": {
+        "title": "Delayed Notification",
+        "description": "The extension waits before returning the notification action. Keep Vehla open to verify foreground delivery.",
+        "submitLabel": "Start Test",
+        "fields": [
+          {
+            "id": "delay",
+            "type": "select",
+            "label": "Delay",
+            "required": true,
+            "defaultValue": "fiveSeconds",
+            "options": [
+              {"id": "threeSeconds", "label": "3 seconds"},
+              {"id": "fiveSeconds", "label": "5 seconds"},
+              {"id": "tenSeconds", "label": "10 seconds"}
+            ]
+          },
+          {
+            "id": "title",
+            "type": "text",
+            "label": "Title",
+            "required": true,
+            "defaultValue": "Vehla notification test"
+          },
+          {
+            "id": "body",
+            "type": "multilineText",
+            "label": "Message",
+            "required": true,
+            "defaultValue": "Delayed notification delivery is working."
+          }
+        ]
+      }
+    }
+  ],
+  "capabilities": [
+    "notifications"
+  ]
+}
