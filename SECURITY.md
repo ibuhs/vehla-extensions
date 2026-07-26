@@ -21,7 +21,7 @@ We strongly recommend updating to the latest SDK version before reporting a secu
 Instead, report vulnerabilities privately by:
 
 - Opening a **Private Vulnerability Report** through GitHub Security Advisories (if enabled for this repository).
-- Emailing **kailaconsulting@outlook.comp**.
+- Emailing **kailaconsulting@outlook.com**.
 
 Please include as much information as possible:
 
