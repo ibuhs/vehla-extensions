@@ -75,7 +75,6 @@ This policy applies to the Vehla Extensions SDK repository, including:
 - SDK APIs
 - Extension loading and registration
 - Permission and capability handling
-- Extension-to-host communication
 - Official example extensions
 - Build and packaging configuration
 
