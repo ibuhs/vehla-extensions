@@ -697,6 +697,77 @@
     },
     {
       "manifest": {
+        "apiVersion": 2,
+        "id": "com.ibuhs.vehla.toolbox",
+        "name": "Toolbox",
+        "version": "1.0.0",
+        "description": "Local-first developer data tools: JSON, encoding, crypto, dates, text, code, SQL, generators, web, and networking \u2014 all off the main thread.",
+        "author": "ibuhs",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/ToolboxWorkspace.bundle",
+        "commands": [
+          {
+            "id": "open-toolbox",
+            "title": "Open Toolbox",
+            "subtitle": "JSON, encoding, crypto, date, text, code, SQL, generators, web, networking",
+            "keywords": [
+              "toolbox",
+              "json",
+              "base64",
+              "hash",
+              "regex",
+              "encode",
+              "decode",
+              "uuid",
+              "sqlite",
+              "sql",
+              "dns",
+              "cors",
+              "tailwind"
+            ],
+            "systemImage": "wrench.and.screwdriver",
+            "workspaceID": "toolbox"
+          }
+        ],
+        "capabilities": [
+          "persistentStorage",
+          "networkAccess"
+        ],
+        "secrets": [
+          {
+            "id": "githubToken",
+            "label": "GitHub Token",
+            "description": "Personal access token used by the Gist Uploader tool.",
+            "required": false
+          }
+        ],
+        "workspaces": [
+          {
+            "id": "toolbox",
+            "title": "Toolbox",
+            "subtitle": "Developer data tools",
+            "systemImage": "wrench.and.screwdriver",
+            "preferredWidth": 1400,
+            "preferredHeight": 860,
+            "minimumWidth": 920,
+            "minimumHeight": 620,
+            "dismissOnResignKey": false
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/toolbox-native-1.0.0.zip",
+      "sha256": "f7eebabbf2da2a446ec7d40ed67de35457870446e04920b4643a91a7e37f7914",
+      "archiveRoot": "toolbox-native",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "6WetRT0jd+BF/VI19CIRMudN22/9WEVWYXVb9NtptaWRSlqW7jdKW5BVRFrpvtlVuIMMo+8J60Ok37kFaMWXDw=="
+    },
+    {
+      "manifest": {
         "apiVersion": 1,
         "id": "com.vehla.examples.web-inspector",
         "name": "Web Inspector",

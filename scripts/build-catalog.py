@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import hashlib
 import json
 import os
@@ -16,14 +17,25 @@ ARCHIVE_BASE_URL = (
     "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages"
 )
 SIGNING_SCRIPT = ROOT / "scripts" / "publisher-signing.swift"
+BUILD_ARTIFACT_NAMES = {
+    ".build",
+    ".swiftpm",
+    ".xcode-derived",
+    "DerivedData",
+    "dist",
+}
 
 
 def package_digest(root: pathlib.Path) -> str:
     digest = hashlib.sha256()
     for path in sorted(item for item in root.rglob("*") if item.is_file()):
-        if path.name in {"README.md", ".DS_Store"}:
+        relative_path = path.relative_to(root)
+        if (
+            path.name in {"README.md", ".DS_Store"}
+            or any(part in BUILD_ARTIFACT_NAMES for part in relative_path.parts)
+        ):
             continue
-        relative = path.relative_to(root).as_posix()
+        relative = relative_path.as_posix()
         digest.update(relative.encode())
         digest.update(b"\0")
         digest.update(path.read_bytes())
@@ -67,16 +79,30 @@ def signing_publisher() -> dict[str, str] | None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Build and sign Vehla Store catalog packages."
+    )
+    parser.add_argument(
+        "--only",
+        action="append",
+        default=[],
+        metavar="DIRECTORY",
+        help=(
+            "Build only this extension directory while preserving other "
+            "catalog entries. May be repeated."
+        ),
+    )
+    arguments = parser.parse_args()
+
     if shutil.which("npm") is None:
         raise SystemExit("npm is required to build Store packages.")
     if not pathlib.Path("/usr/bin/ditto").exists():
         raise SystemExit("/usr/bin/ditto is required to build Store packages.")
 
     PACKAGES.mkdir(exist_ok=True)
-    catalog_packages = []
-    package_ids = set()
     publisher = signing_publisher()
     catalog_path = ROOT / "catalog.json"
+    existing_catalog = {"packages": []}
     existing_packages = {}
     if catalog_path.is_file():
         existing_catalog = json.loads(catalog_path.read_text())
@@ -95,17 +121,46 @@ def main() -> None:
     )
     if not extension_roots:
         raise SystemExit("No extension manifests were found.")
+    if arguments.only:
+        selected = set(arguments.only)
+        available = {path.name for path in extension_roots}
+        missing = selected - available
+        if missing:
+            raise SystemExit(
+                "Unknown extension directories: " + ", ".join(sorted(missing))
+            )
+        extension_roots = [
+            path for path in extension_roots if path.name in selected
+        ]
+
+    catalog_packages = (
+        list(existing_catalog.get("packages", []))
+        if arguments.only
+        else []
+    )
+    package_ids = {
+        package["manifest"]["id"] for package in catalog_packages
+    }
 
     for extension_root in extension_roots:
         manifest = json.loads((extension_root / "extension.json").read_text())
         package_id = manifest["id"]
         version = manifest["version"]
-        if manifest.get("runtime") == "executable" and publisher is None:
+        runtime = manifest.get("runtime", "node")
+        if runtime != "node" and publisher is None:
             raise SystemExit(
                 f"{extension_root.name} is native and requires publisher signing."
             )
         if package_id in package_ids:
-            raise SystemExit(f"Duplicate package ID: {package_id}")
+            if arguments.only:
+                catalog_packages = [
+                    package
+                    for package in catalog_packages
+                    if package["manifest"]["id"] != package_id
+                ]
+                package_ids.remove(package_id)
+            else:
+                raise SystemExit(f"Duplicate package ID: {package_id}")
         package_ids.add(package_id)
 
         if (extension_root / "package.json").is_file():
@@ -119,15 +174,22 @@ def main() -> None:
                 ],
                 check=True,
             )
-        elif manifest.get("runtime") == "executable":
+        elif runtime in {"executable", "nativeUI", "dockWidget"}:
             build_script = extension_root / "build.sh"
             if not build_script.is_file():
                 raise SystemExit(
-                    f"{extension_root.name} requires build.sh for its executable runtime."
+                    f"{extension_root.name} requires build.sh for its native runtime."
                 )
             subprocess.run(["/bin/zsh", str(build_script)], check=True)
             entrypoint = extension_root / manifest["entrypoint"]
-            if not entrypoint.is_file() or not os.access(entrypoint, os.X_OK):
+            if not entrypoint.exists():
+                raise SystemExit(
+                    f"{extension_root.name} did not build its native entrypoint."
+                )
+            if (
+                runtime == "executable"
+                and (not entrypoint.is_file() or not os.access(entrypoint, os.X_OK))
+            ):
                 raise SystemExit(
                     f"{extension_root.name} did not build an executable entrypoint."
                 )
@@ -152,7 +214,11 @@ def main() -> None:
                 shutil.copytree(
                     extension_root,
                     staged_root,
-                    ignore=shutil.ignore_patterns("README.md", ".DS_Store"),
+                    ignore=shutil.ignore_patterns(
+                        "README.md",
+                        ".DS_Store",
+                        *BUILD_ARTIFACT_NAMES,
+                    ),
                 )
                 subprocess.run(
                     [
@@ -194,6 +260,7 @@ def main() -> None:
             catalog_package["signature"] = signature
         catalog_packages.append(catalog_package)
 
+    catalog_packages.sort(key=lambda package: package["archiveRoot"])
     catalog = {
         "schemaVersion": 1,
         "packages": catalog_packages,

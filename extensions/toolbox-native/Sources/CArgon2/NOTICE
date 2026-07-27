@@ -1,0 +1,4 @@
+CArgon2 vendors the PHC Argon2 reference implementation
+(https://github.com/P-H-C/phc-winner-argon2), CC0 1.0 / Apache 2.0 dual-licensed
+by the Argon2 authors. Sources were adapted from the Argon2Swift package packaging
+of that reference code for use as a local SPM C target.

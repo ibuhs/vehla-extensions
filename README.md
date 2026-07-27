@@ -1272,16 +1272,26 @@ Build all archives and regenerate `catalog.json`:
 python3 scripts/build-catalog.py
 ```
 
+Build or update one package while preserving every other catalog entry:
+
+```sh
+python3 scripts/build-catalog.py --only toolbox-native
+```
+
 The build script:
 
 1. Finds every directory under `extensions/` containing `extension.json`.
-2. Runs `npm install --install-links` so local SDK dependencies are physically included.
+2. Runs `npm install --install-links` for Node packages or `build.sh` for
+   executable, Native UI, and Dock Widget packages.
 3. Reuses an immutable matching archive or creates `packages/<directory>-<version>.zip`.
 4. Calculates each archive’s SHA-256 checksum.
 5. Optionally signs the exact archive bytes with an Ed25519 publisher key.
 6. Rebuilds `catalog.json` from the extension manifests.
 
-Package-specific `README.md` files are source documentation and are excluded from runtime archives. If an existing versioned archive differs from the remaining package contents, the build fails and requires a manifest version increment.
+Package-specific `README.md` files and generated SwiftPM, Xcode, and `dist`
+directories are excluded from runtime archives. The signed `bin` entrypoint is
+included. If an existing versioned archive differs from the remaining package
+contents, the build fails and requires a manifest version increment.
 
 ### Sign catalog packages
 

@@ -1,0 +1,42 @@
+{
+  "apiVersion": 2,
+  "id": "com.ibuhs.vehla.toolbox",
+  "name": "Toolbox",
+  "version": "1.0.0",
+  "description": "Local-first developer data tools: JSON, encoding, crypto, dates, text, code, SQL, generators, web, and networking — all off the main thread.",
+  "author": "ibuhs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/ToolboxWorkspace.bundle",
+  "commands": [
+    {
+      "id": "open-toolbox",
+      "title": "Open Toolbox",
+      "subtitle": "JSON, encoding, crypto, date, text, code, SQL, generators, web, networking",
+      "keywords": ["toolbox", "json", "base64", "hash", "regex", "encode", "decode", "uuid", "sqlite", "sql", "dns", "cors", "tailwind"],
+      "systemImage": "wrench.and.screwdriver",
+      "workspaceID": "toolbox"
+    }
+  ],
+  "capabilities": ["persistentStorage", "networkAccess"],
+  "secrets": [
+    {
+      "id": "githubToken",
+      "label": "GitHub Token",
+      "description": "Personal access token used by the Gist Uploader tool.",
+      "required": false
+    }
+  ],
+  "workspaces": [
+    {
+      "id": "toolbox",
+      "title": "Toolbox",
+      "subtitle": "Developer data tools",
+      "systemImage": "wrench.and.screwdriver",
+      "preferredWidth": 1400,
+      "preferredHeight": 860,
+      "minimumWidth": 920,
+      "minimumHeight": 620,
+      "dismissOnResignKey": false
+    }
+  ]
+}
