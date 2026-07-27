@@ -1,0 +1,22 @@
+{
+  "apiVersion": 3,
+  "id": "com.ibuhs.vehla.news-reader",
+  "name": "News Reader Dock Widget",
+  "version": "1.0.7",
+  "description": "Follow RSS and Atom feeds with background refresh, artwork, OPML backup, mute, and per-feed intervals.",
+  "author": "ibuhs",
+  "runtime": "dockWidget",
+  "entrypoint": "bin/NewsDockWidget.bundle",
+  "capabilities": ["persistentStorage", "networkAccess"],
+  "dockWidgets": [
+    {
+      "id": "news-reader",
+      "title": "News",
+      "subtitle": "RSS and Atom reader with background refresh",
+      "systemImage": "newspaper.fill",
+      "preferredPopupWidth": 500,
+      "preferredPopupHeight": 640,
+      "supportedSurfaces": ["compact", "inline", "popup"]
+    }
+  ]
+}

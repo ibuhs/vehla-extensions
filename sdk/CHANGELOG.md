@@ -17,3 +17,5 @@
 
 - TypeScript SDK package metadata now uses the repository's MIT license.
 - SDK build artifacts and SwiftPM/Xcode state are ignored.
+- CLI validation describes native runtimes as having full app access instead
+  of labeling publisher-signed packages unsafe.

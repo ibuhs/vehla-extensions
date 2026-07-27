@@ -105,7 +105,9 @@ vehla-extensions/
     ├── developer-security-tools/
     ├── notification-lab/
     ├── swift-hello/
-    └── swift-sdk-lab/
+    ├── swift-sdk-lab/
+    ├── toolbox-native/
+    └── news-dock-widget/
 ```
 
 ## Prerequisites

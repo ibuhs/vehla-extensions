@@ -678,10 +678,10 @@ private struct VehlaSwiftCLI {
         print("Code signature: valid")
         switch package.manifest.runtime {
         case "nativeUI":
-            print("Execution: unsafe in-process native workspace")
+            print("Execution: in-process native workspace with full app access")
         case "dockWidget":
             print(
-                "Execution: unsafe in-process dock widgets "
+                "Execution: in-process dock widgets with full app access "
                     + "(\(package.manifest.dockWidgets?.count ?? 0))"
             )
         default:
