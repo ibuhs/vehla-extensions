@@ -2,6 +2,8 @@
 
 > This extension was created with help from AI and reviewed by a human.
 
+![News Reader Dock Widget](../../assets/news-reader-dock-widget.png)
+
 An API 3 Vehla Dock Widget with compact, inline, and popup surfaces.
 It fetches RSS and Atom feeds on a background utility queue, stream-parses large
 podcast feeds (early-exit after N items), caches feed artwork, tracks unread
