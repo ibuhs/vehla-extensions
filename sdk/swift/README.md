@@ -53,13 +53,196 @@ All Store command extensions execute outside Vehla’s process. Swift SDK extens
 
 Background-only does not mean persistent. The process starts for one user-requested command and must finish within 15 seconds. Long-running daemons, scheduled jobs, and always-on background services are not currently supported.
 
+## Native UI workspaces
+
+`VehlaNativeUISDK` is a separate, opt-in runtime for complete SwiftUI or
+AppKit workspaces hosted inside Vehla's palette panel. Native workspaces use
+Store API 2, `runtime: "nativeUI"`, and a signed `.bundle` entrypoint.
+
+Unlike command extensions, native UI bundles load into Vehla's process.
+They are **not sandboxed** and must be treated like downloaded desktop
+software: they can read or alter Vehla memory, access anything available to
+Vehla, make network requests, and crash or compromise the app. Vehla shows a
+critical risk warning before installation and requires fresh consent before
+the first launch of every package version.
+
+The principal class conforms to `VehlaNativeWorkspacePlugin` and returns an
+`NSViewController`. SwiftUI workspaces use `NSHostingController`:
+
+```swift
+import SwiftUI
+import VehlaNativeUISDK
+
+@objc(MyWorkspacePlugin)
+final class MyWorkspacePlugin: NSObject, VehlaNativeWorkspacePlugin {
+    let apiVersion = VehlaNativeUIAPIVersion
+    let workspaces = [
+        VehlaWorkspaceDescriptor(id: "main", title: "My Workspace")
+    ]
+
+    @MainActor
+    func makeViewController(
+        workspaceID: String,
+        context: VehlaWorkspaceContext
+    ) throws -> NSViewController {
+        NSHostingController(rootView: MyWorkspaceView(context: context))
+    }
+
+    @MainActor
+    func workspace(
+        _ workspaceID: String,
+        themeDidChange theme: VehlaWorkspaceTheme
+    ) {
+        // Update any custom colors cached by the workspace.
+    }
+}
+```
+
+`context.theme` contains Vehla's current appearance when the workspace opens.
+Vehla calls `workspace(_:themeDidChange:)` when that appearance changes.
+AppKit semantic colors and SwiftUI's color scheme also inherit the host panel's
+appearance. Use `backgroundColor` for the workspace backdrop and
+`surfaceColor` for themed panels or overlays.
+
+`context.localAI` provides optional, text-only access to the on-device model
+selected and downloaded in Vehla. Check `isAvailable`, display `statusLabel`
+when useful, and send a conversation with `complete(messages:)`:
+
+```swift
+guard let localAI = context.localAI, localAI.isAvailable else { return }
+let response = try await localAI.complete(messages: [
+    VehlaWorkspaceAIMessage(role: .system, content: "Be concise."),
+    VehlaWorkspaceAIMessage(role: .user, content: prompt),
+])
+```
+
+A native UI manifest declares each hosted surface and maps commands to it:
+
+```json
+{
+  "apiVersion": 2,
+  "id": "com.example.native-workspace",
+  "name": "Native Workspace",
+  "version": "1.0.0",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/NativeWorkspace.bundle",
+  "capabilities": ["persistentStorage"],
+  "workspaces": [{
+    "id": "main",
+    "title": "Native Workspace",
+    "preferredWidth": 1180,
+    "preferredHeight": 760
+  }],
+  "commands": [{
+    "id": "open",
+    "title": "Open Native Workspace",
+    "workspaceID": "main"
+  }]
+}
+```
+
+Vehla owns the panel, activation, sizing, live theme context, local AI bridge,
+package data directory, Keychain-backed secrets, first-launch consent, and
+crash recovery. The bundle remains loaded until Vehla exits; disabling or
+uninstalling it prevents future launches but does not safely unload executable
+code mid-run.
+
+Native UI packages must declare `persistentStorage`. Vehla authorizes that
+capability before creating the workspace and provides the resulting private
+directory through `context.dataDirectory`.
+
+## Dock widgets
+
+`VehlaDockWidgetSDK` defines Store API 3's trusted in-process Dock widget
+contract. A bundle principal class conforms to `VehlaDockWidgetPlugin`,
+publishes `VehlaDockWidgetDescriptor` values, and creates one
+`NSViewController` for each requested compact, inline, or popup surface.
+`VehlaDockWidgetContext` provides package-confined data storage, the current
+theme, invalidation, and brokered copy, open, message, and notification
+actions.
+
+Use `context.theme.tileTextColor` for text and icons on compact and inline
+surfaces. Vehla resolves that color from the user's Dock widget contrast
+setting and sends updated values through `widget(_:themeDidChange:)`. Popup
+surfaces should continue to use `primaryTextColor` and `secondaryTextColor`,
+which follow the current Command Palette theme. Widgets built against an older
+SDK automatically fall back to `primaryTextColor`.
+
+The optional `context.localAI` bridge gives trusted widgets text-only
+completion access to the on-device MLX model selected and downloaded in Vehla.
+Vehla owns model loading and inference; widgets pass `VehlaDockWidgetAIMessage`
+values and do not link MLX or access model files. Check `isAvailable`, show
+`statusLabel` when unavailable, and call `complete(messages:)` from a
+cancellable task.
+
+`context.open(_:)` accepts `http`, `https`, and
+`x-apple.systempreferences` URLs. The System Settings scheme lets widgets open
+an appropriate macOS settings pane without launching processes directly.
+
+All view creation and lifecycle callbacks run on `MainActor`. Lifecycle
+callbacks are synchronous notifications and must return immediately; they
+cannot be async because the plugin protocol is Objective-C compatible.
+Plugins should launch asynchronous work in cancellable `Task`s stored by a
+plugin-owned actor, cancel visibility-specific work when the phase becomes
+hidden, and cancel all remaining work from `widgetWillClose(_:)`. Never block
+the main actor while waiting for a task.
+
+Packages declaring both `clipboardRead` and `clipboardWrite` may receive
+`context.clipboard`, an optional bridge to Vehla's canonical clipboard history.
+The bridge exposes text, links, image file URLs, source applications, and pin
+state, plus restore, delete, clear, pin, and active-viewer operations. Its
+history includes native captures and imported AwesomeCopy clips. Keep a
+fallback for older hosts where `context.clipboard` is `nil`.
+
+Dock widgets can read and update manifest-declared Keychain values with
+`context.secret(named:)`, `setSecret(_:named:)`, and `removeSecret(named:)`.
+Only secret IDs listed in `extension.json` are accepted.
+
+A Dock widget package uses a signed `.bundle` and may omit `commands`:
+
+```json
+{
+  "apiVersion": 3,
+  "id": "com.example.build-widgets",
+  "name": "Build Widgets",
+  "version": "1.0.0",
+  "runtime": "dockWidget",
+  "entrypoint": "bin/BuildWidgets.bundle",
+  "capabilities": ["persistentStorage"],
+  "dockWidgets": [{
+    "id": "build-status",
+    "title": "Build Status",
+    "subtitle": "Latest pipeline result",
+    "systemImage": "hammer",
+    "preferredPopupWidth": 480,
+    "preferredPopupHeight": 560,
+    "supportedSurfaces": ["compact", "inline", "popup"]
+  }]
+}
+```
+
+Every widget must support `compact`. Popup widths must be 280–1200 points and
+heights 220–900 points. Dock widget packages cannot declare workspaces.
+They must declare `persistentStorage`; the authorized private directory is
+available through `context.dataDirectory`.
+Like native UI workspaces, these bundles execute inside Vehla and are not a
+security sandbox.
+
+The complete
+[`swift-dock-widget`](https://github.com/ibuhs/Vehla/tree/main/examples/swift-dock-widget)
+reference package demonstrates all three surfaces, host actions, and a
+cancellable actor-backed background lifecycle. Its `build.sh` rewrites the
+SwiftPM SDK dylib reference to the framework embedded by Vehla; custom widget
+build scripts must preserve that step.
+
 ## Requirements
 
 - macOS 14 or newer.
 - An Apple Silicon Mac. Intel executables are not supported.
 - Swift 6 or newer.
-- A manifest with `"runtime": "executable"`.
-- A compiled executable included inside the installed package.
+- A manifest runtime matching the package: `executable`, `nativeUI`, or
+  `dockWidget`.
+- A compiled executable or signed native bundle included inside the package.
 - A valid Mach-O code signature. Ad hoc signing is supported for local development.
 - A Vehla build that supports the executable Store runtime.
 
@@ -638,9 +821,10 @@ Before publishing:
 
 Vehla records publisher provenance only when installation uses a verified signed catalog archive. Installing the source directory locally cannot establish that provenance.
 
-## Runtime limits
+## Command runtime limits
 
-Native extensions currently use the same command limits as Node extensions:
+Executable Swift commands currently use the same invocation limits as Node
+extensions:
 
 - One process per invocation.
 - 15-second execution timeout.
@@ -651,6 +835,11 @@ Native extensions currently use the same command limits as Node extensions:
 - No extension-defined global hotkey.
 
 Move slow work behind a remote API or split it into bounded commands.
+
+These one-shot limits do not apply to hosted Dock widgets. Dock widget
+background tasks may remain active while their widget is visible or enabled,
+but must use cancellable async work and stop promptly when Vehla sends
+`.hidden` or `widgetWillClose(_:)`.
 
 ## Troubleshooting
 

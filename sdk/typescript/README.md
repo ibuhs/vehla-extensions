@@ -11,7 +11,9 @@ cd extensions/hello-store
 npm install --install-links
 ```
 
-Open Vehla Settings → Store → Install Local Package, select `extensions/hello-store`, and enable the permissions required by the commands. Search the palette for `hello`, `greet`, or `storecopy`.
+Open Vehla Settings → Store → Install Local Package, select
+`extensions/hello-store`, and enable the permissions required by the commands.
+Search the palette for `hello`, `greet`, or `storecopy`.
 
 `--install-links` copies the local SDK into `node_modules` so the installed package remains self-contained.
 
@@ -44,7 +46,7 @@ Write diagnostics to standard error. Standard output is reserved for the protoco
 
 ## Capabilities
 
-Capabilities must be declared in `extension.json` and allowed by the user in Store settings. API version 1 recognizes:
+Capabilities must be declared in `extension.json` and allowed by the user in Store settings. The MVP supports:
 
 - `clipboardRead`
 - `clipboardWrite`

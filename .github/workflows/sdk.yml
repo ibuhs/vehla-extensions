@@ -1,0 +1,46 @@
+name: SDK
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sdk.yml"
+      - "sdk/**"
+      - "extensions/swift-hello/**"
+      - "extensions/swift-sdk-lab/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sdk.yml"
+      - "sdk/**"
+
+concurrency:
+  group: sdk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sdk:
+    name: Swift and TypeScript SDKs
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Test Swift SDK
+        run: swift test --package-path sdk/swift
+
+      - name: Smoke-test developer CLI
+        run: swift run --package-path sdk/swift vehla-swift help
+
+      - name: Build and validate Swift command example
+        run: |
+          zsh extensions/swift-hello/build.sh
+          swift run --package-path sdk/swift vehla-swift validate \
+            extensions/swift-hello
+
+      - name: Check TypeScript SDK runtime
+        run: |
+          node --check sdk/typescript/index.js
+          npm pack --dry-run ./sdk/typescript

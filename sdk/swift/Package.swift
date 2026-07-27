@@ -12,6 +12,16 @@ let package = Package(
             name: "VehlaStoreSDK",
             targets: ["VehlaStoreSDK"]
         ),
+        .library(
+            name: "VehlaNativeUISDK",
+            type: .dynamic,
+            targets: ["VehlaNativeUISDK"]
+        ),
+        .library(
+            name: "VehlaDockWidgetSDK",
+            type: .dynamic,
+            targets: ["VehlaDockWidgetSDK"]
+        ),
         .executable(
             name: "vehla-swift",
             targets: ["VehlaSwiftCLI"]
@@ -19,6 +29,8 @@ let package = Package(
     ],
     targets: [
         .target(name: "VehlaStoreSDK"),
+        .target(name: "VehlaNativeUISDK"),
+        .target(name: "VehlaDockWidgetSDK"),
         .executableTarget(
             name: "VehlaSwiftCLI",
             dependencies: ["VehlaStoreSDK"]
@@ -26,6 +38,14 @@ let package = Package(
         .testTarget(
             name: "VehlaStoreSDKTests",
             dependencies: ["VehlaStoreSDK"]
+        ),
+        .testTarget(
+            name: "VehlaNativeUISDKTests",
+            dependencies: ["VehlaNativeUISDK"]
+        ),
+        .testTarget(
+            name: "VehlaDockWidgetSDKTests",
+            dependencies: ["VehlaDockWidgetSDK"]
         ),
     ]
 )

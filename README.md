@@ -2,7 +2,8 @@
 
 Build command packages that add new capabilities to Vehla’s Store.
 
-An extension can contain one command or an entire toolkit. Commands can:
+An extension can contain one command, an entire toolkit, or an opt-in native
+workspace. Commands can:
 
 - Accept palette arguments, selected text, and clipboard text.
 - Perform synchronous or asynchronous JavaScript or Swift work.
@@ -25,6 +26,8 @@ Supported:
 - Keyword invocation and palette discovery.
 - Node.js 20 or newer.
 - Native Swift executable extensions built with Swift 6.
+- Store API 2 native SwiftUI/AppKit workspaces hosted in Vehla.
+- Store API 3 signed Swift Dock widgets with compact, inline, and popup surfaces.
 - Asynchronous handlers.
 - Clipboard and selected-text context.
 - Network requests.
@@ -44,14 +47,24 @@ Supported:
 - A 15-second execution limit.
 - A 1 MB protocol output limit.
 
+Native UI workspaces are a separate runtime. Their signed bundles load into
+Vehla's process so they can provide complete SwiftUI/AppKit interfaces inside
+the palette panel. They are not sandboxed, do not use the command timeout, and
+can access or compromise anything available to Vehla. Vehla labels them
+unsafe, warns before installation, and requires explicit risk acceptance for
+each package version before first launch.
+
+Dock widgets use the same trusted in-process model. Their signed bundles can
+provide compact, inline, and popup surfaces beside the macOS Dock. They must
+declare persistent storage, support the compact surface, and stop cancellable
+background work when Vehla reports that the widget is hidden or closing.
+
 Not yet supported:
 
-- Arbitrary extension-defined SwiftUI or web views.
 - Long-running background processes.
 - Scheduled commands.
 - Extension-defined global hotkeys.
 - A security sandbox for JavaScript.
-- In-process Swift extension bundles.
 
 
 
@@ -67,6 +80,8 @@ vehla-extensions/
 ├── scripts/
 │   └── build-catalog.py
 ├── sdk/
+│   ├── README.md
+│   ├── CHANGELOG.md
 │   ├── typescript/
 │   │   ├── package.json
 │   │   ├── index.js
@@ -74,8 +89,12 @@ vehla-extensions/
 │   └── swift/
 │       ├── Package.swift
 │       ├── Sources/VehlaStoreSDK/
+│       ├── Sources/VehlaNativeUISDK/
+│       ├── Sources/VehlaDockWidgetSDK/
 │       ├── Sources/VehlaSwiftCLI/
 │       ├── Tests/VehlaStoreSDKTests/
+│       ├── Tests/VehlaNativeUISDKTests/
+│       ├── Tests/VehlaDockWidgetSDKTests/
 │       └── README.md
 └── extensions/
     ├── hello-store/
