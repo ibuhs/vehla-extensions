@@ -194,6 +194,30 @@ state, plus restore, delete, clear, pin, and active-viewer operations. Its
 history includes native captures and imported AwesomeCopy clips. Keep a
 fallback for older hosts where `context.clipboard` is `nil`.
 
+SDK v2 adds the optional `context.app` bridge. Declare only the capabilities
+the widget needs:
+
+- `sharedContextRead` reads the entity most recently selected in Vehla.
+- `sharedContextPublish` publishes a typed event, media item, timer, metric,
+  link, or text entity for other Vehla surfaces.
+- `appActions` asks AI about an entity, adds it to Notes, creates a Reminder,
+  starts a Timer, runs Speedtest, or copies its details.
+
+```swift
+let track = VehlaDockWidgetSharedContext(
+    id: "track-123",
+    kind: .media,
+    sourceID: "now-playing",
+    title: "Example Song",
+    subtitle: "Example Artist"
+)
+context.app?.publish(track)
+context.app?.perform(.askAI, with: track)
+```
+
+Hosts continue to accept SDK v1 widgets; always treat `context.app` as
+optional when supporting older Vehla versions.
+
 Dock widgets can read and update manifest-declared Keychain values with
 `context.secret(named:)`, `setSecret(_:named:)`, and `removeSecret(named:)`.
 Only secret IDs listed in `extension.json` are accepted.

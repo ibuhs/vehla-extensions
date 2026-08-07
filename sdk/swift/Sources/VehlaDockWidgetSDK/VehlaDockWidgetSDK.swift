@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 
 /// The plugin contract version implemented by this SDK.
-public let VehlaDockWidgetAPIVersion = 1
+public let VehlaDockWidgetAPIVersion = 2
 
 @objc(VehlaDockWidgetSurface)
 public enum VehlaDockWidgetSurface: Int, CaseIterable, Sendable {
@@ -138,6 +138,119 @@ public enum VehlaDockWidgetAction: Sendable {
     case openURL(URL)
     case showMessage(String)
     case notify(title: String, body: String)
+}
+
+@objc(VehlaDockWidgetSharedContextKind)
+public enum VehlaDockWidgetSharedContextKind: Int, Sendable {
+    case event
+    case reminder
+    case media
+    case weather
+    case timer
+    case metric
+    case link
+    case text
+}
+
+@objc(VehlaDockWidgetSharedContext)
+@objcMembers
+public final class VehlaDockWidgetSharedContext: NSObject {
+    public let id: String
+    public let kind: VehlaDockWidgetSharedContextKind
+    public let sourceID: String
+    public let title: String
+    public let subtitle: String?
+    public let body: String?
+    public let url: URL?
+    public let startDate: Date?
+    public let endDate: Date?
+    public let metadata: [String: String]
+
+    public init(
+        id: String,
+        kind: VehlaDockWidgetSharedContextKind,
+        sourceID: String,
+        title: String,
+        subtitle: String? = nil,
+        body: String? = nil,
+        url: URL? = nil,
+        startDate: Date? = nil,
+        endDate: Date? = nil,
+        metadata: [String: String] = [:]
+    ) {
+        self.id = id
+        self.kind = kind
+        self.sourceID = sourceID
+        self.title = title
+        self.subtitle = subtitle
+        self.body = body
+        self.url = url
+        self.startDate = startDate
+        self.endDate = endDate
+        self.metadata = metadata
+    }
+}
+
+@objc(VehlaDockWidgetSharedAction)
+public enum VehlaDockWidgetSharedAction: Int, Sendable {
+    case askAI
+    case addToNotes
+    case createReminder
+    case runSpeedTest
+    case copyDetails
+}
+
+@objc(VehlaDockWidgetAppBridge)
+@objcMembers
+@MainActor
+public final class VehlaDockWidgetAppBridge: NSObject {
+    private let currentContextHandler: () -> VehlaDockWidgetSharedContext?
+    private let publishHandler: (VehlaDockWidgetSharedContext) -> Bool
+    private let actionHandler:
+        (VehlaDockWidgetSharedAction, VehlaDockWidgetSharedContext) -> Bool
+    private let timerHandler:
+        (String?, TimeInterval, VehlaDockWidgetSharedContext?) -> Bool
+
+    @nonobjc
+    public init(
+        currentContextHandler: @escaping () -> VehlaDockWidgetSharedContext?,
+        publishHandler: @escaping (VehlaDockWidgetSharedContext) -> Bool,
+        actionHandler: @escaping
+            (VehlaDockWidgetSharedAction, VehlaDockWidgetSharedContext) -> Bool,
+        timerHandler: @escaping
+            (String?, TimeInterval, VehlaDockWidgetSharedContext?) -> Bool
+    ) {
+        self.currentContextHandler = currentContextHandler
+        self.publishHandler = publishHandler
+        self.actionHandler = actionHandler
+        self.timerHandler = timerHandler
+    }
+
+    public var currentContext: VehlaDockWidgetSharedContext? {
+        currentContextHandler()
+    }
+
+    @discardableResult
+    public func publish(_ context: VehlaDockWidgetSharedContext) -> Bool {
+        publishHandler(context)
+    }
+
+    @discardableResult
+    public func perform(
+        _ action: VehlaDockWidgetSharedAction,
+        with context: VehlaDockWidgetSharedContext
+    ) -> Bool {
+        actionHandler(action, context)
+    }
+
+    @discardableResult
+    public func startTimer(
+        label: String?,
+        duration: TimeInterval,
+        context: VehlaDockWidgetSharedContext? = nil
+    ) -> Bool {
+        timerHandler(label, duration, context)
+    }
 }
 
 public enum VehlaDockWidgetSecretError: LocalizedError, Sendable {
@@ -335,6 +448,7 @@ public final class VehlaDockWidgetContext: NSObject {
     public let theme: VehlaDockWidgetTheme
     public let clipboard: VehlaDockWidgetClipboardBridge?
     public let localAI: VehlaDockWidgetLocalAIBridge?
+    public let app: VehlaDockWidgetAppBridge?
 
     private let secretLookup: (String) -> String?
     private let secretStore: ((String, String) throws -> Void)?
@@ -350,6 +464,7 @@ public final class VehlaDockWidgetContext: NSObject {
         theme: VehlaDockWidgetTheme,
         clipboard: VehlaDockWidgetClipboardBridge? = nil,
         localAI: VehlaDockWidgetLocalAIBridge? = nil,
+        app: VehlaDockWidgetAppBridge? = nil,
         secretLookup: @escaping (String) -> String? = { _ in nil },
         secretStore: ((String, String) throws -> Void)? = nil,
         secretRemove: ((String) throws -> Void)? = nil,
@@ -362,6 +477,7 @@ public final class VehlaDockWidgetContext: NSObject {
         self.theme = theme
         self.clipboard = clipboard
         self.localAI = localAI
+        self.app = app
         self.secretLookup = secretLookup
         self.secretStore = secretStore
         self.secretRemove = secretRemove

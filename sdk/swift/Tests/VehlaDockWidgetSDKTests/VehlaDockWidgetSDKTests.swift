@@ -185,3 +185,40 @@ func clipboardBridgeForwardsHistoryAndMutations() {
     #expect(pinRequest?.1 == false)
     #expect(activeViewer)
 }
+
+@Test
+@MainActor
+func appBridgePublishesContextAndDispatchesActions() {
+    let entity = VehlaDockWidgetSharedContext(
+        id: "event-1",
+        kind: .event,
+        sourceID: "calendar",
+        title: "Design review"
+    )
+    var published: VehlaDockWidgetSharedContext?
+    var dispatched: VehlaDockWidgetSharedAction?
+    var timerDuration: TimeInterval?
+    let bridge = VehlaDockWidgetAppBridge(
+        currentContextHandler: { entity },
+        publishHandler: {
+            published = $0
+            return true
+        },
+        actionHandler: { action, _ in
+            dispatched = action
+            return true
+        },
+        timerHandler: { _, duration, _ in
+            timerDuration = duration
+            return true
+        }
+    )
+
+    #expect(bridge.currentContext?.title == "Design review")
+    #expect(bridge.publish(entity))
+    #expect(published?.id == entity.id)
+    #expect(bridge.perform(.askAI, with: entity))
+    #expect(dispatched == .askAI)
+    #expect(bridge.startTimer(label: "Review", duration: 300))
+    #expect(timerDuration == 300)
+}

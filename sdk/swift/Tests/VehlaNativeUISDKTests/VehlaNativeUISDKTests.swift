@@ -18,6 +18,46 @@ func descriptorCarriesWorkspacePresentationMetadata() {
 }
 
 @Test
+func quickGlassDescriptorUsesBackwardCompatibleDefaults() {
+    let descriptor = VehlaWorkspaceQuickGlassActionDescriptor(
+        id: "format-json",
+        title: "Format JSON"
+    )
+
+    #expect(VehlaNativeUIAPIVersion == 1)
+    #expect(descriptor.id == "format-json")
+    #expect(descriptor.systemImage == "sparkles")
+    #expect(descriptor.delivery == .compactResult)
+}
+
+@Test
+func quickGlassRequestAndResultCarryInvocationMetadata() {
+    let request = VehlaWorkspaceQuickGlassRequest(
+        actionID: "format-json",
+        selectedText: #"{"name":"Vehla"}"#,
+        isEditable: true,
+        frontAppName: "TextEdit",
+        payload: ["source": "quickGlass"]
+    )
+    let result = VehlaWorkspaceQuickGlassResult(
+        outputText: """
+        {
+          "name": "Vehla"
+        }
+        """,
+        delivery: .replaceSelection
+    )
+
+    #expect(request.actionID == "format-json")
+    #expect(request.isEditable)
+    #expect(request.frontAppName == "TextEdit")
+    #expect(request.payload["source"] == "quickGlass")
+    #expect(result.outputText?.contains(#""name": "Vehla""#) == true)
+    #expect(result.errorMessage == nil)
+    #expect(result.delivery == .replaceSelection)
+}
+
+@Test
 func contextBrokersSecretsAndActions() throws {
     var action: VehlaWorkspaceAction?
     var storedSecret: (id: String, value: String)?
