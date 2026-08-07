@@ -9,6 +9,82 @@ public enum VehlaWorkspaceDismissBehavior: Int, Sendable {
     case dismissOnResignKey
 }
 
+@objc(VehlaWorkspaceQuickGlassDelivery)
+public enum VehlaWorkspaceQuickGlassDelivery: Int, Sendable {
+    case compactResult
+    case replaceSelection
+    case openPalette
+}
+
+@objc(VehlaWorkspaceQuickGlassActionDescriptor)
+@objcMembers
+public final class VehlaWorkspaceQuickGlassActionDescriptor: NSObject {
+    public let id: String
+    public let title: String
+    public let systemImage: String
+    public let delivery: VehlaWorkspaceQuickGlassDelivery
+
+    public init(
+        id: String,
+        title: String,
+        systemImage: String = "sparkles",
+        delivery: VehlaWorkspaceQuickGlassDelivery = .compactResult
+    ) {
+        self.id = id
+        self.title = title
+        self.systemImage = systemImage
+        self.delivery = delivery
+    }
+}
+
+@objc(VehlaWorkspaceQuickGlassRequest)
+@objcMembers
+public final class VehlaWorkspaceQuickGlassRequest: NSObject {
+    public let actionID: String
+    public let selectedText: String
+    public let isEditable: Bool
+    public let frontAppName: String?
+    public let payload: [String: String]
+
+    public init(
+        actionID: String,
+        selectedText: String,
+        isEditable: Bool,
+        frontAppName: String? = nil,
+        payload: [String: String] = [:]
+    ) {
+        self.actionID = actionID
+        self.selectedText = selectedText
+        self.isEditable = isEditable
+        self.frontAppName = frontAppName
+        self.payload = payload
+    }
+}
+
+@objc(VehlaWorkspaceQuickGlassResult)
+@objcMembers
+public final class VehlaWorkspaceQuickGlassResult: NSObject {
+    public let outputText: String?
+    public let errorMessage: String?
+    public let delivery: VehlaWorkspaceQuickGlassDelivery
+
+    public init(
+        outputText: String? = nil,
+        errorMessage: String? = nil,
+        delivery: VehlaWorkspaceQuickGlassDelivery = .compactResult
+    ) {
+        self.outputText = outputText
+        self.errorMessage = errorMessage
+        self.delivery = delivery
+    }
+}
+
+@objc(VehlaWorkspaceQuickGlassCompletion)
+public protocol VehlaWorkspaceQuickGlassCompletion: NSObjectProtocol {
+    @MainActor
+    func quickGlassActionDidFinish(_ result: VehlaWorkspaceQuickGlassResult)
+}
+
 @objc(VehlaWorkspaceDescriptor)
 @objcMembers
 public final class VehlaWorkspaceDescriptor: NSObject {
@@ -251,6 +327,19 @@ public final class VehlaWorkspaceContext: NSObject {
 public protocol VehlaNativeWorkspacePlugin: NSObjectProtocol {
     var apiVersion: Int { get }
     var workspaces: [VehlaWorkspaceDescriptor] { get }
+
+    /// Actions this plugin can perform from selected text in QuickGlass.
+    @MainActor
+    @objc optional var quickGlassActions: [VehlaWorkspaceQuickGlassActionDescriptor] { get }
+
+    /// Starts an action and returns immediately. Report completion on the main actor.
+    @MainActor
+    @objc optional func performQuickGlassAction(
+        _ actionID: String,
+        request: VehlaWorkspaceQuickGlassRequest,
+        context: VehlaWorkspaceContext,
+        completion: VehlaWorkspaceQuickGlassCompletion
+    )
 
     @MainActor
     func makeViewController(
