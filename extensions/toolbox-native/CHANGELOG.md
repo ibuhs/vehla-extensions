@@ -2,6 +2,17 @@
 
 All notable changes to Toolbox Native are documented here.
 
+## 1.0.1 — 2026-08-08
+
+### Added
+- QuickGlass actions for common JSON, encoding, hashing, date, text, and code
+  transformations.
+- Prefilled Toolbox handoff for actions that require the full workspace.
+
+### Fixed
+- QuickGlass transformations now preserve output whitespace and use the correct
+  result presentation.
+
 ## 1.0.0 — 2026-07-24
 
 Initial public package identity: `com.ibuhs.vehla.toolbox`.

@@ -28,6 +28,61 @@ public final class ToolboxWorkspacePlugin: NSObject, VehlaNativeWorkspacePlugin 
     }
 
     @MainActor
+    public var quickGlassActions: [VehlaWorkspaceQuickGlassActionDescriptor] {
+        QuickGlassActionCatalog.all.map(\.descriptor)
+    }
+
+    @MainActor
+    public func performQuickGlassAction(
+        _ actionID: String,
+        request: VehlaWorkspaceQuickGlassRequest,
+        context: VehlaWorkspaceContext,
+        completion: VehlaWorkspaceQuickGlassCompletion
+    ) {
+        guard let action = QuickGlassActionCatalog.action(id: actionID) else {
+            completion.quickGlassActionDidFinish(
+                VehlaWorkspaceQuickGlassResult(
+                    errorMessage: "Unknown Toolbox action “\(actionID)”."
+                )
+            )
+            return
+        }
+
+        let toolRequest: ToolRequest
+        do {
+            toolRequest = try action.request(selectedText: request.selectedText)
+        } catch {
+            completion.quickGlassActionDidFinish(
+                VehlaWorkspaceQuickGlassResult(
+                    errorMessage: error.localizedDescription,
+                    delivery: action.delivery
+                )
+            )
+            return
+        }
+
+        let worker = ToolWorker(dataDirectory: context.dataDirectory)
+        Task { @MainActor in
+            do {
+                let output = try await worker.execute(toolRequest)
+                completion.quickGlassActionDidFinish(
+                    VehlaWorkspaceQuickGlassResult(
+                        outputText: output.text,
+                        delivery: action.delivery
+                    )
+                )
+            } catch {
+                completion.quickGlassActionDidFinish(
+                    VehlaWorkspaceQuickGlassResult(
+                        errorMessage: error.localizedDescription,
+                        delivery: action.delivery
+                    )
+                )
+            }
+        }
+    }
+
+    @MainActor
     public func makeViewController(
         workspaceID: String,
         context: VehlaWorkspaceContext

@@ -485,4 +485,100 @@ final class ToolboxWorkspaceTests: XCTestCase {
         XCTAssertNotNil(output.previewHTML)
         XCTAssertTrue(output.previewHTML?.contains("data:image/png;base64,") == true)
     }
+
+    func testQuickGlassCatalogIsCuratedAndRunnable() throws {
+        let expectedIDs: Set<String> = [
+            "json.format", "json.minify", "json.validate",
+            "base64.encode", "base64.decode", "url.encode", "url.decode",
+            "html.encode", "html.decode", "hex.encode", "hex.decode", "rot13",
+            "hash.sha1", "hash.sha256", "hash.sha512", "hash.sha3-256", "hash.md5",
+            "date.unix-to-iso", "date.iso-to-unix", "date.validate-iso",
+            "text.count-characters", "text.count-words", "text.count-lines", "text.trim",
+            "text.uppercase", "text.lowercase", "text.title-case", "text.camel-case",
+            "text.snake-case", "text.slug", "text.dedupe-lines", "text.sort-lines",
+            "text.sort-lines-descending", "text.reverse-lines",
+            "code.format-sql", "code.format-html", "code.format-css", "code.format-yaml",
+            "code.format-xml",
+        ]
+        XCTAssertEqual(Set(QuickGlassActionCatalog.all.map(\.id)), expectedIDs)
+        XCTAssertEqual(QuickGlassActionCatalog.all.count, expectedIDs.count)
+
+        for action in QuickGlassActionCatalog.all {
+            let request = try action.request(selectedText: "sample")
+            XCTAssertEqual(request.toolID, action.toolID)
+            XCTAssertEqual(request.primary, "sample")
+            XCTAssertEqual(
+                Set(request.options.keys),
+                Set(ToolCatalog.tool(id: action.toolID)?.optionKeys ?? [])
+            )
+        }
+    }
+
+    func testQuickGlassUsesSharedDefaultsAndOverrides() throws {
+        let base64 = try XCTUnwrap(QuickGlassActionCatalog.action(id: "base64.decode"))
+        XCTAssertEqual(
+            try base64.request(selectedText: "aGVsbG8=").options["mode"],
+            "decode"
+        )
+
+        let sort = try XCTUnwrap(
+            QuickGlassActionCatalog.action(id: "text.sort-lines-descending")
+        )
+        XCTAssertEqual(
+            try sort.request(selectedText: "a\nb").options["order"],
+            "desc"
+        )
+
+        let unix = try XCTUnwrap(QuickGlassActionCatalog.action(id: "date.unix-to-iso"))
+        let unixOptions = try unix.request(selectedText: "0").options
+        XCTAssertEqual(unixOptions["mode"], "to-date")
+        XCTAssertEqual(unixOptions["timezone"], TimeZone.current.identifier)
+    }
+
+    func testQuickGlassRepresentativeExecution() async throws {
+        let encoded = try XCTUnwrap(QuickGlassActionCatalog.action(id: "base64.encode"))
+        let encodedOutput = try await worker.execute(
+            try encoded.request(selectedText: "hello")
+        )
+        XCTAssertEqual(encodedOutput.text, "aGVsbG8=")
+
+        let uppercase = try XCTUnwrap(QuickGlassActionCatalog.action(id: "text.uppercase"))
+        let uppercaseOutput = try await worker.execute(
+            try uppercase.request(selectedText: "Hello world")
+        )
+        XCTAssertEqual(uppercaseOutput.text, "HELLO WORLD")
+
+        let count = try XCTUnwrap(QuickGlassActionCatalog.action(id: "text.count-words"))
+        let countOutput = try await worker.execute(
+            try count.request(selectedText: "one two three")
+        )
+        XCTAssertTrue(countOutput.text.contains("3"))
+    }
+
+    func testQuickGlassManifestMatchesRuntimeCatalog() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let data = try Data(contentsOf: packageRoot.appendingPathComponent("extension.json"))
+        let manifest = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        let capabilities = try XCTUnwrap(manifest["capabilities"] as? [String])
+        XCTAssertTrue(capabilities.contains("selectedText"))
+
+        let entries = try XCTUnwrap(
+            manifest["quickGlassActions"] as? [[String: String]]
+        )
+        XCTAssertEqual(entries.count, QuickGlassActionCatalog.all.count)
+        for (entry, action) in zip(entries, QuickGlassActionCatalog.all) {
+            XCTAssertEqual(entry["id"], action.id)
+            XCTAssertEqual(entry["title"], action.title)
+            XCTAssertEqual(entry["systemImage"], action.systemImage)
+            XCTAssertEqual(
+                entry["delivery"],
+                action.delivery == .replaceSelection ? "replaceSelection" : "compactResult"
+            )
+        }
+    }
 }

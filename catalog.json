@@ -741,7 +741,7 @@
         "apiVersion": 2,
         "id": "com.ibuhs.vehla.toolbox",
         "name": "Toolbox",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "description": "Local-first developer data tools: JSON, encoding, crypto, dates, text, code, SQL, generators, web, and networking \u2014 all off the main thread.",
         "author": "ibuhs",
         "runtime": "nativeUI",
@@ -772,7 +772,8 @@
         ],
         "capabilities": [
           "persistentStorage",
-          "networkAccess"
+          "networkAccess",
+          "selectedText"
         ],
         "secrets": [
           {
@@ -794,10 +795,246 @@
             "minimumHeight": 620,
             "dismissOnResignKey": false
           }
+        ],
+        "quickGlassActions": [
+          {
+            "id": "json.format",
+            "title": "Format JSON",
+            "systemImage": "text.alignleft",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "json.minify",
+            "title": "Minify JSON",
+            "systemImage": "arrow.down.right.and.arrow.up.left",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "json.validate",
+            "title": "Validate JSON",
+            "systemImage": "checkmark.seal",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "base64.encode",
+            "title": "Base64 Encode",
+            "systemImage": "b.square",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "base64.decode",
+            "title": "Base64 Decode",
+            "systemImage": "b.square.fill",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "url.encode",
+            "title": "URL Encode",
+            "systemImage": "link",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "url.decode",
+            "title": "URL Decode",
+            "systemImage": "link.badge.plus",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "html.encode",
+            "title": "HTML Encode",
+            "systemImage": "chevron.left.forwardslash.chevron.right",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "html.decode",
+            "title": "HTML Decode",
+            "systemImage": "chevron.left.slash.chevron.right",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "hex.encode",
+            "title": "Text to Hex",
+            "systemImage": "number",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "hex.decode",
+            "title": "Hex to Text",
+            "systemImage": "number.square",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "rot13",
+            "title": "ROT13",
+            "systemImage": "arrow.2.squarepath",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "hash.sha1",
+            "title": "SHA-1",
+            "systemImage": "number",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "hash.sha256",
+            "title": "SHA-256",
+            "systemImage": "number",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "hash.sha512",
+            "title": "SHA-512",
+            "systemImage": "number",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "hash.sha3-256",
+            "title": "SHA3-256",
+            "systemImage": "number",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "hash.md5",
+            "title": "MD5",
+            "systemImage": "exclamationmark.lock",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "date.unix-to-iso",
+            "title": "Unix to ISO 8601",
+            "systemImage": "clock",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "date.iso-to-unix",
+            "title": "ISO 8601 to Unix",
+            "systemImage": "clock.arrow.2.circlepath",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "date.validate-iso",
+            "title": "Validate ISO 8601",
+            "systemImage": "checkmark.circle",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "text.count-characters",
+            "title": "Count Characters",
+            "systemImage": "character",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "text.count-words",
+            "title": "Count Words",
+            "systemImage": "textformat.size",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "text.count-lines",
+            "title": "Count Lines",
+            "systemImage": "list.number",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "text.trim",
+            "title": "Trim Whitespace",
+            "systemImage": "scissors",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.uppercase",
+            "title": "Uppercase",
+            "systemImage": "textformat.abc",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.lowercase",
+            "title": "Lowercase",
+            "systemImage": "textformat.abc",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.title-case",
+            "title": "Title Case",
+            "systemImage": "textformat",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.camel-case",
+            "title": "camelCase",
+            "systemImage": "textformat",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.snake-case",
+            "title": "snake_case",
+            "systemImage": "textformat",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.slug",
+            "title": "Generate Slug",
+            "systemImage": "link",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.dedupe-lines",
+            "title": "Remove Duplicate Lines",
+            "systemImage": "list.bullet",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.sort-lines",
+            "title": "Sort Lines",
+            "systemImage": "arrow.up.arrow.down",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.sort-lines-descending",
+            "title": "Sort Lines Descending",
+            "systemImage": "arrow.down",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "text.reverse-lines",
+            "title": "Reverse Lines",
+            "systemImage": "arrow.uturn.down",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "code.format-sql",
+            "title": "Format SQL",
+            "systemImage": "cylinder",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "code.format-html",
+            "title": "Format HTML",
+            "systemImage": "chevron.left.slash.chevron.right",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "code.format-css",
+            "title": "Format CSS",
+            "systemImage": "paintpalette",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "code.format-yaml",
+            "title": "Format YAML",
+            "systemImage": "doc.plaintext",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "code.format-xml",
+            "title": "Format XML",
+            "systemImage": "doc.badge.gearshape",
+            "delivery": "replaceSelection"
+          }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/toolbox-native-1.0.0.zip",
-      "sha256": "f7eebabbf2da2a446ec7d40ed67de35457870446e04920b4643a91a7e37f7914",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/toolbox-native-1.0.1.zip",
+      "sha256": "f4c7364de12e37e5f80a38b754293a01ae4e0e12e0f95c5bfd2a534ea1c761e7",
       "archiveRoot": "toolbox-native",
       "publisher": {
         "id": "com.ibuhs.publisher",
@@ -805,7 +1042,7 @@
         "keyID": "release-2026-07",
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
-      "signature": "6WetRT0jd+BF/VI19CIRMudN22/9WEVWYXVb9NtptaWRSlqW7jdKW5BVRFrpvtlVuIMMo+8J60Ok37kFaMWXDw=="
+      "signature": "jYtjs1TMxwa+b7iCtBXIqyQ+yNlEwE7ZSmU1TtSMthHVZ98swnuQVdShrG+b4cTL11JafaMaCBTTs9tOeO4xCg=="
     },
     {
       "manifest": {
