@@ -1,0 +1,40 @@
+name: Data Extractor Native
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/data-extractor-native.yml"
+      - "extensions/data-extractor-native/**"
+      - "sdk/swift/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/data-extractor-native.yml"
+      - "extensions/data-extractor-native/**"
+      - "sdk/swift/**"
+
+concurrency:
+  group: data-extractor-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test and build Data Extractor
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Test Data Extractor package
+        run: swift test --package-path extensions/data-extractor-native
+
+      - name: Build installable package
+        run: zsh extensions/data-extractor-native/build.sh
+
+      - name: Validate package
+        run: |
+          swift run --package-path sdk/swift vehla-swift validate \
+            extensions/data-extractor-native/dist/DataExtractor

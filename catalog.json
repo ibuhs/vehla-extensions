@@ -3,6 +3,107 @@
   "packages": [
     {
       "manifest": {
+        "apiVersion": 2,
+        "id": "com.ibuhs.vehla.data-extractor",
+        "name": "Data Extractor",
+        "version": "1.0.0",
+        "description": "QuickGlass actions that pull emails, phones, IPs, @mentions, and hashtags from selected text \u2014 off the main thread.",
+        "author": "ibuhs",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/DataExtractorWorkspace.bundle",
+        "commands": [
+          {
+            "id": "open-data-extractor",
+            "title": "Open Data Extractor",
+            "subtitle": "QuickGlass actions for extracting structured values",
+            "keywords": [
+              "email",
+              "phone",
+              "ip",
+              "mention",
+              "hashtag",
+              "extract",
+              "csv"
+            ],
+            "systemImage": "text.magnifyingglass",
+            "workspaceID": "data-extractor"
+          }
+        ],
+        "capabilities": [
+          "persistentStorage",
+          "selectedText"
+        ],
+        "workspaces": [
+          {
+            "id": "data-extractor",
+            "title": "Data Extractor",
+            "subtitle": "QuickGlass extraction tools",
+            "systemImage": "text.magnifyingglass",
+            "preferredWidth": 720,
+            "preferredHeight": 600,
+            "minimumWidth": 560,
+            "minimumHeight": 420,
+            "dismissOnResignKey": true
+          }
+        ],
+        "quickGlassActions": [
+          {
+            "id": "data.emails",
+            "title": "Extract Emails",
+            "systemImage": "envelope",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "data.phones",
+            "title": "Extract Phones",
+            "systemImage": "phone",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "data.ips",
+            "title": "Extract IPs",
+            "systemImage": "network",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "data.mentions",
+            "title": "Extract Mentions",
+            "systemImage": "at",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "data.hashtags",
+            "title": "Extract Hashtags",
+            "systemImage": "number",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "data.all",
+            "title": "Extract All",
+            "systemImage": "text.badge.plus",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "data.csv",
+            "title": "Extract CSV",
+            "systemImage": "tablecells",
+            "delivery": "compactResult"
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/data-extractor-native-1.0.0.zip",
+      "sha256": "4923b9e32aa8cf4f7085129a7b3d7649a4dcb183691c0faf10b72328d2cb731b",
+      "archiveRoot": "data-extractor-native",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "Vw49eSqYDQgJTUkNS/PH5OsTfdp6sr9HLoYZPOLHAENosilT+iNcwrHID5GYM5zPUp6eiM9FqVnnDCVOvFB/Dw=="
+    },
+    {
+      "manifest": {
         "apiVersion": 1,
         "id": "com.vehla.examples.developer-security-tools",
         "name": "Developer Security Tools",

@@ -112,6 +112,7 @@ vehla-extensions/
     ├── list-lab-native/
     ├── type-polish-native/
     ├── number-crunch-native/
+    ├── data-extractor-native/
     └── news-dock-widget/
 ```
 
@@ -1261,6 +1262,10 @@ QuickGlass-only Native UI actions for selected prose: straighten quotes, clean d
 ### Number Crunch
 
 QuickGlass-only Native UI actions for selected numbers: sum, average, evaluate expressions, convert metric and imperial units, and convert file sizes.
+
+### Data Extractor
+
+QuickGlass-only Native UI actions that pull emails, phones, IPs, @mentions, and hashtags from selected text.
 
 ## Publishing checklist
 

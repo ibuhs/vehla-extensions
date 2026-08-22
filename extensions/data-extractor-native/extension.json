@@ -1,0 +1,43 @@
+{
+  "apiVersion": 2,
+  "id": "com.ibuhs.vehla.data-extractor",
+  "name": "Data Extractor",
+  "version": "1.0.0",
+  "description": "QuickGlass actions that pull emails, phones, IPs, @mentions, and hashtags from selected text — off the main thread.",
+  "author": "ibuhs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/DataExtractorWorkspace.bundle",
+  "commands": [
+    {
+      "id": "open-data-extractor",
+      "title": "Open Data Extractor",
+      "subtitle": "QuickGlass actions for extracting structured values",
+      "keywords": ["email", "phone", "ip", "mention", "hashtag", "extract", "csv"],
+      "systemImage": "text.magnifyingglass",
+      "workspaceID": "data-extractor"
+    }
+  ],
+  "capabilities": ["persistentStorage", "selectedText"],
+  "workspaces": [
+    {
+      "id": "data-extractor",
+      "title": "Data Extractor",
+      "subtitle": "QuickGlass extraction tools",
+      "systemImage": "text.magnifyingglass",
+      "preferredWidth": 720,
+      "preferredHeight": 600,
+      "minimumWidth": 560,
+      "minimumHeight": 420,
+      "dismissOnResignKey": true
+    }
+  ],
+  "quickGlassActions": [
+    {"id": "data.emails", "title": "Extract Emails", "systemImage": "envelope", "delivery": "compactResult"},
+    {"id": "data.phones", "title": "Extract Phones", "systemImage": "phone", "delivery": "compactResult"},
+    {"id": "data.ips", "title": "Extract IPs", "systemImage": "network", "delivery": "compactResult"},
+    {"id": "data.mentions", "title": "Extract Mentions", "systemImage": "at", "delivery": "compactResult"},
+    {"id": "data.hashtags", "title": "Extract Hashtags", "systemImage": "number", "delivery": "compactResult"},
+    {"id": "data.all", "title": "Extract All", "systemImage": "text.badge.plus", "delivery": "compactResult"},
+    {"id": "data.csv", "title": "Extract CSV", "systemImage": "tablecells", "delivery": "compactResult"}
+  ]
+}
