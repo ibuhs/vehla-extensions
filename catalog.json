@@ -6,7 +6,7 @@
         "apiVersion": 2,
         "id": "com.ibuhs.vehla.capture-hub",
         "name": "Capture Hub",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "description": "QuickGlass actions that turn selected text into reminders, calendar events, and Apple Notes.",
         "author": "ibuhs",
         "runtime": "nativeUI",
@@ -77,8 +77,8 @@
           }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/capture-hub-native-1.0.3.zip",
-      "sha256": "bab1d194cb69fe389222378fd03cc63c320305494b1c8f54b9c3f3570b9fb55d",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/capture-hub-native-1.0.4.zip",
+      "sha256": "bda6f5c87249a8a4b520bf3789e5efa72f237941a42f73f22f2a39700b1d1d18",
       "archiveRoot": "capture-hub-native",
       "publisher": {
         "id": "com.ibuhs.publisher",
@@ -86,7 +86,7 @@
         "keyID": "release-2026-07",
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
-      "signature": "mwzb8O52/X0QVAXN/XLEf+TVzccZFFJWCRm70+tJIsfxHgu4IDzEg6068jjcXFUrs0a1PYqWQGtEHMTBhH6FCw=="
+      "signature": "nSofA7A0ehsDUfKOH6Hl9cHY25VjeqYuK/sPy2+llm6g2ffGVy4KW3lyqJPzTLUz6loE2eJI9XMaRgda+ZL3AQ=="
     },
     {
       "manifest": {

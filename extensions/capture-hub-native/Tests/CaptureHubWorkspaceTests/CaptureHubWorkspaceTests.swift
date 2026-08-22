@@ -233,7 +233,7 @@ final class CaptureHubWorkspaceTests: XCTestCase {
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         XCTAssertEqual(manifest["id"] as? String, "com.ibuhs.vehla.capture-hub")
-        XCTAssertEqual(manifest["version"] as? String, "1.0.3")
+        XCTAssertEqual(manifest["version"] as? String, "1.0.4")
         XCTAssertEqual(manifest["runtime"] as? String, "nativeUI")
         XCTAssertEqual(manifest["apiVersion"] as? Int, 2)
         XCTAssertEqual(

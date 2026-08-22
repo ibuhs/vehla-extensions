@@ -2,7 +2,7 @@
   "apiVersion": 2,
   "id": "com.ibuhs.vehla.capture-hub",
   "name": "Capture Hub",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "QuickGlass actions that turn selected text into reminders, calendar events, and Apple Notes.",
   "author": "ibuhs",
   "runtime": "nativeUI",

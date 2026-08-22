@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+
+- Fix AppleScript newline escaping that turned line breaks into visible `\n` characters.
+
 ## 1.0.3
 
 - Accept compatible browser clipboard captures and derive note structure from sanitized rich text.
