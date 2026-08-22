@@ -63,6 +63,10 @@ enum ReadingToolsEngine {
     }
 
     static func output(for action: ReadingToolsActionID, text: String) throws -> String {
+        if action == .largeType {
+            return text
+        }
+
         let stats = try analyze(text)
         switch action {
         case .stats:
@@ -73,6 +77,11 @@ enum ReadingToolsEngine {
                 "Sentences: \(stats.sentences)",
                 "Syllables (estimated): \(stats.syllables)",
                 "Estimated reading time: \(formatReadingTime(seconds: stats.readingSeconds))",
+            ].joined(separator: "\n")
+        case .count:
+            return [
+                "Words: \(stats.words)",
+                "Characters: \(stats.characters)",
             ].joined(separator: "\n")
         case .time:
             return [
@@ -97,6 +106,8 @@ enum ReadingToolsEngine {
         case .syllables:
             try requireWords(stats)
             return "Estimated syllables: \(stats.syllables)"
+        case .largeType:
+            preconditionFailure("Large Type is handled before text analysis.")
         }
     }
 

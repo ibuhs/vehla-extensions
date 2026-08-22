@@ -1,10 +1,40 @@
 import SwiftUI
 import VehlaNativeUISDK
 
+enum ReadingToolsWorkspaceContent: Equatable {
+    case reference
+    case largeType(String)
+
+    static func from(_ request: VehlaWorkspaceLaunchRequest) -> Self {
+        guard request.payload["quickGlassActionID"] == ReadingToolsActionID.largeType.rawValue else {
+            return .reference
+        }
+        let selectedText = request.payload["selectedText"]
+            .flatMap { $0.isEmpty ? nil : $0 }
+            ?? request.query
+        return .largeType(selectedText)
+    }
+}
+
 struct ReadingToolsWorkspaceView: View {
     @ObservedObject var theme: ThemeBox
+    let content: ReadingToolsWorkspaceContent
 
     var body: some View {
+        Group {
+            switch content {
+            case .reference:
+                referenceView
+            case .largeType(let text):
+                largeTypeView(text)
+            }
+        }
+        .background(Color(nsColor: theme.theme.backgroundColor))
+        .foregroundStyle(Color(nsColor: theme.theme.primaryTextColor))
+        .preferredColorScheme(theme.theme.isDark ? .dark : .light)
+    }
+
+    private var referenceView: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(spacing: 10) {
                 Image(systemName: "doc.text.magnifyingglass")
@@ -41,8 +71,30 @@ struct ReadingToolsWorkspaceView: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color(nsColor: theme.theme.backgroundColor))
-        .foregroundStyle(Color(nsColor: theme.theme.primaryTextColor))
-        .preferredColorScheme(theme.theme.isDark ? .dark : .light)
+    }
+
+    @ViewBuilder
+    private func largeTypeView(_ text: String) -> some View {
+        let isEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        ScrollView {
+            VStack {
+                Spacer(minLength: 24)
+                Text(isEmpty ? "No selected text." : text)
+                    .font(.system(size: 48, weight: .medium, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(10)
+                    .foregroundStyle(
+                        isEmpty
+                            ? Color(nsColor: theme.theme.secondaryTextColor)
+                            : Color(nsColor: theme.theme.primaryTextColor)
+                    )
+                    .textSelection(.enabled)
+                    .frame(maxWidth: 1_000)
+                    .padding(36)
+                Spacer(minLength: 24)
+            }
+            .frame(maxWidth: .infinity, minHeight: 500)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

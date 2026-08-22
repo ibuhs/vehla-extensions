@@ -1142,8 +1142,8 @@
         "apiVersion": 2,
         "id": "com.ibuhs.vehla.reading-tools",
         "name": "Reading Tools",
-        "version": "1.0.0",
-        "description": "QuickGlass reading analysis for selected text: counts, reading time, readability, grade level, sentences, and estimated syllables \u2014 entirely on this Mac.",
+        "version": "1.0.1",
+        "description": "QuickGlass tools for selected text: counts, reading time, readability, grade level, sentences, estimated syllables, and a large-type display \u2014 entirely on this Mac.",
         "author": "ibuhs",
         "runtime": "nativeUI",
         "entrypoint": "bin/ReadingToolsWorkspace.bundle",
@@ -1190,8 +1190,14 @@
             "delivery": "compactResult"
           },
           {
+            "id": "read.count",
+            "title": "Word/Character Count",
+            "systemImage": "character.cursor.ibeam",
+            "delivery": "compactResult"
+          },
+          {
             "id": "read.time",
-            "title": "Reading Time",
+            "title": "Estimated Reading Time",
             "systemImage": "clock",
             "delivery": "compactResult"
           },
@@ -1218,11 +1224,17 @@
             "title": "Syllable Count",
             "systemImage": "waveform",
             "delivery": "compactResult"
+          },
+          {
+            "id": "read.large-type",
+            "title": "Large Type",
+            "systemImage": "textformat.size.larger",
+            "delivery": "openPalette"
           }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/reading-tools-native-1.0.0.zip",
-      "sha256": "f4baf3fbaabda9b183a0a24d151402f74442cda62993e529d1d32221034ddbae",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/reading-tools-native-1.0.1.zip",
+      "sha256": "31f6ed5ef02e8003b2202bcac151bd150e21c7639a4fe4dbf7dc75eb00caf07d",
       "archiveRoot": "reading-tools-native",
       "publisher": {
         "id": "com.ibuhs.publisher",
@@ -1230,7 +1242,7 @@
         "keyID": "release-2026-07",
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
-      "signature": "dfOPSfkYElZPljSk+yXUOOJ5VSZZ6uF2NrnNvLp4b2hl+dG+yuZhr/EhQp2LzhVg8rIeSDo0kF97XmOYo2oQDQ=="
+      "signature": "wznizM//VFS5VoXIBUT6742J3dRgPAZOvWLxdnlAu8cDftFok4ybSB/YIz7J0ieq5xKvCW7ZV1GSX21ABXltCw=="
     },
     {
       "manifest": {

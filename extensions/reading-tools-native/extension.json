@@ -2,8 +2,8 @@
   "apiVersion": 2,
   "id": "com.ibuhs.vehla.reading-tools",
   "name": "Reading Tools",
-  "version": "1.0.0",
-  "description": "QuickGlass reading analysis for selected text: counts, reading time, readability, grade level, sentences, and estimated syllables — entirely on this Mac.",
+  "version": "1.0.1",
+  "description": "QuickGlass tools for selected text: counts, reading time, readability, grade level, sentences, estimated syllables, and a large-type display — entirely on this Mac.",
   "author": "ibuhs",
   "runtime": "nativeUI",
   "entrypoint": "bin/ReadingToolsWorkspace.bundle",
@@ -33,10 +33,12 @@
   ],
   "quickGlassActions": [
     {"id": "read.stats", "title": "Reading Stats", "systemImage": "doc.text.magnifyingglass", "delivery": "compactResult"},
-    {"id": "read.time", "title": "Reading Time", "systemImage": "clock", "delivery": "compactResult"},
+    {"id": "read.count", "title": "Word/Character Count", "systemImage": "character.cursor.ibeam", "delivery": "compactResult"},
+    {"id": "read.time", "title": "Estimated Reading Time", "systemImage": "clock", "delivery": "compactResult"},
     {"id": "read.readability", "title": "Readability Score", "systemImage": "gauge.with.needle", "delivery": "compactResult"},
     {"id": "read.grade-level", "title": "Grade Level", "systemImage": "graduationcap", "delivery": "compactResult"},
     {"id": "read.sentences", "title": "Sentence Analysis", "systemImage": "text.quote", "delivery": "compactResult"},
-    {"id": "read.syllables", "title": "Syllable Count", "systemImage": "waveform", "delivery": "compactResult"}
+    {"id": "read.syllables", "title": "Syllable Count", "systemImage": "waveform", "delivery": "compactResult"},
+    {"id": "read.large-type", "title": "Large Type", "systemImage": "textformat.size.larger", "delivery": "openPalette"}
   ]
 }

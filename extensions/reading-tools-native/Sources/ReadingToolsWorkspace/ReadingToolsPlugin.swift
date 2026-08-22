@@ -91,7 +91,10 @@ public final class ReadingToolsPlugin: NSObject, VehlaNativeWorkspacePlugin {
         let theme = ThemeBox(theme: context.theme)
         themes[workspaceID] = theme
         let controller = NSHostingController(
-            rootView: ReadingToolsWorkspaceView(theme: theme)
+            rootView: ReadingToolsWorkspaceView(
+                theme: theme,
+                content: ReadingToolsWorkspaceContent.from(context.launchRequest)
+            )
         )
         controller.view.appearance = Self.appearance(for: context.theme)
         controllers[workspaceID] = controller

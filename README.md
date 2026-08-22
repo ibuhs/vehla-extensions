@@ -1275,7 +1275,7 @@ QuickGlass-only Native UI actions that turn selected text into reminders, calend
 
 ### Reading Tools
 
-QuickGlass-only Native UI actions for selected text: reading statistics, reading time, readability, grade level, sentence analysis, and estimated syllables.
+QuickGlass-only Native UI actions for selected text: reading statistics, word and character counts, estimated reading time, readability, grade level, sentence analysis, estimated syllables, and a large-type display.
 
 ## Publishing checklist
 

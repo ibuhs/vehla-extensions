@@ -38,6 +38,13 @@ final class ReadingToolsWorkspaceTests: XCTestCase {
             """
         )
         XCTAssertEqual(
+            try ReadingToolsEngine.output(for: .count, text: sample),
+            """
+            Words: 5
+            Characters: 22
+            """
+        )
+        XCTAssertEqual(
             try ReadingToolsEngine.output(for: .time, text: sample),
             """
             Words: 5
@@ -65,6 +72,10 @@ final class ReadingToolsWorkspaceTests: XCTestCase {
         XCTAssertEqual(
             try ReadingToolsEngine.output(for: .syllables, text: sample),
             "Estimated syllables: 5"
+        )
+        XCTAssertEqual(
+            try ReadingToolsEngine.output(for: .largeType, text: sample),
+            sample
         )
     }
 
@@ -122,11 +133,61 @@ final class ReadingToolsWorkspaceTests: XCTestCase {
         ) {
             XCTAssertEqual($0 as? ReadingToolsError, .noWords)
         }
+        XCTAssertNoThrow(
+            try ReadingToolsEngine.output(for: .largeType, text: "")
+        )
+        XCTAssertEqual(
+            try? ReadingToolsEngine.output(for: .largeType, text: ""),
+            ""
+        )
     }
 
     func testWorkerRunsCatalogActions() async throws {
-        let output = try await ReadingToolsWorker.shared.perform(.time, selectedText: sample)
-        XCTAssertEqual(output, "Words: 5\nAt 200 WPM: 1.5 sec")
+        let output = try await ReadingToolsWorker.shared.perform(.count, selectedText: sample)
+        XCTAssertEqual(output, "Words: 5\nCharacters: 22")
+    }
+
+    func testLargeTypeLaunchRoutingAndQueryFallback() {
+        XCTAssertEqual(
+            ReadingToolsWorkspaceContent.from(
+                VehlaWorkspaceLaunchRequest(query: "normal palette query")
+            ),
+            .reference
+        )
+        XCTAssertEqual(
+            ReadingToolsWorkspaceContent.from(
+                VehlaWorkspaceLaunchRequest(
+                    query: "fallback",
+                    payload: [
+                        "quickGlassActionID": ReadingToolsActionID.largeType.rawValue,
+                        "selectedText": "Selected text",
+                    ]
+                )
+            ),
+            .largeType("Selected text")
+        )
+        XCTAssertEqual(
+            ReadingToolsWorkspaceContent.from(
+                VehlaWorkspaceLaunchRequest(
+                    query: "Fallback text",
+                    payload: [
+                        "quickGlassActionID": ReadingToolsActionID.largeType.rawValue,
+                        "selectedText": "",
+                    ]
+                )
+            ),
+            .largeType("Fallback text")
+        )
+        XCTAssertEqual(
+            ReadingToolsWorkspaceContent.from(
+                VehlaWorkspaceLaunchRequest(
+                    payload: [
+                        "quickGlassActionID": ReadingToolsActionID.largeType.rawValue,
+                    ]
+                )
+            ),
+            .largeType("")
+        )
     }
 
     func testCatalogMatchesManifestAndExcludesSpeech() throws {
@@ -143,7 +204,7 @@ final class ReadingToolsWorkspaceTests: XCTestCase {
 
         XCTAssertEqual(manifest["apiVersion"] as? Int, 2)
         XCTAssertEqual(manifest["id"] as? String, "com.ibuhs.vehla.reading-tools")
-        XCTAssertEqual(manifest["version"] as? String, "1.0.0")
+        XCTAssertEqual(manifest["version"] as? String, "1.0.1")
         XCTAssertEqual(manifest["runtime"] as? String, "nativeUI")
         XCTAssertEqual(
             manifest["capabilities"] as? [String],
@@ -158,8 +219,20 @@ final class ReadingToolsWorkspaceTests: XCTestCase {
             XCTAssertEqual(entry["id"], action.rawValue)
             XCTAssertEqual(entry["title"], action.title)
             XCTAssertEqual(entry["systemImage"], action.systemImage)
-            XCTAssertEqual(entry["delivery"], "compactResult")
+            XCTAssertEqual(
+                entry["delivery"],
+                action == .largeType ? "openPalette" : "compactResult"
+            )
         }
+        XCTAssertEqual(
+            entries.first { $0["id"] == ReadingToolsActionID.largeType.rawValue }?["delivery"],
+            "openPalette"
+        )
+        XCTAssertTrue(
+            entries
+                .filter { $0["id"] != ReadingToolsActionID.largeType.rawValue }
+                .allSatisfy { $0["delivery"] == "compactResult" }
+        )
         XCTAssertFalse(entries.contains {
             ($0["id"] ?? "").localizedCaseInsensitiveContains("speak")
                 || ($0["title"] ?? "").localizedCaseInsensitiveContains("speak")

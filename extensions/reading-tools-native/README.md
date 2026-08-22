@@ -1,31 +1,34 @@
 # Reading Tools
 
 Reading Tools is a QuickGlass-only Native UI extension. Select text, then run
-an analysis from the QuickGlass overflow menu.
+an analysis or open a large-type display from the QuickGlass overflow menu.
 
 | | |
 | --- | --- |
 | Extension ID | `com.ibuhs.vehla.reading-tools` |
 | Workspace ID | `reading-tools` |
-| Version | **1.0.0** |
+| Version | **1.0.1** |
 | Runtime | Vehla Native UI (`nativeUI`) |
 | Author | ibuhs |
 | License | MIT (`LICENSE`) |
 | Minimum OS | macOS 14 |
 
-The required workspace is a reference card, not a toolbench. All analysis
-happens from selected text in QuickGlass and stays on this Mac.
+The workspace normally shows an action reference card. Large Type opens the
+workspace with the selected text in a centered, scrollable, selectable display.
+All processing stays on this Mac.
 
 ## QuickGlass actions
 
 | Action | Delivery | What it does |
 | --- | --- | --- |
 | Reading Stats | Compact result | Reports words, characters, lines, sentences, estimated syllables, and reading time |
-| Reading Time | Compact result | Reports word count and reading time at 200 WPM |
+| Word/Character Count | Compact result | Reports only word and character counts |
+| Estimated Reading Time | Compact result | Reports word count and reading time at 200 WPM |
 | Readability Score | Compact result | Calculates Flesch Reading Ease and a plain-language interpretation |
 | Grade Level | Compact result | Calculates the Flesch-Kincaid US grade level |
 | Sentence Analysis | Compact result | Counts sentences and reports average words per sentence |
 | Syllable Count | Compact result | Estimates English syllables with a deterministic heuristic |
+| Large Type | Open palette | Shows the selected text prominently in the native workspace |
 
 ## Formulas and counting
 
