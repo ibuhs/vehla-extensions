@@ -72,14 +72,28 @@ enum NumberCrunchEngine {
     }
 
     static func humanizeSizes(_ text: String) throws -> String {
-        try replaceByteQuantities(text) { match in
-            formatByteSize(match.bytes, style: .human)
-        }
+        try convertSizes(text, to: .human)
     }
 
     static func toBytes(_ text: String) throws -> String {
+        try convertSizes(text, to: .bytes)
+    }
+
+    static func toKilobytes(_ text: String) throws -> String {
+        try convertSizes(text, to: .kilobyte)
+    }
+
+    static func toMegabytes(_ text: String) throws -> String {
+        try convertSizes(text, to: .megabyte)
+    }
+
+    static func toGigabytes(_ text: String) throws -> String {
+        try convertSizes(text, to: .gigabyte)
+    }
+
+    static func convertSizes(_ text: String, to style: ByteFormat) throws -> String {
         try replaceByteQuantities(text) { match in
-            formatByteSize(match.bytes, style: .bytes)
+            formatByteSize(match.bytes, style: style)
         }
     }
 
@@ -151,8 +165,6 @@ enum NumberCrunchEngine {
 
     private static func formatByteSize(_ bytes: Double, style: ByteFormat) -> String {
         switch style {
-        case .bytes:
-            return "\(format(bytes)) B"
         case .human:
             let magnitude = abs(bytes)
             let units: [(Double, String)] = [
@@ -166,6 +178,8 @@ enum NumberCrunchEngine {
                 return "\(format(bytes / factor)) \(name)"
             }
             return "\(format(bytes)) B"
+        case .unit(let factor, let name):
+            return "\(format(bytes / factor)) \(name)"
         }
     }
 
@@ -231,9 +245,14 @@ private struct ByteMatch {
     let bytes: Double
 }
 
-private enum ByteFormat {
-    case bytes
+enum ByteFormat {
     case human
+    case unit(Double, String)
+
+    static let bytes = Self.unit(1, "B")
+    static let kilobyte = Self.unit(1_000, "KB")
+    static let megabyte = Self.unit(1_000_000, "MB")
+    static let gigabyte = Self.unit(1_000_000_000, "GB")
 }
 
 private enum ByteUnit {

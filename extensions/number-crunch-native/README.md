@@ -7,7 +7,7 @@ units, then run an action from the QuickGlass overflow menu.
 | --- | --- |
 | Extension ID | `com.ibuhs.vehla.number-crunch` |
 | Workspace ID | `number-crunch` |
-| Version | **1.0.0** |
+| Version | **1.1.0** |
 | Runtime | Vehla Native UI (`nativeUI`) |
 | Author | ibuhs |
 | License | MIT (`LICENSE`) |
@@ -27,6 +27,9 @@ from selected text in QuickGlass and stays on this Mac.
 | To Imperial | Replace selection | Converts kg, g, km, m, cm, mm, and °C |
 | Humanize Size | Replace selection | Turns bytes into KiB, MiB, GiB, TiB, or PiB |
 | To Bytes | Replace selection | Turns KB, MB, GiB, and bits into bytes |
+| To KB | Replace selection | Converts any file size to kilobytes (1000) |
+| To MB | Replace selection | Converts any file size to megabytes (1000) |
+| To GB | Replace selection | Converts any file size to gigabytes (1000) |
 
 ## Main-thread safety
 

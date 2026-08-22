@@ -832,7 +832,7 @@
         "apiVersion": 2,
         "id": "com.ibuhs.vehla.number-crunch",
         "name": "Number Crunch",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "QuickGlass actions for selected numbers: sum, average, evaluate expressions, convert metric and imperial units, and convert file sizes \u2014 off the main thread.",
         "author": "ibuhs",
         "runtime": "nativeUI",
@@ -869,7 +869,7 @@
             "subtitle": "QuickGlass number tools",
             "systemImage": "function",
             "preferredWidth": 720,
-            "preferredHeight": 620,
+            "preferredHeight": 700,
             "minimumWidth": 560,
             "minimumHeight": 420,
             "dismissOnResignKey": true
@@ -917,11 +917,29 @@
             "title": "To Bytes",
             "systemImage": "doc",
             "delivery": "replaceSelection"
+          },
+          {
+            "id": "num.to-kb",
+            "title": "To KB",
+            "systemImage": "arrow.up.right",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "num.to-mb",
+            "title": "To MB",
+            "systemImage": "arrow.up.forward",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "num.to-gb",
+            "title": "To GB",
+            "systemImage": "arrow.up.circle",
+            "delivery": "replaceSelection"
           }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/number-crunch-native-1.0.0.zip",
-      "sha256": "5c4ed35649d227c98cf6c679b149f8c58bc9988ad15a93de63809597f624ae5f",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/number-crunch-native-1.1.0.zip",
+      "sha256": "78821065fc951cb761929950ec286564b2eeef393129873cd0eef9f7becb92ad",
       "archiveRoot": "number-crunch-native",
       "publisher": {
         "id": "com.ibuhs.publisher",
@@ -929,7 +947,7 @@
         "keyID": "release-2026-07",
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
-      "signature": "EnnQw/NrWumfA13NtFPEKTDXiGi/Lr7DGy6RAU67OZ/2jDqLY1QEGi6mPU0D/QFlOfUBno95JZIYUSUJxhvJCw=="
+      "signature": "fwifupkePsCzECMJfJS+Ks3NB0RKf/TzxiBSbtMim7hrTzrF4erY7w3M20KMLLy9JW7ghHhZWPPdHBe9OGg/AQ=="
     },
     {
       "manifest": {

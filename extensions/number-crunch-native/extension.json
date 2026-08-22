@@ -2,7 +2,7 @@
   "apiVersion": 2,
   "id": "com.ibuhs.vehla.number-crunch",
   "name": "Number Crunch",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "QuickGlass actions for selected numbers: sum, average, evaluate expressions, convert metric and imperial units, and convert file sizes — off the main thread.",
   "author": "ibuhs",
   "runtime": "nativeUI",
@@ -25,7 +25,7 @@
       "subtitle": "QuickGlass number tools",
       "systemImage": "function",
       "preferredWidth": 720,
-      "preferredHeight": 620,
+      "preferredHeight": 700,
       "minimumWidth": 560,
       "minimumHeight": 420,
       "dismissOnResignKey": true
@@ -38,6 +38,9 @@
     {"id": "num.to-metric", "title": "To Metric", "systemImage": "ruler", "delivery": "replaceSelection"},
     {"id": "num.to-imperial", "title": "To Imperial", "systemImage": "ruler.fill", "delivery": "replaceSelection"},
     {"id": "num.humanize-size", "title": "Humanize Size", "systemImage": "internaldrive", "delivery": "replaceSelection"},
-    {"id": "num.to-bytes", "title": "To Bytes", "systemImage": "doc", "delivery": "replaceSelection"}
+    {"id": "num.to-bytes", "title": "To Bytes", "systemImage": "doc", "delivery": "replaceSelection"},
+    {"id": "num.to-kb", "title": "To KB", "systemImage": "arrow.up.right", "delivery": "replaceSelection"},
+    {"id": "num.to-mb", "title": "To MB", "systemImage": "arrow.up.forward", "delivery": "replaceSelection"},
+    {"id": "num.to-gb", "title": "To GB", "systemImage": "arrow.up.circle", "delivery": "replaceSelection"}
   ]
 }

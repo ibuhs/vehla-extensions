@@ -19,7 +19,7 @@ public final class NumberCrunchPlugin: NSObject, VehlaNativeWorkspacePlugin {
                 subtitle: "QuickGlass number tools",
                 systemImage: "function",
                 preferredWidth: 720,
-                preferredHeight: 620,
+                preferredHeight: 700,
                 minimumWidth: 560,
                 minimumHeight: 420,
                 dismissBehavior: .dismissOnResignKey

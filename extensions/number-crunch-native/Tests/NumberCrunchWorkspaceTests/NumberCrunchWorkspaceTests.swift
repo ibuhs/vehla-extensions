@@ -46,6 +46,10 @@ final class NumberCrunchWorkspaceTests: XCTestCase {
             try NumberCrunchEngine.humanizeSizes("The cache is 1.5 MB.")
                 .contains("1.4305 MiB")
         )
+        XCTAssertEqual(try NumberCrunchEngine.toKilobytes("2048 bytes"), "2.048 KB")
+        XCTAssertEqual(try NumberCrunchEngine.toMegabytes("1500 KB"), "1.5 MB")
+        XCTAssertEqual(try NumberCrunchEngine.toGigabytes("2048 MB"), "2.048 GB")
+        XCTAssertEqual(try NumberCrunchEngine.toKilobytes("1.5 MB"), "1500 KB")
     }
 
     func testLeavesOppositeUnitsAlone() throws {

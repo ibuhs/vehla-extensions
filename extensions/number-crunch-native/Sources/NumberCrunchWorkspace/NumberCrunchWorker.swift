@@ -19,6 +19,12 @@ actor NumberCrunchWorker {
             return try NumberCrunchEngine.humanizeSizes(selectedText)
         case .toBytes:
             return try NumberCrunchEngine.toBytes(selectedText)
+        case .toKilobytes:
+            return try NumberCrunchEngine.toKilobytes(selectedText)
+        case .toMegabytes:
+            return try NumberCrunchEngine.toMegabytes(selectedText)
+        case .toGigabytes:
+            return try NumberCrunchEngine.toGigabytes(selectedText)
         }
     }
 }
