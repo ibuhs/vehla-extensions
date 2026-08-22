@@ -114,6 +114,7 @@ vehla-extensions/
     ├── number-crunch-native/
     ├── data-extractor-native/
     ├── capture-hub-native/
+    ├── reading-tools-native/
     └── news-dock-widget/
 ```
 
@@ -1271,6 +1272,10 @@ QuickGlass-only Native UI actions that pull emails, phones, IPs, @mentions, and 
 ### Capture Hub
 
 QuickGlass-only Native UI actions that turn selected text into reminders, calendar events, and Apple Notes.
+
+### Reading Tools
+
+QuickGlass-only Native UI actions for selected text: reading statistics, reading time, readability, grade level, sentence analysis, and estimated syllables.
 
 ## Publishing checklist
 

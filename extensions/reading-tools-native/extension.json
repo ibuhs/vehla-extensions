@@ -1,0 +1,42 @@
+{
+  "apiVersion": 2,
+  "id": "com.ibuhs.vehla.reading-tools",
+  "name": "Reading Tools",
+  "version": "1.0.0",
+  "description": "QuickGlass reading analysis for selected text: counts, reading time, readability, grade level, sentences, and estimated syllables — entirely on this Mac.",
+  "author": "ibuhs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/ReadingToolsWorkspace.bundle",
+  "commands": [
+    {
+      "id": "open-reading-tools",
+      "title": "Open Reading Tools",
+      "subtitle": "QuickGlass analysis for selected text",
+      "keywords": ["reading", "words", "time", "readability", "grade", "sentences", "syllables"],
+      "systemImage": "doc.text.magnifyingglass",
+      "workspaceID": "reading-tools"
+    }
+  ],
+  "capabilities": ["persistentStorage", "selectedText"],
+  "workspaces": [
+    {
+      "id": "reading-tools",
+      "title": "Reading Tools",
+      "subtitle": "QuickGlass reading analysis",
+      "systemImage": "doc.text.magnifyingglass",
+      "preferredWidth": 720,
+      "preferredHeight": 560,
+      "minimumWidth": 560,
+      "minimumHeight": 420,
+      "dismissOnResignKey": true
+    }
+  ],
+  "quickGlassActions": [
+    {"id": "read.stats", "title": "Reading Stats", "systemImage": "doc.text.magnifyingglass", "delivery": "compactResult"},
+    {"id": "read.time", "title": "Reading Time", "systemImage": "clock", "delivery": "compactResult"},
+    {"id": "read.readability", "title": "Readability Score", "systemImage": "gauge.with.needle", "delivery": "compactResult"},
+    {"id": "read.grade-level", "title": "Grade Level", "systemImage": "graduationcap", "delivery": "compactResult"},
+    {"id": "read.sentences", "title": "Sentence Analysis", "systemImage": "text.quote", "delivery": "compactResult"},
+    {"id": "read.syllables", "title": "Syllable Count", "systemImage": "waveform", "delivery": "compactResult"}
+  ]
+}
