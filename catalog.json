@@ -829,6 +829,110 @@
     },
     {
       "manifest": {
+        "apiVersion": 2,
+        "id": "com.ibuhs.vehla.number-crunch",
+        "name": "Number Crunch",
+        "version": "1.0.0",
+        "description": "QuickGlass actions for selected numbers: sum, average, evaluate expressions, convert metric and imperial units, and convert file sizes \u2014 off the main thread.",
+        "author": "ibuhs",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/NumberCrunchWorkspace.bundle",
+        "commands": [
+          {
+            "id": "open-number-crunch",
+            "title": "Open Number Crunch",
+            "subtitle": "QuickGlass actions for selected numbers and units",
+            "keywords": [
+              "sum",
+              "average",
+              "calc",
+              "math",
+              "metric",
+              "imperial",
+              "units",
+              "celsius",
+              "bytes",
+              "kilobytes"
+            ],
+            "systemImage": "function",
+            "workspaceID": "number-crunch"
+          }
+        ],
+        "capabilities": [
+          "persistentStorage",
+          "selectedText"
+        ],
+        "workspaces": [
+          {
+            "id": "number-crunch",
+            "title": "Number Crunch",
+            "subtitle": "QuickGlass number tools",
+            "systemImage": "function",
+            "preferredWidth": 720,
+            "preferredHeight": 620,
+            "minimumWidth": 560,
+            "minimumHeight": 420,
+            "dismissOnResignKey": true
+          }
+        ],
+        "quickGlassActions": [
+          {
+            "id": "num.sum",
+            "title": "Sum Numbers",
+            "systemImage": "plus",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "num.average",
+            "title": "Average",
+            "systemImage": "divide",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "num.evaluate",
+            "title": "Evaluate",
+            "systemImage": "function",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "num.to-metric",
+            "title": "To Metric",
+            "systemImage": "ruler",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "num.to-imperial",
+            "title": "To Imperial",
+            "systemImage": "ruler.fill",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "num.humanize-size",
+            "title": "Humanize Size",
+            "systemImage": "internaldrive",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "num.to-bytes",
+            "title": "To Bytes",
+            "systemImage": "doc",
+            "delivery": "replaceSelection"
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/number-crunch-native-1.0.0.zip",
+      "sha256": "5c4ed35649d227c98cf6c679b149f8c58bc9988ad15a93de63809597f624ae5f",
+      "archiveRoot": "number-crunch-native",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "EnnQw/NrWumfA13NtFPEKTDXiGi/Lr7DGy6RAU67OZ/2jDqLY1QEGi6mPU0D/QFlOfUBno95JZIYUSUJxhvJCw=="
+    },
+    {
+      "manifest": {
         "apiVersion": 1,
         "id": "com.vehla.examples.swift-hello",
         "name": "Swift Hello",

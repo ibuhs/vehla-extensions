@@ -111,6 +111,7 @@ vehla-extensions/
     ├── markdown-quick-native/
     ├── list-lab-native/
     ├── type-polish-native/
+    ├── number-crunch-native/
     └── news-dock-widget/
 ```
 
@@ -1256,6 +1257,10 @@ QuickGlass-only Native UI actions for selected lists: split and join, shuffle, n
 ### Type Polish
 
 QuickGlass-only Native UI actions for selected prose: straighten quotes, clean dashes, unwrap hard wraps, collapse spaces, and strip invisible characters.
+
+### Number Crunch
+
+QuickGlass-only Native UI actions for selected numbers: sum, average, evaluate expressions, convert metric and imperial units, and convert file sizes.
 
 ## Publishing checklist
 

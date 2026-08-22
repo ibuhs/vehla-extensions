@@ -1,0 +1,43 @@
+{
+  "apiVersion": 2,
+  "id": "com.ibuhs.vehla.number-crunch",
+  "name": "Number Crunch",
+  "version": "1.0.0",
+  "description": "QuickGlass actions for selected numbers: sum, average, evaluate expressions, convert metric and imperial units, and convert file sizes — off the main thread.",
+  "author": "ibuhs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/NumberCrunchWorkspace.bundle",
+  "commands": [
+    {
+      "id": "open-number-crunch",
+      "title": "Open Number Crunch",
+      "subtitle": "QuickGlass actions for selected numbers and units",
+      "keywords": ["sum", "average", "calc", "math", "metric", "imperial", "units", "celsius", "bytes", "kilobytes"],
+      "systemImage": "function",
+      "workspaceID": "number-crunch"
+    }
+  ],
+  "capabilities": ["persistentStorage", "selectedText"],
+  "workspaces": [
+    {
+      "id": "number-crunch",
+      "title": "Number Crunch",
+      "subtitle": "QuickGlass number tools",
+      "systemImage": "function",
+      "preferredWidth": 720,
+      "preferredHeight": 620,
+      "minimumWidth": 560,
+      "minimumHeight": 420,
+      "dismissOnResignKey": true
+    }
+  ],
+  "quickGlassActions": [
+    {"id": "num.sum", "title": "Sum Numbers", "systemImage": "plus", "delivery": "compactResult"},
+    {"id": "num.average", "title": "Average", "systemImage": "divide", "delivery": "compactResult"},
+    {"id": "num.evaluate", "title": "Evaluate", "systemImage": "function", "delivery": "compactResult"},
+    {"id": "num.to-metric", "title": "To Metric", "systemImage": "ruler", "delivery": "replaceSelection"},
+    {"id": "num.to-imperial", "title": "To Imperial", "systemImage": "ruler.fill", "delivery": "replaceSelection"},
+    {"id": "num.humanize-size", "title": "Humanize Size", "systemImage": "internaldrive", "delivery": "replaceSelection"},
+    {"id": "num.to-bytes", "title": "To Bytes", "systemImage": "doc", "delivery": "replaceSelection"}
+  ]
+}
