@@ -8,7 +8,7 @@ reference card only.
 | --- | --- |
 | Extension ID | `com.ibuhs.vehla.capture-hub` |
 | Workspace ID | `capture-hub` |
-| Version | **1.0.0** |
+| Version | **1.0.1** |
 | Runtime | Vehla Native UI (`nativeUI`, API 2) |
 | Author | ibuhs |
 | License | MIT (`LICENSE`) |
@@ -21,7 +21,7 @@ reference card only.
 | Add Reminder | Creates one reminder. The first recognized date is removed from the title and used as its due date. |
 | Add Lines as Reminders | Creates one reminder per non-empty trimmed line, in order, up to 100 reminders. |
 | Create Calendar Event | Uses recognized dates and durations, or starts at the next whole hour for one hour. The original selection is retained in event notes. |
-| Create Apple Note | Uses the first non-empty line (up to 80 characters) as the note name and the full selection as its body. |
+| Create Apple Note | Uses the first non-empty line (up to 80 characters) as the note name and any remaining lines as its body. |
 | Append to Capture Note | Finds or creates `Vehla Captures` and appends a timestamp plus the selected text. |
 
 Every action returns a compact QuickGlass result. Empty selections and unknown

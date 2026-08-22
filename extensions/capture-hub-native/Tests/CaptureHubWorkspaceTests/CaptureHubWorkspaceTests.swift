@@ -113,6 +113,14 @@ final class CaptureHubWorkspaceTests: XCTestCase {
         XCTAssertEqual(title.count, 80)
         XCTAssertTrue(title.hasSuffix("…"))
         XCTAssertEqual(
+            try CaptureHubEngine.noteBody(from: "\n\(longTitle)\n\nBody\nSecond line"),
+            "Body\nSecond line"
+        )
+        XCTAssertEqual(
+            try CaptureHubEngine.noteBody(from: "A single selected line"),
+            ""
+        )
+        XCTAssertEqual(
             CaptureHubEngine.html(from: "<tag> & \"quote\"\nnext"),
             "&lt;tag&gt; &amp; &quot;quote&quot;<br>next"
         )
@@ -144,7 +152,7 @@ final class CaptureHubWorkspaceTests: XCTestCase {
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         XCTAssertEqual(manifest["id"] as? String, "com.ibuhs.vehla.capture-hub")
-        XCTAssertEqual(manifest["version"] as? String, "1.0.0")
+        XCTAssertEqual(manifest["version"] as? String, "1.0.1")
         XCTAssertEqual(manifest["runtime"] as? String, "nativeUI")
         XCTAssertEqual(manifest["apiVersion"] as? Int, 2)
         XCTAssertEqual(

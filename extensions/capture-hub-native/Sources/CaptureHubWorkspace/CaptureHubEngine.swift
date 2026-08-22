@@ -145,6 +145,21 @@ enum CaptureHubEngine {
         return String(firstLine.prefix(noteTitleLimit - 1)) + "…"
     }
 
+    static func noteBody(from text: String) throws -> String {
+        let source = try nonempty(text)
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+        let lines = source.components(separatedBy: "\n")
+        guard let titleIndex = lines.firstIndex(where: {
+            !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }) else {
+            return ""
+        }
+        return lines.dropFirst(titleIndex + 1)
+            .joined(separator: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     static func html(from text: String) -> String {
         text.replacingOccurrences(of: "&", with: "&amp;")
             .replacingOccurrences(of: "<", with: "&lt;")

@@ -8,8 +8,8 @@
     <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
     <key>CFBundleName</key><string>CaptureHubWorkspace</string>
     <key>CFBundlePackageType</key><string>BNDL</string>
-    <key>CFBundleShortVersionString</key><string>1.0.0</string>
-    <key>CFBundleVersion</key><string>1</string>
+    <key>CFBundleShortVersionString</key><string>1.0.1</string>
+    <key>CFBundleVersion</key><string>2</string>
     <key>NSPrincipalClass</key><string>CaptureHubPlugin</string>
     <key>NSCalendarsFullAccessUsageDescription</key><string>Capture Hub creates calendar events from text you select.</string>
     <key>NSRemindersFullAccessUsageDescription</key><string>Capture Hub creates reminders from text you select.</string>

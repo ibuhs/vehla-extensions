@@ -113,7 +113,7 @@ actor CaptureHubWorker {
 
     private func createNote(from text: String) throws -> String {
         let title = try CaptureHubEngine.noteTitle(from: text)
-        let body = CaptureHubEngine.html(from: text)
+        let body = CaptureHubEngine.html(from: try CaptureHubEngine.noteBody(from: text))
         let source = """
         tell application "Notes"
             set targetAccount to default account
