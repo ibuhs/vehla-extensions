@@ -107,27 +107,98 @@ final class CaptureHubWorkspaceTests: XCTestCase {
         XCTAssertEqual(draft.endDate.timeIntervalSince(draft.startDate), 3_600)
     }
 
-    func testNoteTitleTruncationAndHTMLEscaping() throws {
-        let longTitle = String(repeating: "a", count: 100)
-        let title = try CaptureHubEngine.noteTitle(from: "\n\(longTitle)\nBody")
-        XCTAssertEqual(title.count, 80)
-        XCTAssertTrue(title.hasSuffix("…"))
-        XCTAssertEqual(
-            try CaptureHubEngine.noteBody(from: "\n\(longTitle)\n\nBody\nSecond line"),
-            "Body\nSecond line"
+    func testNoteDraftPreservesLongSingleLineAndSplitsMultiline() throws {
+        let longSelection = String(repeating: "a", count: 100)
+        let singleLine = try CaptureHubEngine.noteDraft(from: longSelection)
+        XCTAssertEqual(singleLine.title, "Vehla Capture")
+        XCTAssertEqual(singleLine.body, longSelection)
+        XCTAssertFalse(singleLine.removesFirstRenderedLine)
+
+        let longTitle = String(repeating: "b", count: 100)
+        let multiline = try CaptureHubEngine.noteDraft(
+            from: "\n\(longTitle)\n\n  Body\n    Indented"
         )
+        XCTAssertEqual(multiline.title.count, 80)
+        XCTAssertTrue(multiline.title.hasSuffix("…"))
+        XCTAssertEqual(multiline.body, "  Body\n    Indented")
+        XCTAssertTrue(multiline.removesFirstRenderedLine)
         XCTAssertEqual(
-            try CaptureHubEngine.noteBody(from: "A single selected line"),
+            try CaptureHubEngine.noteDraft(from: "Short title").body,
             ""
         )
+    }
+
+    func testPlainTextHTMLEscapingPreservesBreaksAndIndentation() {
         XCTAssertEqual(
-            CaptureHubEngine.html(from: "<tag> & \"quote\"\nnext"),
-            "&lt;tag&gt; &amp; &quot;quote&quot;<br>next"
+            CaptureHubEngine.html(from: "<tag> & \"quote\"\n  next"),
+            "&lt;tag&gt; &amp; &quot;quote&quot;<br>&nbsp;&nbsp;next"
         )
         XCTAssertEqual(
             CaptureHubEngine.appleScriptString(#"a\b"c"#),
             #"a\\b\"c"#
         )
+    }
+
+    func testRichHTMLSanitizerPreservesSafeFormattingAndStructure() throws {
+        let source = """
+        <h2 style="color:red">Title</h2>
+        <p><strong>Bold</strong> and <em>italic</em></p>
+        <ol><li>One</li><li><a href="https://example.com/path">Two</a></li></ol>
+        """
+        let result = try XCTUnwrap(
+            CaptureHubEngine.sanitizedHTML(source, removingFirstRenderedLine: false)
+        )
+        XCTAssertTrue(result.contains("<h2>Title</h2>"))
+        XCTAssertTrue(result.contains("<strong>Bold</strong>"))
+        XCTAssertTrue(result.contains("<em>italic</em>"))
+        XCTAssertTrue(result.contains("<ol><li>One</li>"))
+        XCTAssertTrue(result.contains(#"<a href="https://example.com/path">Two</a>"#))
+        XCTAssertFalse(result.contains("style="))
+        XCTAssertFalse(result.contains("color"))
+    }
+
+    func testRichHTMLSanitizerRemovesDangerousContentAndLinks() throws {
+        let source = """
+        <p>Safe <a href="javascript:alert(1)">JS</a>
+        <a href="data:text/html,bad">Data</a>
+        <a href="file:///tmp/secret">File</a>
+        <a href="mailto:test@example.com">Mail</a></p>
+        <script>alert(1)</script><style>body{display:none}</style>
+        <img src="https://example.com/pixel.png"><iframe src="https://example.com">hidden</iframe>
+        """
+        let result = try XCTUnwrap(
+            CaptureHubEngine.sanitizedHTML(source, removingFirstRenderedLine: false)
+        )
+        XCTAssertTrue(result.contains("Safe"))
+        XCTAssertTrue(result.contains("JS"))
+        XCTAssertTrue(result.contains(#"href="mailto:test@example.com""#))
+        for forbidden in [
+            "javascript:", "data:", "file:", "<script", "<style", "<img", "<iframe",
+            "alert(1)", "display:none", "pixel.png", "hidden",
+        ] {
+            XCTAssertFalse(result.lowercased().contains(forbidden))
+        }
+    }
+
+    func testRichHTMLCanRemoveOnlyTitleLine() throws {
+        let blockResult = try XCTUnwrap(
+            CaptureHubEngine.sanitizedHTML(
+                "<h1>Title</h1><p><b>Body</b></p><ul><li>One</li></ul>",
+                removingFirstRenderedLine: true
+            )
+        )
+        XCTAssertFalse(blockResult.contains("Title"))
+        XCTAssertTrue(blockResult.contains("<b>Body</b>"))
+        XCTAssertTrue(blockResult.contains("<ul><li>One</li></ul>"))
+
+        let breakResult = try XCTUnwrap(
+            CaptureHubEngine.sanitizedHTML(
+                "<p><strong>Title</strong><br><em>Body</em></p>",
+                removingFirstRenderedLine: true
+            )
+        )
+        XCTAssertFalse(breakResult.contains("Title"))
+        XCTAssertTrue(breakResult.contains("<em>Body</em>"))
     }
 
     func testEmptySelectionAndUnknownActionErrors() {
@@ -152,7 +223,7 @@ final class CaptureHubWorkspaceTests: XCTestCase {
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         XCTAssertEqual(manifest["id"] as? String, "com.ibuhs.vehla.capture-hub")
-        XCTAssertEqual(manifest["version"] as? String, "1.0.1")
+        XCTAssertEqual(manifest["version"] as? String, "1.0.2")
         XCTAssertEqual(manifest["runtime"] as? String, "nativeUI")
         XCTAssertEqual(manifest["apiVersion"] as? Int, 2)
         XCTAssertEqual(

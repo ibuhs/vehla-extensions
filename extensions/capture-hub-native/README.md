@@ -8,7 +8,7 @@ reference card only.
 | --- | --- |
 | Extension ID | `com.ibuhs.vehla.capture-hub` |
 | Workspace ID | `capture-hub` |
-| Version | **1.0.1** |
+| Version | **1.0.2** |
 | Runtime | Vehla Native UI (`nativeUI`, API 2) |
 | Author | ibuhs |
 | License | MIT (`LICENSE`) |
@@ -21,8 +21,8 @@ reference card only.
 | Add Reminder | Creates one reminder. The first recognized date is removed from the title and used as its due date. |
 | Add Lines as Reminders | Creates one reminder per non-empty trimmed line, in order, up to 100 reminders. |
 | Create Calendar Event | Uses recognized dates and durations, or starts at the next whole hour for one hour. The original selection is retained in event notes. |
-| Create Apple Note | Uses the first non-empty line (up to 80 characters) as the note name and any remaining lines as its body. |
-| Append to Capture Note | Finds or creates `Vehla Captures` and appends a timestamp plus the selected text. |
+| Create Apple Note | Uses the first non-empty line (up to 80 characters) as the note name and any remaining lines as its body. Long single-line selections use `Vehla Capture` as the name so no selected text is lost. |
+| Append to Capture Note | Finds or creates `Vehla Captures` and appends a timestamp plus the complete selected text. |
 
 Every action returns a compact QuickGlass result. Empty selections and unknown
 actions return clear errors.
@@ -39,6 +39,10 @@ Apple does not provide a public Notes write API. The note actions therefore use
 AppleScript with Notes' default account and default folder. macOS asks for
 Automation permission the first time; if it was denied, enable Vehla under
 **System Settings → Privacy & Security → Automation**.
+
+Web selections keep safe paragraph, line, list, heading, emphasis, and link
+formatting in Notes. Capture Hub removes scripts, styles, remote resources,
+attachments, colors, and unsafe links before sending content to Notes.
 
 Selected text is processed locally and sent only to Reminders, Calendar, or
 Apple Notes for the action you choose. Capture Hub makes no network requests

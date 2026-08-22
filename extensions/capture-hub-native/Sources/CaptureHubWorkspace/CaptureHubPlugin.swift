@@ -49,12 +49,14 @@ public final class CaptureHubPlugin: NSObject, VehlaNativeWorkspacePlugin {
         }
 
         let selectedText = request.selectedText
+        let selectedHTML = request.payload["selectedHTML"]
         let delivery = action.delivery
         Task { @MainActor in
             do {
                 let output = try await CaptureHubWorker.shared.perform(
                     action,
-                    selectedText: selectedText
+                    selectedText: selectedText,
+                    selectedHTML: selectedHTML
                 )
                 completion.quickGlassActionDidFinish(
                     VehlaWorkspaceQuickGlassResult(

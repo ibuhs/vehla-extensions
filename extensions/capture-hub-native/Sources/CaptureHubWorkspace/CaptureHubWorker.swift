@@ -6,7 +6,11 @@ actor CaptureHubWorker {
 
     private let eventStore = EKEventStore()
 
-    func perform(_ action: CaptureHubActionID, selectedText: String) async throws -> String {
+    func perform(
+        _ action: CaptureHubActionID,
+        selectedText: String,
+        selectedHTML: String? = nil
+    ) async throws -> String {
         switch action {
         case .reminder:
             return try await addReminder(from: selectedText)
@@ -15,9 +19,9 @@ actor CaptureHubWorker {
         case .event:
             return try await addEvent(from: selectedText)
         case .note:
-            return try createNote(from: selectedText)
+            return try createNote(from: selectedText, selectedHTML: selectedHTML)
         case .appendNote:
-            return try appendToCaptureNote(selectedText)
+            return try appendToCaptureNote(selectedText, selectedHTML: selectedHTML)
         }
     }
 
@@ -111,29 +115,37 @@ actor CaptureHubWorker {
         return eventStore.calendars(for: .event).first(where: \.allowsContentModifications)
     }
 
-    private func createNote(from text: String) throws -> String {
-        let title = try CaptureHubEngine.noteTitle(from: text)
-        let body = CaptureHubEngine.html(from: try CaptureHubEngine.noteBody(from: text))
+    private func createNote(from text: String, selectedHTML: String?) throws -> String {
+        let draft = try CaptureHubEngine.noteDraft(from: text)
+        let body = selectedHTML.flatMap {
+            CaptureHubEngine.sanitizedHTML(
+                $0,
+                removingFirstRenderedLine: draft.removesFirstRenderedLine
+            )
+        } ?? CaptureHubEngine.html(from: draft.body)
         let source = """
         tell application "Notes"
             set targetAccount to default account
             set targetFolder to default folder of targetAccount
-            make new note at targetFolder with properties {name:"\(CaptureHubEngine.appleScriptString(title))", body:"\(CaptureHubEngine.appleScriptString(body))"}
+            make new note at targetFolder with properties {name:"\(CaptureHubEngine.appleScriptString(draft.title))", body:"\(CaptureHubEngine.appleScriptString(body))"}
         end tell
         """
         try runNotesScript(source)
-        return "Created Apple Note “\(title)”."
+        return "Created Apple Note “\(draft.title)”."
     }
 
-    private func appendToCaptureNote(_ text: String) throws -> String {
+    private func appendToCaptureNote(_ text: String, selectedHTML: String?) throws -> String {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw CaptureHubError.emptySelection
         }
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withSpaceBetweenDateAndTime]
         let timestamp = formatter.string(from: Date())
+        let capturedBody = selectedHTML.flatMap {
+            CaptureHubEngine.sanitizedHTML($0, removingFirstRenderedLine: false)
+        } ?? CaptureHubEngine.html(from: text)
         let addition = "<br><br><b>\(CaptureHubEngine.html(from: timestamp))</b><br>"
-            + CaptureHubEngine.html(from: text)
+            + capturedBody
         let source = """
         tell application "Notes"
             set targetAccount to default account
