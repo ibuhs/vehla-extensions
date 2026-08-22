@@ -108,6 +108,7 @@ vehla-extensions/
     ├── swift-sdk-lab/
     ├── toolbox-native/
     ├── link-lens-native/
+    ├── markdown-quick-native/
     └── news-dock-widget/
 ```
 
@@ -1241,6 +1242,10 @@ Invocation capability grants, confined atomic storage, typed Codable preferences
 ### Link Lens
 
 QuickGlass-only Native UI actions for selected URLs: tracking cleanup, redirect unwraps, host inspection, link extraction, and local safety heuristics.
+
+### Markdown Quick
+
+QuickGlass-only Native UI actions for selected Markdown: normalize, strip, format tables, unwrap links, and extract headings or links.
 
 ## Publishing checklist
 

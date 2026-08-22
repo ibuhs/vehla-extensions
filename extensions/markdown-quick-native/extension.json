@@ -1,0 +1,42 @@
+{
+  "apiVersion": 2,
+  "id": "com.ibuhs.vehla.markdown-quick",
+  "name": "Markdown Quick",
+  "version": "1.0.0",
+  "description": "QuickGlass actions for selected Markdown: normalize, strip, format tables, unwrap links, and extract headings or links — off the main thread.",
+  "author": "ibuhs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/MarkdownQuickWorkspace.bundle",
+  "commands": [
+    {
+      "id": "open-markdown-quick",
+      "title": "Open Markdown Quick",
+      "subtitle": "QuickGlass actions for selected Markdown",
+      "keywords": ["markdown", "md", "table", "heading", "strip", "normalize", "gfm"],
+      "systemImage": "text.justify.left",
+      "workspaceID": "markdown-quick"
+    }
+  ],
+  "capabilities": ["persistentStorage", "selectedText"],
+  "workspaces": [
+    {
+      "id": "markdown-quick",
+      "title": "Markdown Quick",
+      "subtitle": "QuickGlass Markdown tools",
+      "systemImage": "text.justify.left",
+      "preferredWidth": 720,
+      "preferredHeight": 540,
+      "minimumWidth": 560,
+      "minimumHeight": 420,
+      "dismissOnResignKey": true
+    }
+  ],
+  "quickGlassActions": [
+    {"id": "md.normalize", "title": "Normalize Markdown", "systemImage": "text.alignleft", "delivery": "replaceSelection"},
+    {"id": "md.strip", "title": "Strip Markdown", "systemImage": "textformat", "delivery": "replaceSelection"},
+    {"id": "md.format-tables", "title": "Format Tables", "systemImage": "tablecells", "delivery": "replaceSelection"},
+    {"id": "md.unwrap-links", "title": "Links to URLs", "systemImage": "link", "delivery": "replaceSelection"},
+    {"id": "md.extract-links", "title": "Extract Links", "systemImage": "link.badge.plus", "delivery": "compactResult"},
+    {"id": "md.extract-headings", "title": "Extract Headings", "systemImage": "list.bullet.indent", "delivery": "compactResult"}
+  ]
+}

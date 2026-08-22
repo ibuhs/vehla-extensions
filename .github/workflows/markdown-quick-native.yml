@@ -1,0 +1,40 @@
+name: Markdown Quick Native
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/markdown-quick-native.yml"
+      - "extensions/markdown-quick-native/**"
+      - "sdk/swift/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/markdown-quick-native.yml"
+      - "extensions/markdown-quick-native/**"
+      - "sdk/swift/**"
+
+concurrency:
+  group: markdown-quick-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test and build Markdown Quick
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Test Markdown Quick package
+        run: swift test --package-path extensions/markdown-quick-native
+
+      - name: Build installable package
+        run: zsh extensions/markdown-quick-native/build.sh
+
+      - name: Validate package
+        run: |
+          swift run --package-path sdk/swift vehla-swift validate \
+            extensions/markdown-quick-native/dist/MarkdownQuick
