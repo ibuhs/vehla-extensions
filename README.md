@@ -107,6 +107,7 @@ vehla-extensions/
     ├── swift-hello/
     ├── swift-sdk-lab/
     ├── toolbox-native/
+    ├── link-lens-native/
     └── news-dock-widget/
 ```
 
@@ -1236,6 +1237,10 @@ Native executable runtime, background-only execution, typed Swift handlers, code
 ### Swift SDK Lab
 
 Invocation capability grants, confined atomic storage, typed Codable preferences, structured redacted logs, permission-aware HTTP requests, secret-backed authentication, and rich native result views.
+
+### Link Lens
+
+QuickGlass-only Native UI actions for selected URLs: tracking cleanup, redirect unwraps, host inspection, link extraction, and local safety heuristics.
 
 ## Publishing checklist
 

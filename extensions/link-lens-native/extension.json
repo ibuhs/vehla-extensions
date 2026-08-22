@@ -1,0 +1,41 @@
+{
+  "apiVersion": 2,
+  "id": "com.ibuhs.vehla.link-lens",
+  "name": "Link Lens",
+  "version": "1.0.0",
+  "description": "QuickGlass actions for selected links: clean tracking, unwrap redirects, inspect hosts, extract URLs, and flag risky links — off the main thread.",
+  "author": "ibuhs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/LinkLensWorkspace.bundle",
+  "commands": [
+    {
+      "id": "open-link-lens",
+      "title": "Open Link Lens",
+      "subtitle": "QuickGlass actions for cleaning, unwrapping, and inspecting selected URLs",
+      "keywords": ["link", "url", "tracking", "redirect", "punycode", "safety", "extract"],
+      "systemImage": "link.circle",
+      "workspaceID": "link-lens"
+    }
+  ],
+  "capabilities": ["persistentStorage", "networkAccess", "selectedText"],
+  "workspaces": [
+    {
+      "id": "link-lens",
+      "title": "Link Lens",
+      "subtitle": "QuickGlass link tools",
+      "systemImage": "link.circle",
+      "preferredWidth": 720,
+      "preferredHeight": 520,
+      "minimumWidth": 560,
+      "minimumHeight": 420,
+      "dismissOnResignKey": true
+    }
+  ],
+  "quickGlassActions": [
+    {"id": "url.clean", "title": "Remove Tracking", "systemImage": "wand.and.stars", "delivery": "replaceSelection"},
+    {"id": "url.unwrap", "title": "Unwrap Redirect", "systemImage": "arrow.uturn.forward", "delivery": "replaceSelection"},
+    {"id": "url.inspect", "title": "Inspect Link", "systemImage": "info.circle", "delivery": "compactResult"},
+    {"id": "url.extract", "title": "Extract Links", "systemImage": "link.badge.plus", "delivery": "compactResult"},
+    {"id": "url.safety", "title": "Check Link Safety", "systemImage": "checkmark.shield", "delivery": "compactResult"}
+  ]
+}

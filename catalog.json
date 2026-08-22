@@ -396,6 +396,96 @@
     },
     {
       "manifest": {
+        "apiVersion": 2,
+        "id": "com.ibuhs.vehla.link-lens",
+        "name": "Link Lens",
+        "version": "1.0.0",
+        "description": "QuickGlass actions for selected links: clean tracking, unwrap redirects, inspect hosts, extract URLs, and flag risky links \u2014 off the main thread.",
+        "author": "ibuhs",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/LinkLensWorkspace.bundle",
+        "commands": [
+          {
+            "id": "open-link-lens",
+            "title": "Open Link Lens",
+            "subtitle": "QuickGlass actions for cleaning, unwrapping, and inspecting selected URLs",
+            "keywords": [
+              "link",
+              "url",
+              "tracking",
+              "redirect",
+              "punycode",
+              "safety",
+              "extract"
+            ],
+            "systemImage": "link.circle",
+            "workspaceID": "link-lens"
+          }
+        ],
+        "capabilities": [
+          "persistentStorage",
+          "networkAccess",
+          "selectedText"
+        ],
+        "workspaces": [
+          {
+            "id": "link-lens",
+            "title": "Link Lens",
+            "subtitle": "QuickGlass link tools",
+            "systemImage": "link.circle",
+            "preferredWidth": 720,
+            "preferredHeight": 520,
+            "minimumWidth": 560,
+            "minimumHeight": 420,
+            "dismissOnResignKey": true
+          }
+        ],
+        "quickGlassActions": [
+          {
+            "id": "url.clean",
+            "title": "Remove Tracking",
+            "systemImage": "wand.and.stars",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "url.unwrap",
+            "title": "Unwrap Redirect",
+            "systemImage": "arrow.uturn.forward",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "url.inspect",
+            "title": "Inspect Link",
+            "systemImage": "info.circle",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "url.extract",
+            "title": "Extract Links",
+            "systemImage": "link.badge.plus",
+            "delivery": "compactResult"
+          },
+          {
+            "id": "url.safety",
+            "title": "Check Link Safety",
+            "systemImage": "checkmark.shield",
+            "delivery": "compactResult"
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/link-lens-native-1.0.0.zip",
+      "sha256": "82b8336f8d6d460e3e24e5775380b9a3523bc1b60994c203e80de1b56bade0ec",
+      "archiveRoot": "link-lens-native",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "BrRbCHu5cy56/EF8CXZxzTlqXSa+SWAjZbD0EVeYsweJB6gSi3FXGYElVFLnpZCnX73K1A1+1wUbgr0lgejADg=="
+    },
+    {
+      "manifest": {
         "apiVersion": 3,
         "id": "com.ibuhs.vehla.news-reader",
         "name": "News Reader Dock Widget",
