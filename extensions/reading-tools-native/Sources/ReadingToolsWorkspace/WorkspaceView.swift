@@ -76,23 +76,25 @@ struct ReadingToolsWorkspaceView: View {
     @ViewBuilder
     private func largeTypeView(_ text: String) -> some View {
         let isEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        ScrollView {
+        ScrollView(.vertical) {
             VStack {
                 Spacer(minLength: 24)
                 Text(isEmpty ? "No selected text." : text)
                     .font(.system(size: 48, weight: .medium, design: .rounded))
                     .multilineTextAlignment(.center)
                     .lineSpacing(10)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(
                         isEmpty
                             ? Color(nsColor: theme.theme.secondaryTextColor)
                             : Color(nsColor: theme.theme.primaryTextColor)
                     )
                     .textSelection(.enabled)
-                    .frame(maxWidth: 1_000)
-                    .padding(36)
+                    .frame(maxWidth: .infinity)
                 Spacer(minLength: 24)
             }
+            .padding(.horizontal, 36)
+            .padding(.vertical, 24)
             .frame(maxWidth: .infinity, minHeight: 500)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

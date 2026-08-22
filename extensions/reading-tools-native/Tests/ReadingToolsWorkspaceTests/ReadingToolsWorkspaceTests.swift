@@ -204,7 +204,7 @@ final class ReadingToolsWorkspaceTests: XCTestCase {
 
         XCTAssertEqual(manifest["apiVersion"] as? Int, 2)
         XCTAssertEqual(manifest["id"] as? String, "com.ibuhs.vehla.reading-tools")
-        XCTAssertEqual(manifest["version"] as? String, "1.0.1")
+        XCTAssertEqual(manifest["version"] as? String, "1.0.2")
         XCTAssertEqual(manifest["runtime"] as? String, "nativeUI")
         XCTAssertEqual(
             manifest["capabilities"] as? [String],

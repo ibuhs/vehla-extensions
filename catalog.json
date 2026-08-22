@@ -1142,7 +1142,7 @@
         "apiVersion": 2,
         "id": "com.ibuhs.vehla.reading-tools",
         "name": "Reading Tools",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "description": "QuickGlass tools for selected text: counts, reading time, readability, grade level, sentences, estimated syllables, and a large-type display \u2014 entirely on this Mac.",
         "author": "ibuhs",
         "runtime": "nativeUI",
@@ -1233,8 +1233,8 @@
           }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/reading-tools-native-1.0.1.zip",
-      "sha256": "31f6ed5ef02e8003b2202bcac151bd150e21c7639a4fe4dbf7dc75eb00caf07d",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/reading-tools-native-1.0.2.zip",
+      "sha256": "bfd429d46fa20e653ae2056e415fcca40bacfb9f4a5d168e38be6eee22a5fe02",
       "archiveRoot": "reading-tools-native",
       "publisher": {
         "id": "com.ibuhs.publisher",
@@ -1242,7 +1242,7 @@
         "keyID": "release-2026-07",
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
-      "signature": "wznizM//VFS5VoXIBUT6742J3dRgPAZOvWLxdnlAu8cDftFok4ybSB/YIz7J0ieq5xKvCW7ZV1GSX21ABXltCw=="
+      "signature": "/hsenTJ8/b9OaylpCnNzlZogPMQph1NP8GQfLDLU0y7/oPdVkVLCPfdo1jFqmCBUYw9qcPM7+PncJ3ZdRE9pCw=="
     },
     {
       "manifest": {

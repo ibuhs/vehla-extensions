@@ -2,7 +2,7 @@
   "apiVersion": 2,
   "id": "com.ibuhs.vehla.reading-tools",
   "name": "Reading Tools",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "QuickGlass tools for selected text: counts, reading time, readability, grade level, sentences, estimated syllables, and a large-type display — entirely on this Mac.",
   "author": "ibuhs",
   "runtime": "nativeUI",

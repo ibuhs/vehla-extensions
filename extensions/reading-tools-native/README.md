@@ -7,7 +7,7 @@ an analysis or open a large-type display from the QuickGlass overflow menu.
 | --- | --- |
 | Extension ID | `com.ibuhs.vehla.reading-tools` |
 | Workspace ID | `reading-tools` |
-| Version | **1.0.1** |
+| Version | **1.0.2** |
 | Runtime | Vehla Native UI (`nativeUI`) |
 | Author | ibuhs |
 | License | MIT (`LICENSE`) |
