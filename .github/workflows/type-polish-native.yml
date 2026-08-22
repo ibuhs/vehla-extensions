@@ -1,0 +1,40 @@
+name: Type Polish Native
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/type-polish-native.yml"
+      - "extensions/type-polish-native/**"
+      - "sdk/swift/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/type-polish-native.yml"
+      - "extensions/type-polish-native/**"
+      - "sdk/swift/**"
+
+concurrency:
+  group: type-polish-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test and build Type Polish
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Test Type Polish package
+        run: swift test --package-path extensions/type-polish-native
+
+      - name: Build installable package
+        run: zsh extensions/type-polish-native/build.sh
+
+      - name: Validate package
+        run: |
+          swift run --package-path sdk/swift vehla-swift validate \
+            extensions/type-polish-native/dist/TypePolish

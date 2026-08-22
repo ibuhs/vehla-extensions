@@ -110,6 +110,7 @@ vehla-extensions/
     ├── link-lens-native/
     ├── markdown-quick-native/
     ├── list-lab-native/
+    ├── type-polish-native/
     └── news-dock-widget/
 ```
 
@@ -1251,6 +1252,10 @@ QuickGlass-only Native UI actions for selected Markdown: normalize, strip, forma
 ### List Lab
 
 QuickGlass-only Native UI actions for selected lists: split and join, shuffle, number, quote, wrap, unwrap, and prefix from the clipboard.
+
+### Type Polish
+
+QuickGlass-only Native UI actions for selected prose: straighten quotes, clean dashes, unwrap hard wraps, collapse spaces, and strip invisible characters.
 
 ## Publishing checklist
 

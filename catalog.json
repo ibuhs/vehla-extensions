@@ -1352,6 +1352,101 @@
     },
     {
       "manifest": {
+        "apiVersion": 2,
+        "id": "com.ibuhs.vehla.type-polish",
+        "name": "Type Polish",
+        "version": "1.0.0",
+        "description": "QuickGlass actions for selected prose: straighten quotes, clean dashes, unwrap hard line breaks, collapse spaces, and strip invisible junk \u2014 off the main thread.",
+        "author": "ibuhs",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/TypePolishWorkspace.bundle",
+        "commands": [
+          {
+            "id": "open-type-polish",
+            "title": "Open Type Polish",
+            "subtitle": "QuickGlass actions for cleaning selected prose",
+            "keywords": [
+              "quotes",
+              "dash",
+              "ellipsis",
+              "unwrap",
+              "nbsp",
+              "plain",
+              "typography"
+            ],
+            "systemImage": "textformat.abc",
+            "workspaceID": "type-polish"
+          }
+        ],
+        "capabilities": [
+          "persistentStorage",
+          "selectedText"
+        ],
+        "workspaces": [
+          {
+            "id": "type-polish",
+            "title": "Type Polish",
+            "subtitle": "QuickGlass prose cleanup",
+            "systemImage": "textformat.abc",
+            "preferredWidth": 720,
+            "preferredHeight": 560,
+            "minimumWidth": 560,
+            "minimumHeight": 420,
+            "dismissOnResignKey": true
+          }
+        ],
+        "quickGlassActions": [
+          {
+            "id": "type.straighten-quotes",
+            "title": "Straighten Quotes",
+            "systemImage": "quote.closing",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "type.clean-dashes",
+            "title": "Clean Dashes",
+            "systemImage": "minus",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "type.unwrap",
+            "title": "Unwrap Lines",
+            "systemImage": "text.justify.left",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "type.collapse-spaces",
+            "title": "Collapse Spaces",
+            "systemImage": "arrow.left.and.right",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "type.strip-junk",
+            "title": "Strip Invisible",
+            "systemImage": "eraser",
+            "delivery": "replaceSelection"
+          },
+          {
+            "id": "type.polish",
+            "title": "Polish Text",
+            "systemImage": "sparkles",
+            "delivery": "replaceSelection"
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/type-polish-native-1.0.0.zip",
+      "sha256": "f67f26ef388b6ac895307c760f71213f14e8824b286cda2ca49777add26b9ca3",
+      "archiveRoot": "type-polish-native",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "PXCMMKEY8CncuhoIjzf9SLRSaciJYT/lBx51L8Fh0466N+kHqGweaul/0lyTeAbHHwi9wE88PMQ5fDS1PcLADg=="
+    },
+    {
+      "manifest": {
         "apiVersion": 1,
         "id": "com.vehla.examples.web-inspector",
         "name": "Web Inspector",
