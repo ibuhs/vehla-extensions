@@ -1,0 +1,46 @@
+{
+  "apiVersion": 2,
+  "id": "com.ibuhs.vehla.list-lab",
+  "name": "List Lab",
+  "version": "1.0.0",
+  "description": "QuickGlass actions for selected lists: split and join, shuffle, number, quote, wrap, unwrap, and prefix from the clipboard — off the main thread.",
+  "author": "ibuhs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/ListLabWorkspace.bundle",
+  "commands": [
+    {
+      "id": "open-list-lab",
+      "title": "Open List Lab",
+      "subtitle": "QuickGlass actions for selected lists",
+      "keywords": ["list", "comma", "pipe", "shuffle", "number", "quote", "wrap", "prefix"],
+      "systemImage": "list.bullet",
+      "workspaceID": "list-lab"
+    }
+  ],
+  "capabilities": ["persistentStorage", "selectedText", "clipboardRead"],
+  "workspaces": [
+    {
+      "id": "list-lab",
+      "title": "List Lab",
+      "subtitle": "QuickGlass list tools",
+      "systemImage": "list.bullet",
+      "preferredWidth": 720,
+      "preferredHeight": 640,
+      "minimumWidth": 560,
+      "minimumHeight": 420,
+      "dismissOnResignKey": true
+    }
+  ],
+  "quickGlassActions": [
+    {"id": "list.split-comma", "title": "Comma to Lines", "systemImage": "list.bullet", "delivery": "replaceSelection"},
+    {"id": "list.join-comma", "title": "Lines to Comma", "systemImage": "text.justify", "delivery": "replaceSelection"},
+    {"id": "list.split-pipe", "title": "Pipe to Lines", "systemImage": "rectangle.split.1x2", "delivery": "replaceSelection"},
+    {"id": "list.join-pipe", "title": "Lines to Pipe", "systemImage": "rectangle.split.2x1", "delivery": "replaceSelection"},
+    {"id": "list.shuffle", "title": "Shuffle Lines", "systemImage": "shuffle", "delivery": "replaceSelection"},
+    {"id": "list.number", "title": "Number Lines", "systemImage": "list.number", "delivery": "replaceSelection"},
+    {"id": "list.quote", "title": "Quote Lines", "systemImage": "quote.opening", "delivery": "replaceSelection"},
+    {"id": "list.wrap-parens", "title": "Wrap ()", "systemImage": "lanyardcard", "delivery": "replaceSelection"},
+    {"id": "list.unwrap", "title": "Unwrap", "systemImage": "pip.remove", "delivery": "replaceSelection"},
+    {"id": "list.prefix-clipboard", "title": "Prefix with Clipboard", "systemImage": "text.insert", "delivery": "replaceSelection"}
+  ]
+}

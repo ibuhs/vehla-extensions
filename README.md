@@ -109,6 +109,7 @@ vehla-extensions/
     ├── toolbox-native/
     ├── link-lens-native/
     ├── markdown-quick-native/
+    ├── list-lab-native/
     └── news-dock-widget/
 ```
 
@@ -1246,6 +1247,10 @@ QuickGlass-only Native UI actions for selected URLs: tracking cleanup, redirect 
 ### Markdown Quick
 
 QuickGlass-only Native UI actions for selected Markdown: normalize, strip, format tables, unwrap links, and extract headings or links.
+
+### List Lab
+
+QuickGlass-only Native UI actions for selected lists: split and join, shuffle, number, quote, wrap, unwrap, and prefix from the clipboard.
 
 ## Publishing checklist
 
