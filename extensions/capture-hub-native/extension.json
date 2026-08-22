@@ -1,0 +1,41 @@
+{
+  "apiVersion": 2,
+  "id": "com.ibuhs.vehla.capture-hub",
+  "name": "Capture Hub",
+  "version": "1.0.0",
+  "description": "QuickGlass actions that turn selected text into reminders, calendar events, and Apple Notes.",
+  "author": "ibuhs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/CaptureHubWorkspace.bundle",
+  "commands": [
+    {
+      "id": "open-capture-hub",
+      "title": "Open Capture Hub",
+      "subtitle": "QuickGlass capture actions and permission reference",
+      "keywords": ["capture", "reminder", "calendar", "event", "note"],
+      "systemImage": "square.and.arrow.down",
+      "workspaceID": "capture-hub"
+    }
+  ],
+  "capabilities": ["persistentStorage", "selectedText"],
+  "workspaces": [
+    {
+      "id": "capture-hub",
+      "title": "Capture Hub",
+      "subtitle": "QuickGlass capture reference",
+      "systemImage": "square.and.arrow.down",
+      "preferredWidth": 720,
+      "preferredHeight": 600,
+      "minimumWidth": 560,
+      "minimumHeight": 420,
+      "dismissOnResignKey": true
+    }
+  ],
+  "quickGlassActions": [
+    {"id": "capture.reminder", "title": "Add Reminder", "systemImage": "checklist", "delivery": "compactResult"},
+    {"id": "capture.reminder-lines", "title": "Add Lines as Reminders", "systemImage": "list.bullet", "delivery": "compactResult"},
+    {"id": "capture.event", "title": "Create Calendar Event", "systemImage": "calendar.badge.plus", "delivery": "compactResult"},
+    {"id": "capture.note", "title": "Create Apple Note", "systemImage": "note.text.badge.plus", "delivery": "compactResult"},
+    {"id": "capture.append-note", "title": "Append to Capture Note", "systemImage": "note.text", "delivery": "compactResult"}
+  ]
+}

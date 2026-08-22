@@ -1,0 +1,40 @@
+name: Capture Hub Native
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/capture-hub-native.yml"
+      - "extensions/capture-hub-native/**"
+      - "sdk/swift/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/capture-hub-native.yml"
+      - "extensions/capture-hub-native/**"
+      - "sdk/swift/**"
+
+concurrency:
+  group: capture-hub-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test and build Capture Hub
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Test Capture Hub package
+        run: swift test --package-path extensions/capture-hub-native
+
+      - name: Build installable package
+        run: zsh extensions/capture-hub-native/build.sh
+
+      - name: Validate package
+        run: |
+          swift run --package-path sdk/swift vehla-swift validate \
+            extensions/capture-hub-native/dist/CaptureHub

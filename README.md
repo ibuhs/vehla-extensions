@@ -113,6 +113,7 @@ vehla-extensions/
     ├── type-polish-native/
     ├── number-crunch-native/
     ├── data-extractor-native/
+    ├── capture-hub-native/
     └── news-dock-widget/
 ```
 
@@ -1266,6 +1267,10 @@ QuickGlass-only Native UI actions for selected numbers: sum, average, evaluate e
 ### Data Extractor
 
 QuickGlass-only Native UI actions that pull emails, phones, IPs, @mentions, and hashtags from selected text.
+
+### Capture Hub
+
+QuickGlass-only Native UI actions that turn selected text into reminders, calendar events, and Apple Notes.
 
 ## Publishing checklist
 
