@@ -155,6 +155,16 @@ final class CaptureHubWorkspaceTests: XCTestCase {
         XCTAssertTrue(result.contains(#"<a href="https://example.com/path">Two</a>"#))
         XCTAssertFalse(result.contains("style="))
         XCTAssertFalse(result.contains("color"))
+
+        let structured = try XCTUnwrap(
+            CaptureHubEngine.structuredText(fromHTML: source)
+        )
+        XCTAssertTrue(structured.hasPrefix("Title\n"))
+        XCTAssertTrue(structured.contains("Bold and italic"))
+        XCTAssertTrue(structured.contains("One\nTwo"))
+        let draft = try CaptureHubEngine.noteDraft(from: structured)
+        XCTAssertEqual(draft.title, "Title")
+        XCTAssertTrue(draft.body.contains("Bold and italic"))
     }
 
     func testRichHTMLSanitizerRemovesDangerousContentAndLinks() throws {
@@ -223,7 +233,7 @@ final class CaptureHubWorkspaceTests: XCTestCase {
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         XCTAssertEqual(manifest["id"] as? String, "com.ibuhs.vehla.capture-hub")
-        XCTAssertEqual(manifest["version"] as? String, "1.0.2")
+        XCTAssertEqual(manifest["version"] as? String, "1.0.3")
         XCTAssertEqual(manifest["runtime"] as? String, "nativeUI")
         XCTAssertEqual(manifest["apiVersion"] as? Int, 2)
         XCTAssertEqual(

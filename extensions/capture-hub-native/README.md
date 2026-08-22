@@ -8,7 +8,7 @@ reference card only.
 | --- | --- |
 | Extension ID | `com.ibuhs.vehla.capture-hub` |
 | Workspace ID | `capture-hub` |
-| Version | **1.0.2** |
+| Version | **1.0.3** |
 | Runtime | Vehla Native UI (`nativeUI`, API 2) |
 | Author | ibuhs |
 | License | MIT (`LICENSE`) |

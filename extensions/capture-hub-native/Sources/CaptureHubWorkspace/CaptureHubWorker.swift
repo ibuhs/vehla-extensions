@@ -116,7 +116,9 @@ actor CaptureHubWorker {
     }
 
     private func createNote(from text: String, selectedHTML: String?) throws -> String {
-        let draft = try CaptureHubEngine.noteDraft(from: text)
+        let structuredText = selectedHTML
+            .flatMap(CaptureHubEngine.structuredText(fromHTML:))
+        let draft = try CaptureHubEngine.noteDraft(from: structuredText ?? text)
         let body = selectedHTML.flatMap {
             CaptureHubEngine.sanitizedHTML(
                 $0,

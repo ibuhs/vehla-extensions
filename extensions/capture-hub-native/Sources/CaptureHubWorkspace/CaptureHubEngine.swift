@@ -215,6 +215,15 @@ enum CaptureHubEngine {
             : sanitized
     }
 
+    static func structuredText(fromHTML html: String) -> String? {
+        guard !html.isEmpty, html.utf8.count <= 1_048_576 else { return nil }
+        let text = HTMLSanitizer.plainText(in: HTMLSanitizer.sanitize(html))
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? nil : text
+    }
+
     static func appleScriptString(_ text: String) -> String {
         text.replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")

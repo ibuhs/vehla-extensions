@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3
+
+- Accept compatible browser clipboard captures and derive note structure from sanitized rich text.
+- Preserve formatting from RTF when selected content does not provide HTML.
+
 ## 1.0.2
 
 - Preserve safe web formatting and structure in Apple Notes captures.
