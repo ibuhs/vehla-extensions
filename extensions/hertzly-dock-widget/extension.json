@@ -1,0 +1,22 @@
+{
+  "apiVersion": 3,
+  "id": "com.ibuhs.vehla.hertzly",
+  "name": "Hertzly Radio Dock Widget",
+  "version": "1.0.0",
+  "description": "Tune into internet radio from the Dock with country browsing, favorites, and an FM-inspired dial.",
+  "author": "ibuhs",
+  "runtime": "dockWidget",
+  "entrypoint": "bin/HertzlyDockWidget.bundle",
+  "capabilities": ["persistentStorage", "networkAccess", "openURL"],
+  "dockWidgets": [
+    {
+      "id": "hertzly-radio",
+      "title": "Hertzly",
+      "subtitle": "Internet radio tuner",
+      "systemImage": "radio.fill",
+      "preferredPopupWidth": 560,
+      "preferredPopupHeight": 700,
+      "supportedSurfaces": ["compact", "inline", "popup"]
+    }
+  ]
+}

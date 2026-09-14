@@ -584,6 +584,48 @@
     },
     {
       "manifest": {
+        "apiVersion": 3,
+        "id": "com.ibuhs.vehla.hertzly",
+        "name": "Hertzly Radio Dock Widget",
+        "version": "1.0.0",
+        "description": "Tune into internet radio from the Dock with country browsing, favorites, and an FM-inspired dial.",
+        "author": "ibuhs",
+        "runtime": "dockWidget",
+        "entrypoint": "bin/HertzlyDockWidget.bundle",
+        "capabilities": [
+          "persistentStorage",
+          "networkAccess",
+          "openURL"
+        ],
+        "dockWidgets": [
+          {
+            "id": "hertzly-radio",
+            "title": "Hertzly",
+            "subtitle": "Internet radio tuner",
+            "systemImage": "radio.fill",
+            "preferredPopupWidth": 560,
+            "preferredPopupHeight": 700,
+            "supportedSurfaces": [
+              "compact",
+              "inline",
+              "popup"
+            ]
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/hertzly-dock-widget-1.0.0.zip",
+      "sha256": "fa4c2c650de920c14197408fce272d50dbcb48d95a7952ac1ebb6686ba921d83",
+      "archiveRoot": "hertzly-dock-widget",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "cIu28/irw557QxBxvbQKf2OGL7rEfKStq6Ln1oaVM51sTcv2IxNU2wm4JrUoqL2Ldc8jpjmOk8kpbUYoNKytAw=="
+    },
+    {
+      "manifest": {
         "apiVersion": 2,
         "id": "com.ibuhs.vehla.link-lens",
         "name": "Link Lens",
