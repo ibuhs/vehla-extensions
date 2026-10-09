@@ -1181,6 +1181,51 @@
     },
     {
       "manifest": {
+        "apiVersion": 3,
+        "id": "com.wiseman.vehla.quicknote",
+        "name": "QuickNote",
+        "version": "2.1.9",
+        "description": "A native scratchpad with checklists, calculations, capture, permanent slots and safe Antinote import.",
+        "author": "Michael Wiseman",
+        "runtime": "dockWidget",
+        "entrypoint": "bin/QuickNoteDockWidget.bundle",
+        "capabilities": [
+          "persistentStorage",
+          "openURL",
+          "clipboardRead",
+          "clipboardWrite",
+          "userSelectedFiles",
+          "appActions"
+        ],
+        "dockWidgets": [
+          {
+            "id": "quicknote",
+            "title": "QuickNote",
+            "subtitle": "A scratchpad for the present moment",
+            "systemImage": "note.text",
+            "preferredPopupWidth": 760,
+            "preferredPopupHeight": 680,
+            "supportedSurfaces": [
+              "compact",
+              "inline",
+              "popup"
+            ]
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/quicknote-dock-widget-2.1.9.zip",
+      "sha256": "a0588af418ff2e43c833f0b7d126da1bb33a7e8ce559d295c341d7555a8b2317",
+      "archiveRoot": "quicknote-dock-widget",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "bLxCXtNhDO4DfC35lNAcGNj6AhbCXu032GtoWoCPhJNKucKy9BuTZtiqpsL2QjMtOXIg7Tb0jFM9PNqpbP0MBA=="
+    },
+    {
+      "manifest": {
         "apiVersion": 2,
         "id": "com.ibuhs.vehla.reading-tools",
         "name": "Reading Tools",
