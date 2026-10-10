@@ -1,0 +1,34 @@
+{
+  "apiVersion": 2,
+  "id": "com.kailalabs.vehla.cover-art-search",
+  "name": "Cover Art Search",
+  "version": "1.0.1",
+  "description": "Find high-quality movie, show, anime, and game cover art from IMDb.",
+  "author": "Kaila Labs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/CoverArtSearchWorkspace.bundle",
+  "commands": [
+    {
+      "id": "search-cover-art",
+      "title": "Search Cover Art",
+      "subtitle": "Find posters for movies, shows, anime, and games",
+      "keywords": ["cover", "art", "poster", "movie", "film", "show", "anime", "game", "imdb"],
+      "systemImage": "photo.on.rectangle.angled",
+      "workspaceID": "cover-art-search"
+    }
+  ],
+  "capabilities": ["networkAccess", "clipboardWrite", "openURL", "persistentStorage"],
+  "workspaces": [
+    {
+      "id": "cover-art-search",
+      "title": "Cover Art Search",
+      "subtitle": "IMDb posters and artwork",
+      "systemImage": "photo.on.rectangle.angled",
+      "preferredWidth": 760,
+      "preferredHeight": 610,
+      "minimumWidth": 600,
+      "minimumHeight": 480,
+      "dismissOnResignKey": true
+    }
+  ]
+}

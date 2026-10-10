@@ -1,0 +1,61 @@
+{
+  "apiVersion": 2,
+  "id": "com.kailalabs.vehla.puresnitch",
+  "name": "PureSnitch",
+  "version": "1.0.0",
+  "description": "A native network monitor and rules manager with opt-in host-wide IPv4 firewall enforcement and an experimental local DNS proxy.",
+  "author": "Kaila Labs \u00b7 based on PureSnitch by Moamen Basel",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/PureSnitchWorkspace.bundle",
+  "capabilities": [
+    "persistentStorage",
+    "networkAccess"
+  ],
+  "commands": [
+    {
+      "id": "open",
+      "title": "Open PureSnitch",
+      "subtitle": "Monitor connections, traffic, and firewall rules",
+      "keywords": [
+        "puresnitch",
+        "networkmonitor",
+        "firewall"
+      ],
+      "systemImage": "shield.lefthalf.filled",
+      "workspaceID": "puresnitch"
+    },
+    {
+      "id": "rules",
+      "title": "PureSnitch Rules",
+      "subtitle": "Manage host-wide IP rules and DNS-proxy decisions",
+      "keywords": [
+        "networkrules"
+      ],
+      "systemImage": "list.bullet.rectangle",
+      "workspaceID": "puresnitch"
+    },
+    {
+      "id": "settings",
+      "title": "PureSnitch Settings",
+      "subtitle": "Install the helper, manage blocklists, and configure enforcement",
+      "keywords": [
+        "puresnitchsettings"
+      ],
+      "systemImage": "gearshape",
+      "workspaceID": "puresnitch"
+    }
+  ],
+  "workspaces": [
+    {
+      "id": "puresnitch",
+      "title": "PureSnitch",
+      "subtitle": "Network monitor and firewall",
+      "systemImage": "shield.lefthalf.filled",
+      "preferredWidth": 1180,
+      "preferredHeight": 760,
+      "minimumWidth": 940,
+      "minimumHeight": 600,
+      "dismissOnResignKey": false
+    }
+  ]
+}

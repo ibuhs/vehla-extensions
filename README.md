@@ -115,6 +115,9 @@ vehla-extensions/
     ├── data-extractor-native/
     ├── capture-hub-native/
     ├── reading-tools-native/
+    ├── puresnitch-native/
+    ├── cover-art-search/
+    ├── z-library/
     └── news-dock-widget/
 ```
 

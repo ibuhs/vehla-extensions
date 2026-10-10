@@ -91,6 +91,67 @@
     {
       "manifest": {
         "apiVersion": 2,
+        "id": "com.kailalabs.vehla.cover-art-search",
+        "name": "Cover Art Search",
+        "version": "1.0.1",
+        "description": "Find high-quality movie, show, anime, and game cover art from IMDb.",
+        "author": "Kaila Labs",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/CoverArtSearchWorkspace.bundle",
+        "commands": [
+          {
+            "id": "search-cover-art",
+            "title": "Search Cover Art",
+            "subtitle": "Find posters for movies, shows, anime, and games",
+            "keywords": [
+              "cover",
+              "art",
+              "poster",
+              "movie",
+              "film",
+              "show",
+              "anime",
+              "game",
+              "imdb"
+            ],
+            "systemImage": "photo.on.rectangle.angled",
+            "workspaceID": "cover-art-search"
+          }
+        ],
+        "capabilities": [
+          "networkAccess",
+          "clipboardWrite",
+          "openURL",
+          "persistentStorage"
+        ],
+        "workspaces": [
+          {
+            "id": "cover-art-search",
+            "title": "Cover Art Search",
+            "subtitle": "IMDb posters and artwork",
+            "systemImage": "photo.on.rectangle.angled",
+            "preferredWidth": 760,
+            "preferredHeight": 610,
+            "minimumWidth": 600,
+            "minimumHeight": 480,
+            "dismissOnResignKey": true
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/cover-art-search-1.0.1.zip",
+      "sha256": "be337c2e38ef3c9210a845f8f1c5a98483c3a36051c94916ffe0da963351422c",
+      "archiveRoot": "cover-art-search",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "F7ZB7nsdwuCdMBFtGo5f+R+88dnTZJCGb1aKPesHpRudO6EphRtuaXwnsEFsApDHXB9hfZ/1WaosTS4l9z/IDg=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 2,
         "id": "com.ibuhs.vehla.data-extractor",
         "name": "Data Extractor",
         "version": "1.0.0",
@@ -1181,6 +1242,79 @@
     },
     {
       "manifest": {
+        "apiVersion": 2,
+        "id": "com.kailalabs.vehla.puresnitch",
+        "name": "PureSnitch",
+        "version": "1.0.0",
+        "description": "A native network monitor and rules manager with opt-in host-wide IPv4 firewall enforcement and an experimental local DNS proxy.",
+        "author": "Kaila Labs \u00b7 based on PureSnitch by Moamen Basel",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/PureSnitchWorkspace.bundle",
+        "capabilities": [
+          "persistentStorage",
+          "networkAccess"
+        ],
+        "commands": [
+          {
+            "id": "open",
+            "title": "Open PureSnitch",
+            "subtitle": "Monitor connections, traffic, and firewall rules",
+            "keywords": [
+              "puresnitch",
+              "networkmonitor",
+              "firewall"
+            ],
+            "systemImage": "shield.lefthalf.filled",
+            "workspaceID": "puresnitch"
+          },
+          {
+            "id": "rules",
+            "title": "PureSnitch Rules",
+            "subtitle": "Manage host-wide IP rules and DNS-proxy decisions",
+            "keywords": [
+              "networkrules"
+            ],
+            "systemImage": "list.bullet.rectangle",
+            "workspaceID": "puresnitch"
+          },
+          {
+            "id": "settings",
+            "title": "PureSnitch Settings",
+            "subtitle": "Install the helper, manage blocklists, and configure enforcement",
+            "keywords": [
+              "puresnitchsettings"
+            ],
+            "systemImage": "gearshape",
+            "workspaceID": "puresnitch"
+          }
+        ],
+        "workspaces": [
+          {
+            "id": "puresnitch",
+            "title": "PureSnitch",
+            "subtitle": "Network monitor and firewall",
+            "systemImage": "shield.lefthalf.filled",
+            "preferredWidth": 1180,
+            "preferredHeight": 760,
+            "minimumWidth": 940,
+            "minimumHeight": 600,
+            "dismissOnResignKey": false
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/puresnitch-native-1.0.0.zip",
+      "sha256": "91259634788998506ac2b967d585eb4b1d67c7ad861b84e220d62cb1d496fc33",
+      "archiveRoot": "puresnitch-native",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "Q5Fp0s9pdtYPpna7T1AiES98WCptfI+voorBMJSnmPQg0K8q0dIjQQzQ0dwHktk9s5aKCNlFLudNXu13q+6YBw=="
+    },
+    {
+      "manifest": {
         "apiVersion": 3,
         "id": "com.wiseman.vehla.quicknote",
         "name": "QuickNote",
@@ -2251,6 +2385,78 @@
         "publicKey": "tlTXxfBKnLkkMrcnneebGtv2Jcwm892Chu40wKpiR7g="
       },
       "signature": "O1bj6h/r2i637fdrjTJNTWyS7Ase9rl4BokKaZhdr2fOaQKCAwe8QbefUeGhP8zDOg0h+2tUjGfarnT3w5qHDw=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 2,
+        "id": "com.kailalabs.vehla.z-library",
+        "name": "Z-Library",
+        "version": "1.0.3",
+        "description": "Search Z-Library, download books, and keep a persistent download queue using the zlib CLI.",
+        "author": "Kaila Labs",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/ZLibraryWorkspace.bundle",
+        "commands": [
+          {
+            "id": "search-books",
+            "title": "Search Books",
+            "subtitle": "Search and download from Z-Library",
+            "keywords": [
+              "zlib",
+              "z-library",
+              "book",
+              "ebook",
+              "author",
+              "isbn",
+              "download"
+            ],
+            "systemImage": "books.vertical",
+            "workspaceID": "z-library"
+          },
+          {
+            "id": "download-queue",
+            "title": "Open Z-Library Download Queue",
+            "subtitle": "Review books saved for later",
+            "keywords": [
+              "zlib",
+              "queue",
+              "books",
+              "downloads"
+            ],
+            "systemImage": "tray.full",
+            "workspaceID": "z-library"
+          }
+        ],
+        "capabilities": [
+          "persistentStorage",
+          "networkAccess",
+          "clipboardWrite",
+          "openURL"
+        ],
+        "workspaces": [
+          {
+            "id": "z-library",
+            "title": "Z-Library",
+            "subtitle": "Search books and manage downloads",
+            "systemImage": "books.vertical",
+            "preferredWidth": 780,
+            "preferredHeight": 620,
+            "minimumWidth": 620,
+            "minimumHeight": 480,
+            "dismissOnResignKey": false
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/z-library-1.0.3.zip",
+      "sha256": "3c628ca1a65d915c85799fd71bbbdec4e5677b73f0921cd5779681aefbbfc1ad",
+      "archiveRoot": "z-library",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "U956MO5h+VHAQ+F+6ooZhk5ZYASplz1OuzBmI1cBHeQyqDTXJvVurWMWMUmBbPsv/a6TSGBUB7FiHdQBHJo1Ag=="
     }
   ]
 }

@@ -1,0 +1,42 @@
+{
+  "apiVersion": 2,
+  "id": "com.kailalabs.vehla.z-library",
+  "name": "Z-Library",
+  "version": "1.0.3",
+  "description": "Search Z-Library, download books, and keep a persistent download queue using the zlib CLI.",
+  "author": "Kaila Labs",
+  "runtime": "nativeUI",
+  "entrypoint": "bin/ZLibraryWorkspace.bundle",
+  "commands": [
+    {
+      "id": "search-books",
+      "title": "Search Books",
+      "subtitle": "Search and download from Z-Library",
+      "keywords": ["zlib", "z-library", "book", "ebook", "author", "isbn", "download"],
+      "systemImage": "books.vertical",
+      "workspaceID": "z-library"
+    },
+    {
+      "id": "download-queue",
+      "title": "Open Z-Library Download Queue",
+      "subtitle": "Review books saved for later",
+      "keywords": ["zlib", "queue", "books", "downloads"],
+      "systemImage": "tray.full",
+      "workspaceID": "z-library"
+    }
+  ],
+  "capabilities": ["persistentStorage", "networkAccess", "clipboardWrite", "openURL"],
+  "workspaces": [
+    {
+      "id": "z-library",
+      "title": "Z-Library",
+      "subtitle": "Search books and manage downloads",
+      "systemImage": "books.vertical",
+      "preferredWidth": 780,
+      "preferredHeight": 620,
+      "minimumWidth": 620,
+      "minimumHeight": 480,
+      "dismissOnResignKey": false
+    }
+  ]
+}
