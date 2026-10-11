@@ -91,6 +91,59 @@
     {
       "manifest": {
         "apiVersion": 2,
+        "id": "com.ahmadjerow.compressor-glass",
+        "name": "Compressor Glass",
+        "version": "1.3.0",
+        "description": "Compress images, videos, PDFs and files without visible quality loss, in a tinted Liquid Glass window.",
+        "author": "Ahmad Jerow",
+        "runtime": "nativeUI",
+        "entrypoint": "bin/CompressorWorkspace.bundle",
+        "commands": [
+          {
+            "id": "open-compressor",
+            "title": "Open Compressor",
+            "subtitle": "Drop files, pick a folder, compress",
+            "keywords": [
+              "compressor",
+              "squeeze",
+              "shrink"
+            ],
+            "systemImage": "arrow.down.right.and.arrow.up.left",
+            "workspaceID": "compressor"
+          }
+        ],
+        "capabilities": [
+          "persistentStorage",
+          "notifications"
+        ],
+        "workspaces": [
+          {
+            "id": "compressor",
+            "title": "Compressor",
+            "subtitle": "Smaller files, same quality",
+            "systemImage": "arrow.down.right.and.arrow.up.left",
+            "preferredWidth": 800,
+            "preferredHeight": 760,
+            "minimumWidth": 780,
+            "minimumHeight": 520,
+            "dismissOnResignKey": false
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/compressor-native-1.3.0.zip",
+      "sha256": "0adf306c14fd375e1160361bdb57fe2adba1c63986941e0b619361538ac86ad4",
+      "archiveRoot": "compressor-native",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "hahiI+gdaetVglbcRABACIsYFle2LpbQ7xC4ytRIvswZZ6Hzln/a3ikMqN4AUUTDZXcL2rcPvX1PTFWANDThAA=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 2,
         "id": "com.kailalabs.vehla.cover-art-search",
         "name": "Cover Art Search",
         "version": "1.0.1",

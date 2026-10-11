@@ -118,6 +118,7 @@ vehla-extensions/
     ├── puresnitch-native/
     ├── cover-art-search/
     ├── z-library/
+    ├── compressor-native/
     └── news-dock-widget/
 ```
 
