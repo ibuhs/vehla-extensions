@@ -1,0 +1,28 @@
+{
+  "apiVersion": 3,
+  "id": "com.ibuhs.vehla.peripheral-matrix",
+  "name": "Peripheral Matrix",
+  "version": "1.1.0",
+  "description": "Device batteries, live QMK layers, and keymap programming.",
+  "author": "ibuhs",
+  "runtime": "dockWidget",
+  "entrypoint": "bin/PeripheralMatrix.bundle",
+  "capabilities": [
+    "persistentStorage"
+  ],
+  "dockWidgets": [
+    {
+      "id": "peripheral-matrix",
+      "title": "Peripheral Matrix",
+      "subtitle": "Device batteries, live QMK layers, and keymap programming.",
+      "systemImage": "keyboard",
+      "preferredPopupWidth": 680,
+      "preferredPopupHeight": 760,
+      "supportedSurfaces": [
+        "compact",
+        "inline",
+        "popup"
+      ]
+    }
+  ]
+}

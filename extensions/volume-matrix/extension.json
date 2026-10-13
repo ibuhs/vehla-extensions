@@ -1,0 +1,18 @@
+{
+  "apiVersion": 3,
+  "id": "com.ibuhs.vehla.volume-matrix",
+  "name": "Volume Matrix",
+  "version": "1.0.0",
+  "description": "Mounted volumes, APFS space usage, disk activity, and mount/eject controls.",
+  "author": "ibuhs",
+  "runtime": "dockWidget",
+  "entrypoint": "bin/VolumeMatrix.bundle",
+  "capabilities": ["persistentStorage"],
+  "dockWidgets": [{
+    "id": "volume-matrix", "title": "Volume Matrix",
+    "subtitle": "Disk space, live activity, and mount/eject controls.",
+    "systemImage": "externaldrive.fill",
+    "preferredPopupWidth": 560, "preferredPopupHeight": 660,
+    "supportedSurfaces": ["compact", "inline", "popup"]
+  }]
+}
