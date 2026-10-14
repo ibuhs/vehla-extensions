@@ -29,7 +29,7 @@ struct QMKLayerPreset: Codable, Sendable {
     var keyboardIdentity: String? { baseline?.deviceIdentity }
     func load(endpoint: any VIAEndpoint, directory: URL) {
         guard !busy else { return }
-        guard let profile = endpoint.keymapProfile else { status = "Keymap editing currently supports Keychron K10 Pro ANSI White (3434:02A3)."; return }
+        guard let profile = endpoint.keymapProfile else { status = "This keyboard has no verified programming layout. See Supported keyboards."; return }
         self.profile = profile; session = VIAKeymapSession(endpoint: endpoint, profile: profile); dataDirectory = directory
         baseline = nil; draft = []; lastBackup = nil; needsReload = false; busy = true; status = "Reading mapping and preserving macros…"
         task = Task { [weak self] in

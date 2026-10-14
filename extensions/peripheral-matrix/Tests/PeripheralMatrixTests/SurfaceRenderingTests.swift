@@ -17,22 +17,22 @@ final class SurfaceRenderingTests: XCTestCase {
             dataDirectory: directory, theme: theme, invalidationHandler: {}, actionHandler: { _ in })
         let controller = try plugin.makeViewController(widgetID: "peripheral-matrix", surface: .popup, context: context)
         // Vehla can inspect a child view's size before it has constrained it.
-        XCTAssertGreaterThanOrEqual(controller.view.frame.width, 680)
-        XCTAssertGreaterThanOrEqual(controller.view.frame.height, 760)
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 760),
+        XCTAssertGreaterThanOrEqual(controller.view.frame.width, 440)
+        XCTAssertGreaterThanOrEqual(controller.view.frame.height, 340)
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 440, height: 340),
             styleMask: [.borderless], backing: .buffered, defer: false)
         window.appearance = NSAppearance(named: .darkAqua)
-        let backdrop = PreviewBackdrop(frame: NSRect(x: 0, y: 0, width: 680, height: 760))
+        let backdrop = PreviewBackdrop(frame: NSRect(x: 0, y: 0, width: 440, height: 340))
         let parent = NSViewController()
         parent.view = backdrop
         parent.addChild(controller)
         backdrop.addSubview(controller.view)
         window.contentViewController = parent
-        window.setContentSize(NSSize(width: 680, height: 760))
+        window.setContentSize(NSSize(width: 440, height: 340))
         defer { window.orderOut(nil); window.contentViewController = nil; plugin.widgetWillClose("peripheral-matrix") }
         controller.view.layoutSubtreeIfNeeded()
         try await Task.sleep(for: .milliseconds(200))
-        XCTAssertEqual(controller.view.bounds.size, NSSize(width: 680, height: 760))
+        XCTAssertEqual(controller.view.bounds.size, NSSize(width: 440, height: 340))
         XCTAssertFalse(controller.view.subviews.isEmpty)
         let bitmap = try XCTUnwrap(backdrop.bitmapImageRepForCachingDisplay(in: backdrop.bounds))
         backdrop.cacheDisplay(in: backdrop.bounds, to: bitmap)

@@ -249,6 +249,18 @@ enum QMKKeycodes {
     ]
     static let macros = (0..<16).map { QMKKeycodeOption(code: UInt16(0x7700 + $0), name: "Existing macro \($0 + 1)", label: "M\($0 + 1)") }
     static let options = basic + custom + macros
+    static func options(for profile: QMKKeyboardProfile?) -> [QMKKeycodeOption] {
+        guard let profile, !profile.customNames.isEmpty else { return options }
+        return basic + profile.customNames.enumerated().map {
+            QMKKeycodeOption(code: UInt16(0x7e00 + $0.offset), name: "Keychron: " + $0.element, label: $0.element)
+        } + macros
+    }
+    static func label(_ code: UInt16, profile: QMKKeyboardProfile?) -> String {
+        if (0x7e00...0x7e3f).contains(code), let profile, !profile.customNames.isEmpty {
+            return options(for: profile).first { $0.code == code }?.label ?? String(format: "0x%04X", code)
+        }
+        return label(code)
+    }
     static func label(_ code: UInt16) -> String {
         if let known = options.first(where: { $0.code == code }) { return known.label }
         let base = code & 0xffe0, layer = Int(code & 0x1f)
@@ -260,14 +272,14 @@ enum QMKKeycodes {
         }
         return String(format: "0x%04X", code)
     }
-    static func parse(_ text: String) -> UInt16? {
+    static func parse(_ text: String, profile: QMKKeyboardProfile? = nil) -> UInt16? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let aliases: [String: UInt16] = ["KC_TRNS": 1, "_______": 1, "XXXXXXX": 0, "KC_ENT": 0x28, "KC_ESC": 0x29, "KC_BSPC": 0x2a, "KC_SPC": 0x2c, "KC_LCTL": 0xe0, "KC_LSFT": 0xe1, "KC_LALT": 0xe2, "KC_LGUI": 0xe3]
         if let alias = aliases[trimmed] { return alias }
         if let opening = trimmed.firstIndex(of: "("), trimmed.hasSuffix(")"), let layer = Int(trimmed[trimmed.index(after: opening)..<trimmed.index(before: trimmed.endIndex)]) {
             return layerAction(String(trimmed[..<opening]), layer: layer, count: 32)
         }
-        if let named = options.first(where: { $0.name.uppercased() == trimmed }) { return named.code }
+        if let named = options(for: profile).first(where: { $0.name.uppercased() == trimmed }) { return named.code }
         guard trimmed.hasPrefix("0X"), trimmed.count >= 3, trimmed.count <= 6 else { return nil }
         return UInt16(trimmed.dropFirst(2), radix: 16)
     }

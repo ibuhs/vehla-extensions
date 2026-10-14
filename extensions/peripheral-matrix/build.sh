@@ -29,6 +29,8 @@ rm -rf "$BUNDLE"
 mkdir -p "$BUNDLE/Contents/MacOS"
 cp "$BIN_PATH/lib$PRODUCT.dylib" "$EXECUTABLE"
 chmod 755 "$EXECUTABLE"
+mkdir -p "$BUNDLE/Contents/Resources"
+/usr/bin/ditto "$BIN_PATH/PeripheralMatrix_PeripheralMatrix.bundle" "$BUNDLE/Contents/Resources/PeripheralMatrix_PeripheralMatrix.bundle"
 
 install_name_tool \
   -change @rpath/libVehlaDockWidgetSDK.dylib \
@@ -53,9 +55,9 @@ cat > "$BUNDLE/Contents/Info.plist" <<'PLIST'
     <key>CFBundlePackageType</key>
     <string>BNDL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.1.0</string>
+    <string>1.1.1</string>
     <key>CFBundleVersion</key>
-    <string>11</string>
+    <string>12</string>
     <key>NSPrincipalClass</key>
     <string>PeripheralMatrixPlugin</string>
 </dict>

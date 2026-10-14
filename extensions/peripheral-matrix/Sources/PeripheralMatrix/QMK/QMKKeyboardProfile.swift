@@ -7,7 +7,8 @@ struct QMKPhysicalKey: Identifiable, Equatable, Sendable {
     let y: Double
     let width: Double
     let height: Double
-    var id: Int { row * 21 + column }
+    var matrixColumns: Int = 21
+    var id: Int { row * matrixColumns + column }
 }
 struct QMKKeyboardProfile: Equatable, Sendable {
     let id: String
@@ -16,6 +17,7 @@ struct QMKKeyboardProfile: Equatable, Sendable {
     let columns: Int
     let layers: Int
     let keys: [QMKPhysicalKey]
+    var customNames: [String] = []
     var keysPerLayer: Int { rows * columns }
     var totalKeys: Int { layers * keysPerLayer }
     var layoutWidth: Double { keys.map { $0.x + $0.width }.max() ?? 1 }

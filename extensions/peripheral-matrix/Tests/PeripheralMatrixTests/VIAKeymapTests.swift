@@ -17,9 +17,11 @@ import XCTest
     var driftDuringLoad = false
     var mutateMacrosOnWrite = false
     private var keymapPasses = 0
-    init() {
-        for layer in 0..<4 {
-            for key in QMKKeyboardProfile.k10ProANSIWhite.keys { codes[layer * 126 + key.id] = UInt16(4 + key.id % 26) }
+    init(profile: QMKKeyboardProfile = .k10ProANSIWhite) {
+        keymapProfile = profile
+        codes = [UInt16](repeating: 0, count: profile.totalKeys)
+        for layer in 0..<profile.layers {
+            for key in profile.keys { codes[layer * profile.keysPerLayer + key.id] = UInt16(4 + key.id % 26) }
         }
     }
     func beginKeymapSession() async throws {
@@ -45,7 +47,8 @@ import XCTest
             guard offset + length <= bytes.count else { throw VIAError.message("Read outside fake storage") }
             response.replaceSubrange(4..<(4 + length), with: bytes[offset..<(offset + length)])
         case 0x04, 0x05:
-            let index = Int(packet[1]) * 126 + Int(packet[2]) * 21 + Int(packet[3])
+            let profile = try XCTUnwrap(keymapProfile)
+            let index = Int(packet[1]) * profile.keysPerLayer + Int(packet[2]) * profile.columns + Int(packet[3])
             guard codes.indices.contains(index) else { throw VIAError.message("Write outside fake matrix") }
             if packet[0] == 0x05 {
                 writes += 1; codes[index] = UInt16(packet[4]) << 8 | UInt16(packet[5])

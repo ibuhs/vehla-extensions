@@ -13,7 +13,7 @@ struct QMKLayerEditorView: View {
     @State private var command = true
     @State private var action = "MO"
     @State private var targetLayer = 1
-    private var selectedLabel: String { editor.selectedKey.map { QMKKeycodes.label(editor.code(for: $0)) } ?? "Select a key" }
+    private var selectedLabel: String { editor.selectedKey.map { QMKKeycodes.label(editor.code(for: $0), profile: editor.profile) } ?? "Select a key" }
     private func name(_ layer: Int) -> String { layerNames.indices.contains(layer) ? layerNames[layer] : "Layer \(layer)" }
 
     var body: some View {
@@ -52,7 +52,7 @@ struct QMKLayerEditorView: View {
                                 ForEach(editor.changes) { change in
                                     let layer = change.index / profile.keysPerLayer
                                     let key = change.index % profile.keysPerLayer
-                                    Text("\(name(layer)) · R\(key / profile.columns) C\(key % profile.columns): \(QMKKeycodes.label(change.before)) → \(QMKKeycodes.label(change.after))")
+                                    Text("\(name(layer)) · R\(key / profile.columns) C\(key % profile.columns): \(QMKKeycodes.label(change.before, profile: editor.profile)) → \(QMKKeycodes.label(change.after, profile: editor.profile))")
                                         .font(.caption).frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
@@ -75,19 +75,19 @@ struct QMKLayerEditorView: View {
                 ForEach(profile.keys) { key in
                     let changed = editor.changes.contains { $0.index == editor.selectedLayer * profile.keysPerLayer + key.id }
                     Button { editor.selectedKey = key.id } label: {
-                        Text(QMKKeycodes.label(editor.code(for: key.id))).font(.system(size: 8, weight: .medium))
+                        Text(QMKKeycodes.label(editor.code(for: key.id), profile: editor.profile)).font(.system(size: 8, weight: .medium))
                             .lineLimit(2).minimumScaleFactor(0.65)
                             .frame(width: max(8, key.width * unit - 3), height: max(8, key.height * unit - 3))
                             .background(editor.selectedKey == key.id ? Color.primary.opacity(0.2) : Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 4))
                             .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(changed ? Color.orange : Color.primary.opacity(0.12), lineWidth: changed ? 1.5 : 0.5))
                     }.buttonStyle(.plain)
                         .offset(x: key.x * unit, y: key.y * unit)
-                        .accessibilityLabel("\(QMKKeycodes.label(editor.code(for: key.id))), row \(key.row), column \(key.column)")
+                        .accessibilityLabel("\(QMKKeycodes.label(editor.code(for: key.id), profile: editor.profile)), row \(key.row), column \(key.column)")
                         .accessibilityIdentifier("qmk.key.\(key.row).\(key.column)")
                         .disabled(editor.busy || editor.needsReload)
                 }
             }
-        }.frame(height: 190)
+        }.aspectRatio(profile.layoutWidth / profile.layoutHeight, contentMode: .fit)
     }
     private var assignments: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -95,12 +95,12 @@ struct QMKLayerEditorView: View {
                 TextField("Search keys, media, modifiers or existing macros", text: $search)
                 TextField("KC_A or 0x0004", text: $input).frame(width: 125)
                     .accessibilityIdentifier("qmk.keycode-input")
-                Button("Assign") { if let code = QMKKeycodes.parse(input) { editor.assign(code) } }
-                    .disabled(QMKKeycodes.parse(input) == nil)
+                Button("Assign") { if let code = QMKKeycodes.parse(input, profile: editor.profile) { editor.assign(code) } }
+                    .disabled(QMKKeycodes.parse(input, profile: editor.profile) == nil)
             }
             ScrollView(.horizontal) {
                 HStack(spacing: 5) {
-                    ForEach(QMKKeycodes.options.filter { !(0x7700...0x777f).contains($0.code) || Int($0.code - 0x7700) < (editor.baseline?.macroCount ?? 0) }.filter { search.isEmpty ? $0.code <= 1 || (4...39).contains($0.code) : $0.name.localizedCaseInsensitiveContains(search) || $0.label.localizedCaseInsensitiveContains(search) }) { key in
+                    ForEach(QMKKeycodes.options(for: editor.profile).filter { !(0x7700...0x777f).contains($0.code) || Int($0.code - 0x7700) < (editor.baseline?.macroCount ?? 0) }.filter { search.isEmpty ? $0.code <= 1 || (4...39).contains($0.code) : $0.name.localizedCaseInsensitiveContains(search) || $0.label.localizedCaseInsensitiveContains(search) }) { key in
                         Button(key.label) { editor.assign(key.code); input = String(format: "0x%04X", key.code) }
                             .controlSize(.small).help(key.name)
                     }

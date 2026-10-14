@@ -124,18 +124,35 @@ retries during event tracking, checking that each confirmed result is published.
 
 Enabling LE discovery queries already-connected Battery Service and HID devices immediately. Refresh bypasses the normal battery-read cooldown, retries missing services and characteristics, and restarts a bounded battery-service scan without toggling LE off. Disconnected devices are reconnected; stalled connection attempts are released for retry. Background discovery is throttled to once every 30 seconds, scans stop after 10 seconds, and successful battery readings normally refresh once a minute. Devices using unsupported vendor battery protocols may still report unknown.
 
-## Devices and QMK tabs
+## Battery popup and keyboard programming
 
-**Devices** holds battery status, AirPods readings, and LE discovery. **QMK** holds live layer switching, profile names, bridge diagnostics, and the new keymap editor.
+The compact 440 × 340 popup holds battery status, AirPods readings, and LE discovery. **QMK Keyboard Programming** at the bottom opens a separate resizable glass-style window (920 × 780) with live layer switching, profile names, bridge diagnostics, and the keymap editor. The keyboard connection stays active while this window is open, even when the dock popup closes.
 
 ### Program layers
 
-1. Connect the K10 Pro ANSI White by USB in Cable mode; close VIA/Keychron Launcher before editing.
-2. In QMK, enable the firmware bridge and choose **Program layers**. Loading is read-only and captures all four firmware layers and macro storage.
+1. Connect a supported keyboard by USB in Cable mode; close VIA/Keychron Launcher before editing.
+2. Open **QMK Keyboard Programming**, enable **Connect programmable keyboards**, and choose **Program layers**. Loading is read-only and captures all four firmware layers and macro storage.
 3. Choose the layer to edit and click a physical key. Assign a basic key, an existing macro, a modifier shortcut, a layer action (MO/TG/TO/DF/OSL), or a 16-bit QMK keycode. Editing a layer does not change which layer is active.
 4. Review draft changes and choose **Apply**. A private backup is saved before any write; only changed physical keys are written. Every write is read back, then all layers and macros are verified. Stale mappings and backup failures prevent writes. Interrupted applies attempt to restore only keys they attempted and report when restoration cannot be confirmed.
 
-The editor supports **3434:02A3, K10 Pro ANSI White, VIA protocol 12, 6×21 matrix, four layers**. Its physical layout comes from the [official Keychron VIA definition](https://github.com/Keychron/qmk_firmware/blob/618127a725a1773e85f13455602cf6f72ab4de17/keyboards/keychron/k10_pro/via_json/k10_pro_ansi_white.json), pinned to the installed firmware source. Unsupported devices can still use the supported live bridge; the editor never guesses their matrix.
+Supported layouts are matched by exact USB vendor/product IDs, never by keyboard name or size alone:
+
+| Family | Layouts | Size |
+| --- | --- | --- |
+| K10 Pro White | ANSI | Full size |
+| Q1 Max | ANSI, ISO, JIS knob | 75% |
+| V1 | ANSI, ANSI knob | 75% |
+| V2 | ANSI, ANSI knob | 65% |
+| V3 | ANSI, ANSI knob | TKL |
+| V4 | ANSI | 60% |
+| V5 | ANSI, ANSI knob | 96% |
+| V6 | ANSI, ANSI knob | Full size |
+
+All profiles require VIA protocol 12 and four firmware layers. The K10 Pro integration was checked on physical hardware. Q1 Max and V-series profiles are definition-backed and tested against simulated storage; physical-device verification is still needed. Newer firmware reporting another protocol is rejected before writes. Knob presses are ordinary matrix keys; knob rotation, lighting, and macro sequences are preserved rather than edited.
+
+Satechi states that [SM1 does not support VIA key mapping](https://support.satechi.com/hc/en-us/articles/57165043922971-Does-the-SM1-Slim-Mechanical-Backlit-Bluetooth-Keyboard-support-VIA-key-mapping). It remains eligible for battery/status discovery when macOS or its Bluetooth Battery Service provides readings; it is not offered a guessed QMK editor.
+
+Layouts come from pinned public definitions: [K10 Pro source](https://github.com/Keychron/qmk_firmware/blob/618127a725a1773e85f13455602cf6f72ab4de17/keyboards/keychron/k10_pro/via_json/k10_pro_ansi_white.json), [Q1 Max source](https://github.com/Keychron/qmk_firmware/tree/666862cb8123b64a6b96718d739c6203ad99031f/keyboards/keychron/q1_max/via_json), and [VIA's Keychron V-series definitions](https://github.com/the-via/keyboards/tree/9e3e9f4aa9f50f9439fdebc747560f51aaf109a0/v3/keychron). Generated catalog entries include source URLs and definition SHA-256 hashes. `Scripts/generate_keyboard_profiles.py` regenerates the catalog from downloaded definitions without network access or hardware writes. Unsupported devices can still use supported live bridge firmware; the editor never guesses their matrix.
 
 Layer tools copy existing layers, import/export `.vehla-layer.json` presets, and load a backup mapping into the draft for review. The K10 Pro's four existing layers are programmable without reflashing; increasing that count requires a firmware build. Macro contents are preserved and existing macro slots can be assigned, but this editor does not change macro sequences.
 

@@ -7,7 +7,7 @@ public final class PeripheralMatrixPlugin: NSObject, VehlaDockWidgetPlugin {
     public let apiVersion = VehlaDockWidgetAPIVersion
     public let widgets = [VehlaDockWidgetDescriptor(id: "peripheral-matrix", title: "Peripheral Matrix",
         subtitle: "Device batteries, live QMK layers, and keymap programming.",
-        systemImage: "keyboard", preferredPopupWidth: 680, preferredPopupHeight: 760,
+        systemImage: "keyboard", preferredPopupWidth: 440, preferredPopupHeight: 340,
         supportedSurfaces: [.compact, .inline, .popup])]
     @MainActor private let model = PeripheralMatrixModel()
     @MainActor public func makeViewController(widgetID: String, surface: VehlaDockWidgetSurface,

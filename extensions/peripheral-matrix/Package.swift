@@ -6,7 +6,7 @@ let package = Package(
     dependencies: [.package(path: "../../sdk/swift")],
     targets: [
 
-        .target(name: "PeripheralMatrix", dependencies: [.product(name: "VehlaDockWidgetSDK", package: "swift")]),
+        .target(name: "PeripheralMatrix", dependencies: [.product(name: "VehlaDockWidgetSDK", package: "swift")], resources: [.process("Resources")]),
         .testTarget(name: "PeripheralMatrixTests", dependencies: ["PeripheralMatrix"])
     ]
 )

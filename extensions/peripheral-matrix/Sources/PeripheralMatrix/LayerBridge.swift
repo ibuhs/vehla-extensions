@@ -19,7 +19,7 @@ import IOKit.hid
     var keymapProfile: QMKKeyboardProfile? {
         let vendor = (IOHIDDeviceGetProperty(device, kIOHIDVendorIDKey as CFString) as? NSNumber)?.uint32Value
         let product = (IOHIDDeviceGetProperty(device, kIOHIDProductIDKey as CFString) as? NSNumber)?.uint32Value
-        return vendor == 0x3434 && product == 0x02a3 ? .k10ProANSIWhite : nil
+        return QMKKeyboardCatalog.profile(vendor: vendor ?? 0, product: product ?? 0)
     }
     var keymapIdentity: String {
         let serial = IOHIDDeviceGetProperty(device, kIOHIDSerialNumberKey as CFString) as? String ?? ""

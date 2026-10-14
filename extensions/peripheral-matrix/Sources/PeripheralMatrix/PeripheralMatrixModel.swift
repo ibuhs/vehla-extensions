@@ -3,10 +3,9 @@ import IOKit.hid
 import Combine
 import VehlaDockWidgetSDK
 
-enum PeripheralMatrixTab: String, CaseIterable { case devices = "Devices", qmk = "QMK" }
-
 @MainActor final class PeripheralMatrixModel: ObservableObject {
-    @Published var selectedTab = PeripheralMatrixTab.devices
+    private var programmingWindow: QMKProgrammingWindowController?
+    private var programmingVisible = false
     let editor = QMKEditorModel()
     @Published var editorConnectionID: String?
     @Published var editingProfiles = false
@@ -78,16 +77,21 @@ enum PeripheralMatrixTab: String, CaseIterable { case devices = "Devices", qmk =
         registryTask?.cancel(); registryTask = nil
         resumeBluetooth = bluetoothEnabled; resumeBridge = bridgeEnabled
         bluetooth.stop(); bluetoothEnabled = false
+        if programmingVisible { return }
+        stopBridgeWhenIdle()
+    }
+    private func stopBridgeWhenIdle() {
         if editor.busy {
             Task { [weak self] in
                 guard let self else { return }
                 await self.editor.waitForOperation()
-                guard !self.visible else { return }
+                guard !self.visible && !self.programmingVisible else { return }
                 self.editor.invalidate(); self.bridge.stop(); self.bridgeEnabled = false
             }
         } else { editor.invalidate(); bridge.stop(); bridgeEnabled = false }
     }
     func close() {
+        programmingWindow?.close()
         hide()
         if bluetooth.enabled { bluetooth.stop(); bluetoothEnabled = false }
         if bridge.enabled && !editor.busy { bridge.stop(); bridgeEnabled = false }
@@ -128,7 +132,7 @@ enum PeripheralMatrixTab: String, CaseIterable { case devices = "Devices", qmk =
             }
         }
         if bluetooth.enabled { bluetooth.refresh(force: forceRegistry) }
-        if visible { bridge.refresh() }
+        if visible || programmingVisible { bridge.refresh() }
     }
     private func publish(layerChanged: Bool = false) {
         let updatedDevices = PeripheralInventory.merge(registry, batteries: Array(bluetooth.snapshots.values))
@@ -147,9 +151,23 @@ enum PeripheralMatrixTab: String, CaseIterable { case devices = "Devices", qmk =
             if bridgeTestResult != result { bridgeTestResult = result }
         }
     }
+    func openProgramming() {
+        if let programmingWindow { programmingWindow.present(); return }
+        programmingVisible = true
+        if resumeBridge && !bridgeEnabled { setBridge(true) }
+        let controller = QMKProgrammingWindowController(model: self)
+        controller.onClose = { [weak self] in
+            guard let self else { return }
+            self.programmingVisible = false
+            self.programmingWindow = nil
+            if !self.visible { self.stopBridgeWhenIdle() }
+        }
+        programmingWindow = controller
+        controller.present()
+    }
     func loadKeymap(_ connection: LayerConnection) {
         guard let context, !editor.busy else { return }
-        selectedTab = .qmk; editorConnectionID = connection.id
+        editorConnectionID = connection.id
         editor.load(endpoint: connection, directory: context.dataDirectory)
     }
     var editorLayerNames: [String] {
