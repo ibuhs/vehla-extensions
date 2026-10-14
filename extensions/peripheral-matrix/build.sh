@@ -55,9 +55,9 @@ cat > "$BUNDLE/Contents/Info.plist" <<'PLIST'
     <key>CFBundlePackageType</key>
     <string>BNDL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.1.3</string>
+    <string>1.1.4</string>
     <key>CFBundleVersion</key>
-    <string>14</string>
+    <string>15</string>
     <key>NSPrincipalClass</key>
     <string>PeripheralMatrixPlugin</string>
 </dict>
@@ -71,6 +71,8 @@ mkdir -p "$PACKAGE/bin"
 /usr/bin/install -m 644 "$ROOT/extension.json" "$PACKAGE/extension.json"
 /usr/bin/install -m 644 "$ROOT/README.md" "$PACKAGE/README.md"
 mkdir -p "$PACKAGE/firmware/keychron-k10-pro"
+/usr/bin/install -m 644 "$ROOT/Sources/PeripheralMatrix/Resources/bridge-setup-guide.md" "$PACKAGE/firmware/BRIDGE_SETUP.md"
+/usr/bin/install -m 644 "$ROOT/Sources/PeripheralMatrix/Resources/bridge-setup-ai-prompt.txt" "$PACKAGE/firmware/AI_SETUP_PROMPT.txt"
 /usr/bin/install -m 644 "$ROOT/firmware/vehla_layer_bridge.c" "$PACKAGE/firmware/vehla_layer_bridge.c"
 # Package integration sources only; personal backups and compiled keymaps stay private.
 for source in README.md backup_via.py restore_via.py prepare_keymap.py verify_bridge.py; do

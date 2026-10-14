@@ -163,3 +163,9 @@ Programming uses the [QMK VIA dynamic-keymap protocol](https://github.com/Keychr
 Set `VEHLA_QMK_INTEGRATION=1` when running tests for a read-only native VIA check on the connected keyboard. Automated apply/rollback tests use simulated device storage and do not change a real keyboard's mappings.
 
 Bluetooth warnings are scoped to battery discovery and cleared when Core Bluetooth recovers, on a powered-on refresh, or when discovery stops. A powered-off warning is shown only after the same active manager remains off for two seconds, avoiding transient startup/wake alerts. Recovery never clears unrelated QMK errors.
+
+## Guided bridge setup and AI assistance
+
+In Keyboard Programming, choose **Set up live layer control** beside the layer toolbar when the bridge is unavailable, or **Live layer setup and AI prompt…** in the options menu at any time. The setup assistant explains compatibility, verified backup, model-specific installation, and post-flash verification. **Copy AI setup prompt** copies a self-contained workflow for an AI tool with local hardware access, or a chat assistant guiding local commands. It does not send data to an AI service or flash firmware.
+
+[Read the setup guide](Sources/PeripheralMatrix/Resources/bridge-setup-guide.md) · [Read the AI prompt](Sources/PeripheralMatrix/Resources/bridge-setup-ai-prompt.txt). Both are bundled offline and also included as `firmware/BRIDGE_SETUP.md` and `firmware/AI_SETUP_PROMPT.txt` in the distributable package. Bridge installation is optional for VIA programming, and firmware integration remains verified only for the K10 Pro ANSI White.

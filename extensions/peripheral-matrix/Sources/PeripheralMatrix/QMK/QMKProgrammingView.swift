@@ -5,6 +5,7 @@ struct QMKProgrammingView: View {
     @ObservedObject var model: PeripheralMatrixModel
     @State private var showDetails = false
     @State private var showNames = false
+    @State private var showBridgeSetup = false
     private var connection: LayerConnection? { model.layers.first { $0.id == model.editorConnectionID } }
     private var canReload: Bool { !model.editor.busy && model.editor.changes.isEmpty }
     var body: some View {
@@ -25,6 +26,7 @@ struct QMKProgrammingView: View {
                     .disabled(!canReload).help("Reload current keyboard mapping")
                     .accessibilityLabel("Reload keyboard").accessibilityIdentifier("qmk.reload-keymap")
                 Menu {
+                    Button("Live layer setup and AI prompt…") { showBridgeSetup = true }
                     Button("Rename layers…") { showNames = true }.disabled(connection == nil)
                     Button("Test connection") { model.testBridge(); showDetails = true }.disabled(model.editor.busy)
                     Button("Supported keyboards and diagnostics…") { showDetails = true }
@@ -51,6 +53,9 @@ struct QMKProgrammingView: View {
                             Label("Active: \(model.name(connection, layer: state.active))", systemImage: "checkmark.circle")
                         }.disabled(model.editor.busy || connection.pendingLayer != nil)
                             .help("Switch the keyboard's active layer. Editing a layer does not activate it.")
+                    } else {
+                        Button("Set up live layer control") { showBridgeSetup = true }
+                            .font(.caption).accessibilityIdentifier("qmk.bridge.setup")
                     }
                 }.padding(10).background(.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
             }
@@ -101,6 +106,7 @@ struct QMKProgrammingView: View {
         }.padding(24)
         .foregroundStyle(Color(nsColor: model.theme?.primaryTextColor ?? .labelColor))
         .tint(Color(nsColor: model.theme?.primaryTextColor ?? .labelColor))
+        .sheet(isPresented: $showBridgeSetup) { QMKBridgeSetupView() }
         .environment(\.colorScheme, model.theme?.isDark == true ? .dark : .light)
     }
     private var details: some View {
