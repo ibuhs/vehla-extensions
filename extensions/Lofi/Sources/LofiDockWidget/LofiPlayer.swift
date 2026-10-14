@@ -1,5 +1,6 @@
 import AVFoundation
 import AppKit
+import MediaPlayer
 import Observation
 import VehlaDockWidgetSDK
 
@@ -38,6 +39,12 @@ final class LofiPlayer: NSObject, AVAudioPlayerDelegate {
     @ObservationIgnored private var playbackTask: Task<Void, Never>?
     @ObservationIgnored private var scanTask: Task<Void, Never>?
     @ObservationIgnored private var requestID = UUID()
+    @ObservationIgnored private var remoteCommands: [MPRemoteCommand] = []
+
+    enum RemoteAction: Sendable {
+        case play, pause, toggle, next, previous
+        case seek(Double), skip(Double)
+    }
 
     init(directory: URL, context: VehlaDockWidgetContext? = nil) {
         self.directory = directory; self.context = context
@@ -88,7 +95,7 @@ final class LofiPlayer: NSObject, AVAudioPlayerDelegate {
     func revealSourceFolder() { if let sourceFolder { NSWorkspace.shared.open(sourceFolder) } }
     func waitForSourceScan() async { await scanTask?.value }
     private func loadSource(_ url: URL, keepingIndex: Bool = false) {
-        pause(); player = nil; scanTask?.cancel()
+        pause(); releaseMediaControls(); player = nil; scanTask?.cancel()
         if sourceAccess, let sourceFolder { sourceFolder.stopAccessingSecurityScopedResource() }
         sourceFolder = url; sourceAccess = url.startAccessingSecurityScopedResource()
         tracks = []; bag = LofiShuffleBag(count: 0); history = []; elapsed = 0; duration = 0
@@ -112,7 +119,7 @@ final class LofiPlayer: NSObject, AVAudioPlayerDelegate {
             }
         }
     }
-    func togglePlay() { isPlaying ? pause() : play() }
+    func togglePlay() { (isPlaying || playbackTask != nil) ? pause() : play() }
     func play() {
         guard !tracks.isEmpty else { message = "Choose a music folder from the ••• menu to start listening."; return }
         message = nil
@@ -122,11 +129,17 @@ final class LofiPlayer: NSObject, AVAudioPlayerDelegate {
     func pause() {
         requestID = UUID(); playbackTask?.cancel(); playbackTask = nil
         player?.pause(); isPlaying = false; stopTicker()
+        if let player { elapsed = player.currentTime }
+        updateNowPlaying()
     }
     func next() { guard !tracks.isEmpty else { return }; remember(index); startTrack(at: nextIndex()) }
     func previous() {
         guard !tracks.isEmpty else { return }
-        if elapsed > 4, let player { player.currentTime = 0; elapsed = 0; if !isPlaying { startPlayback(player) }; return }
+        if let player, player.currentTime > 4 {
+            player.currentTime = 0; elapsed = 0
+            if !isPlaying { startPlayback(player) } else { updateNowPlaying() }
+            return
+        }
         if shuffle {
             guard let last = history.popLast() else { return }
             bag.markPlayed(last); bag.putBack(index); startTrack(at: last)
@@ -147,12 +160,14 @@ final class LofiPlayer: NSObject, AVAudioPlayerDelegate {
     func seek(to fraction: Double) {
         guard let player, duration > 0, fraction.isFinite else { return }
         player.currentTime = min(max(fraction, 0), 1) * duration; elapsed = player.currentTime
+        updateNowPlaying()
     }
     private func startTrack(at position: Int) {
         guard tracks.indices.contains(position) else { return }
         playbackTask?.cancel(); player?.stop(); player = nil; isPlaying = false; stopTicker()
         let token = UUID(); requestID = token
         let track = tracks[position]; index = position; message = nil; elapsed = 0; duration = Double(track.seconds); persist()
+        updateNowPlaying()
         playbackTask = Task { [weak self] in
             await Task.yield()
             guard !Task.isCancelled, let self, self.requestID == token else { return }
@@ -160,12 +175,98 @@ final class LofiPlayer: NSObject, AVAudioPlayerDelegate {
                 let next = try AVAudioPlayer(contentsOf: track.url)
                 next.delegate = self; next.volume = Float(self.volume); next.prepareToPlay()
                 self.player = next; self.duration = next.duration; self.startPlayback(next)
-            } catch { self.message = "“\(track.title)” couldn't be played. The file may be unavailable or unsupported."; self.isPlaying = false }
+            } catch {
+                self.message = "“\(track.title)” couldn't be played. The file may be unavailable or unsupported."
+                self.isPlaying = false; self.releaseMediaControls()
+            }
+            self.playbackTask = nil
         }
     }
     private func startPlayback(_ player: AVAudioPlayer) {
         isPlaying = player.play()
-        if isPlaying { startTicker() } else { message = "This track couldn't start playing." }
+        if isPlaying { registerMediaControls(); startTicker(); updateNowPlaying() }
+        else { message = "This track couldn't start playing."; releaseMediaControls() }
+    }
+
+    private func registerMediaControls() {
+        guard remoteCommands.isEmpty else { return }
+        let center = MPRemoteCommandCenter.shared()
+        remoteCommands = [center.playCommand, center.pauseCommand, center.togglePlayPauseCommand,
+            center.nextTrackCommand, center.previousTrackCommand, center.changePlaybackPositionCommand,
+            center.skipForwardCommand, center.skipBackwardCommand]
+        center.skipForwardCommand.preferredIntervals = [15]
+        center.skipBackwardCommand.preferredIntervals = [15]
+        for command in remoteCommands {
+            command.isEnabled = true
+            command.addTarget(self, action: #selector(receiveRemoteCommand(_:)))
+        }
+    }
+
+    // Remote events may arrive off the main thread. Finish the action before returning
+    // its status, so rapid play/pause clicks cannot outlive the playback session.
+    @objc nonisolated private func receiveRemoteCommand(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
+        let center = MPRemoteCommandCenter.shared()
+        let action: RemoteAction
+        switch event.command {
+        case center.playCommand: action = .play
+        case center.pauseCommand: action = .pause
+        case center.togglePlayPauseCommand: action = .toggle
+        case center.nextTrackCommand: action = .next
+        case center.previousTrackCommand: action = .previous
+        case center.changePlaybackPositionCommand:
+            guard let event = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+            action = .seek(event.positionTime)
+        case center.skipForwardCommand, center.skipBackwardCommand:
+            guard let event = event as? MPSkipIntervalCommandEvent else { return .commandFailed }
+            action = .skip(event.command == center.skipForwardCommand ? event.interval : -event.interval)
+        default: return .commandFailed
+        }
+        if Thread.isMainThread { return MainActor.assumeIsolated { handleRemoteAction(action) } }
+        return DispatchQueue.main.sync { self.handleRemoteAction(action) }
+    }
+
+    func handleRemoteAction(_ action: RemoteAction) -> MPRemoteCommandHandlerStatus {
+        guard !remoteCommands.isEmpty, tracks.indices.contains(index) else { return .noActionableNowPlayingItem }
+        switch action {
+        case .play: if !isPlaying && playbackTask == nil { play() }
+        case .pause: pause()
+        case .toggle: togglePlay()
+        case .next: next()
+        case .previous: previous()
+        case .seek(let seconds):
+            guard player != nil, duration > 0, seconds.isFinite else { return .commandFailed }
+            seek(to: seconds / duration)
+        case .skip(let seconds):
+            guard let player, duration > 0, seconds.isFinite else { return .commandFailed }
+            seek(to: (player.currentTime + seconds) / duration)
+        }
+        return .success
+    }
+
+    private func updateNowPlaying() {
+        guard !remoteCommands.isEmpty, tracks.indices.contains(index) else { return }
+        let center = MPNowPlayingInfoCenter.default()
+        center.nowPlayingInfo = [
+            MPMediaItemPropertyTitle: current.title,
+            MPMediaItemPropertyArtist: current.artist.isEmpty ? "Lofi" : current.artist,
+            MPMediaItemPropertyPlaybackDuration: duration,
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: player?.currentTime ?? elapsed,
+            MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0,
+            MPNowPlayingInfoPropertyDefaultPlaybackRate: 1.0,
+            MPNowPlayingInfoPropertyIsLiveStream: false,
+        ]
+        // Pausing retains the item and command targets so headphones can resume Lofi.
+        center.playbackState = isPlaying ? .playing : .paused
+    }
+
+    private func releaseMediaControls() {
+        guard !remoteCommands.isEmpty else { return }
+        // Remove only our targets: other audio widgets share this process's center.
+        for command in remoteCommands { command.removeTarget(self) }
+        remoteCommands = []
+        let center = MPNowPlayingInfoCenter.default()
+        center.playbackState = .stopped
+        center.nowPlayingInfo = nil
     }
     func setVisibility(_ phase: VehlaDockWidgetVisibilityPhase) {
         surfaceVisible = phase != .hidden; popupVisible = phase == .popup
@@ -193,6 +294,7 @@ final class LofiPlayer: NSObject, AVAudioPlayerDelegate {
         playbackTask?.cancel(); playbackTask = nil
         scanTask?.cancel(); scanTask = nil
         player?.stop(); player = nil; isPlaying = false; stopTicker()
+        releaseMediaControls()
         if sourceAccess, let sourceFolder { sourceFolder.stopAccessingSecurityScopedResource(); sourceAccess = false }
     }
 }

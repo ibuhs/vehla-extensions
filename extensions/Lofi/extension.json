@@ -2,7 +2,7 @@
   "apiVersion": 3,
   "id": "com.ibuhs.vehla.lofi",
   "name": "Lofi",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A cozy local music player with a user-selected source folder, fair shuffle, and playback controls.",
   "author": "ibuhs",
   "runtime": "dockWidget",

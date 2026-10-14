@@ -1,8 +1,82 @@
 import AppKit
+import MediaPlayer
 import XCTest
 @testable import LofiDockWidget
 
 final class LofiTests: XCTestCase {
+    @MainActor func testRemoteControlsRetainPausedTrackAndReleaseOnShutdown() async throws {
+        _ = NSApplication.shared
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let folder = directory.appendingPathComponent("Music")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let audio = try Data(contentsOf: XCTUnwrap(Bundle.module.url(forResource: "silent", withExtension: "mp3", subdirectory: "Fixtures")))
+        for title in ["First", "Second", "Third"] { try audio.write(to: folder.appendingPathComponent("\(title).mp3")) }
+        let player = LofiPlayer(directory: directory)
+        defer { player.shutdown() }
+        player.volume = 0
+        XCTAssertEqual(player.handleRemoteAction(.toggle), .noActionableNowPlayingItem)
+        player.selectSourceFolder(folder); await player.waitForSourceScan()
+        player.setShuffle(false)
+        // A library alone must not claim headphone controls before playback.
+        XCTAssertEqual(player.handleRemoteAction(.play), .noActionableNowPlayingItem)
+        player.play(); try await waitForPlayback(player)
+        let center = MPNowPlayingInfoCenter.default()
+        XCTAssertEqual(center.playbackState, .playing)
+        XCTAssertEqual(center.nowPlayingInfo?[MPMediaItemPropertyTitle] as? String, "First")
+        XCTAssertEqual(player.handleRemoteAction(.pause), .success)
+        XCTAssertFalse(player.isPlaying)
+        XCTAssertEqual(center.playbackState, .paused)
+        XCTAssertEqual(center.nowPlayingInfo?[MPMediaItemPropertyTitle] as? String, "First")
+        XCTAssertEqual(center.nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] as? Double, 0)
+        // The next headphone click resumes the same paused item.
+        XCTAssertEqual(player.handleRemoteAction(.toggle), .success)
+        XCTAssertTrue(player.isPlaying)
+        XCTAssertEqual(player.handleRemoteAction(.next), .success)
+        try await waitForPlayback(player)
+        XCTAssertEqual(player.index, 1)
+        XCTAssertEqual(center.nowPlayingInfo?[MPMediaItemPropertyTitle] as? String, "Second")
+        XCTAssertEqual(player.handleRemoteAction(.previous), .success)
+        try await waitForPlayback(player)
+        XCTAssertEqual(player.index, 0)
+        player.pause()
+        XCTAssertEqual(player.handleRemoteAction(.seek(4.5)), .success)
+        XCTAssertEqual(player.elapsed, 4.5, accuracy: 0.02)
+        XCTAssertEqual(center.nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] as? Double ?? -1, 4.5, accuracy: 0.02)
+        XCTAssertEqual(player.handleRemoteAction(.skip(-2)), .success)
+        XCTAssertEqual(player.elapsed, 2.5, accuracy: 0.02)
+        XCTAssertFalse(player.isPlaying, "Seeking a paused track must not resume it")
+        XCTAssertEqual(player.handleRemoteAction(.seek(.nan)), .commandFailed)
+        player.setVisibility(.hidden)
+        XCTAssertEqual(player.handleRemoteAction(.seek(4.5)), .success)
+        XCTAssertEqual(player.handleRemoteAction(.play), .success)
+        XCTAssertEqual(player.handleRemoteAction(.previous), .success)
+        XCTAssertEqual(player.index, 0, "Previous restarts after four seconds even with the popup hidden")
+        XCTAssertEqual(player.elapsed, 0, accuracy: 0.02)
+        // Pause must cancel an in-flight skip, and duplicate pause events stay paused.
+        XCTAssertEqual(player.handleRemoteAction(.next), .success)
+        XCTAssertEqual(player.handleRemoteAction(.toggle), .success)
+        XCTAssertEqual(player.handleRemoteAction(.pause), .success)
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertFalse(player.isPlaying)
+        XCTAssertEqual(center.playbackState, .paused)
+        XCTAssertEqual(player.handleRemoteAction(.play), .success)
+        try await waitForPlayback(player)
+        player.reloadSourceFolder(); await player.waitForSourceScan()
+        XCTAssertEqual(player.handleRemoteAction(.toggle), .noActionableNowPlayingItem)
+        XCTAssertNil(center.nowPlayingInfo)
+        player.play(); try await waitForPlayback(player)
+        player.shutdown()
+        XCTAssertEqual(center.playbackState, .stopped)
+        XCTAssertNil(center.nowPlayingInfo)
+        XCTAssertEqual(player.handleRemoteAction(.toggle), .noActionableNowPlayingItem)
+    }
+
+    @MainActor private func waitForPlayback(_ player: LofiPlayer) async throws {
+        for _ in 0..<100 where !player.isPlaying { try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertTrue(player.isPlaying, player.message ?? "Playback failed")
+    }
+
     func testShuffleDoesNotRepeatAcrossSmallRoundBoundaries() {
         for count in 2...5 {
             var bag = LofiShuffleBag(count: count)
