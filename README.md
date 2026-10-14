@@ -1209,6 +1209,11 @@ Ensure:
 
 ## Included examples
 
+### Lofi
+
+[Native Lofi dock widget](extensions/Lofi/README.md) with a user-selected local
+music folder, fair shuffle, and playback controls. Music stays in its source folder.
+
 ### Hello Store
 
 Minimal SDK and manifest introduction.
