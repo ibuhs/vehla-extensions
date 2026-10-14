@@ -18,12 +18,6 @@ struct QMKLayerEditorView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Label("Program layers", systemImage: "keyboard.badge.ellipsis").font(.headline)
-                Spacer()
-                Button("Reload", action: reload).disabled(editor.busy || !editor.changes.isEmpty)
-                    .accessibilityIdentifier("qmk.reload-keymap")
-            }
             if let status = editor.status {
                 HStack(spacing: 8) {
                     if editor.busy { ProgressView().controlSize(.small) }
@@ -31,10 +25,6 @@ struct QMKLayerEditorView: View {
                 }.accessibilityIdentifier("qmk.editor-status")
             }
             if let profile = editor.profile, editor.baseline != nil {
-                Picker("Editing layer", selection: $editor.selectedLayer) {
-                    ForEach(0..<profile.layers, id: \.self) { Text(name($0)).tag($0) }
-                }.pickerStyle(.segmented).accessibilityIdentifier("qmk.edit-layer")
-                    .disabled(editor.busy)
                 keyboard(profile)
                 if let key = editor.selectedKey {
                     HStack {

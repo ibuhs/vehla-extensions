@@ -55,9 +55,9 @@ cat > "$BUNDLE/Contents/Info.plist" <<'PLIST'
     <key>CFBundlePackageType</key>
     <string>BNDL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.1.1</string>
+    <string>1.1.2</string>
     <key>CFBundleVersion</key>
-    <string>12</string>
+    <string>13</string>
     <key>NSPrincipalClass</key>
     <string>PeripheralMatrixPlugin</string>
 </dict>

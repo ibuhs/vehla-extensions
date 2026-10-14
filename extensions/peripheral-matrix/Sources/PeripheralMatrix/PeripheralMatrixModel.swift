@@ -6,6 +6,8 @@ import VehlaDockWidgetSDK
 @MainActor final class PeripheralMatrixModel: ObservableObject {
     private var programmingWindow: QMKProgrammingWindowController?
     private var programmingVisible = false
+    private var programmingPoll: Task<Void, Never>?
+    private var automaticLoadAttemptID: String?
     let editor = QMKEditorModel()
     @Published var editorConnectionID: String?
     @Published var editingProfiles = false
@@ -138,9 +140,12 @@ import VehlaDockWidgetSDK
         let updatedDevices = PeripheralInventory.merge(registry, batteries: Array(bluetooth.snapshots.values))
         if devices != updatedDevices { devices = updatedDevices }
         let updatedLayers = bridge.connections.values.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-        if let editorConnectionID, !updatedLayers.contains(where: { $0.id == editorConnectionID }) { editor.invalidate() }
+        if let editorConnectionID, !updatedLayers.contains(where: { $0.id == editorConnectionID }) {
+            editor.invalidate(); automaticLoadAttemptID = nil
+        }
         if layers.map(\.id) != updatedLayers.map(\.id) { layers = updatedLayers }
         else if layerChanged { objectWillChange.send() }
+        loadConnectedKeyboardIfNeeded()
         if bridgeTestResult != nil {
             let access = CGPreflightListenEventAccess() ? "granted" : "not granted"
             let details = updatedLayers.map { connection in
@@ -154,19 +159,37 @@ import VehlaDockWidgetSDK
     func openProgramming() {
         if let programmingWindow { programmingWindow.present(); return }
         programmingVisible = true
-        if resumeBridge && !bridgeEnabled { setBridge(true) }
+        if !bridgeEnabled { setBridge(true) }
+        loadConnectedKeyboardIfNeeded()
+        programmingPoll = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(2))
+                guard !Task.isCancelled, let self else { return }
+                self.bridge.refresh()
+            }
+        }
         let controller = QMKProgrammingWindowController(model: self)
         controller.onClose = { [weak self] in
             guard let self else { return }
             self.programmingVisible = false
+            self.programmingPoll?.cancel(); self.programmingPoll = nil
             self.programmingWindow = nil
             if !self.visible { self.stopBridgeWhenIdle() }
         }
         programmingWindow = controller
         controller.present()
     }
+    private func loadConnectedKeyboardIfNeeded() {
+        guard programmingVisible, !editor.busy, editor.changes.isEmpty,
+              let connection = layers.first(where: { $0.keymapProfile != nil }),
+              automaticLoadAttemptID != connection.id,
+              editor.baseline == nil || editor.needsReload else { return }
+        automaticLoadAttemptID = connection.id
+        loadKeymap(connection)
+    }
     func loadKeymap(_ connection: LayerConnection) {
-        guard let context, !editor.busy else { return }
+        guard let context, !editor.busy, editor.changes.isEmpty else { return }
+        automaticLoadAttemptID = connection.id
         editorConnectionID = connection.id
         editor.load(endpoint: connection, directory: context.dataDirectory)
     }

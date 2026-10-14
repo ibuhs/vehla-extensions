@@ -31,7 +31,7 @@ struct PeripheralMatrixView: View {
     private var popup: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Label("Peripheral Matrix", systemImage: "keyboard").font(.headline)
+                Label("Peripherals", systemImage: "keyboard").font(.headline)
                 Spacer()
                 Button("Refresh", systemImage: "arrow.clockwise", action: model.refresh).labelStyle(.iconOnly)
                     .disabled(model.editor.busy)
@@ -55,31 +55,39 @@ struct PeripheralMatrixView: View {
                 }.padding(.vertical, 6).frame(maxWidth: .infinity, alignment: .leading)
             }.buttonStyle(.plain).accessibilityIdentifier("peripheral.qmk.open")
             .accessibilityHint("Opens keyboard programming in a larger window.")
-        }.padding(20).foregroundStyle(Color(nsColor: model.theme?.primaryTextColor ?? .labelColor))
+        }.padding(18).foregroundStyle(Color(nsColor: model.theme?.primaryTextColor ?? .labelColor))
     }
     private var devicesTab: some View {
-        VStack(alignment: .leading, spacing: 18) {
-                GroupBox("Battery overview") {
-                    VStack(alignment: .leading, spacing: 12) {
-                        if model.devices.isEmpty { Text("No battery readings yet. Connect a device or refresh to check again.").foregroundStyle(.secondary) }
-                        ForEach(model.devices) { device in
-                            HStack(spacing: 12) {
-                                Image(systemName: device.icon).font(.title3).frame(width: 26)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(device.name).font(.headline)
-                                    Text(device.transport).font(.caption).foregroundStyle(.secondary)
-                                    if let battery = device.battery { ProgressView(value: Double(battery), total: 100).tint(battery <= 20 ? .orange : .green) }
-                                }
-                                Spacer()
-                                Text(device.batteryText).font(.caption).monospacedDigit().foregroundStyle(device.battery.map { $0 <= 20 } == true ? Color.orange : Color.primary)
-                            }
-                            .accessibilityElement(children: .combine)
-                        }
-                    }.frame(maxWidth: .infinity, alignment: .leading).padding(6)
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(spacing: 0) {
+                if model.devices.isEmpty {
+                    VStack(spacing: 8) {
+                        Image(systemName: "keyboard").font(.title2).foregroundStyle(.secondary)
+                        Text("No battery readings yet").font(.headline)
+                        Text("Connect a device or refresh to check again.").font(.caption).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity).padding(.vertical, 20)
                 }
-                Toggle("Discover Bluetooth LE batteries", isOn: Binding(get: { model.bluetoothEnabled }, set: model.setBluetooth))
-                Text("Reads supported Bluetooth batteries. AirPods readings appear when macOS provides them.")
-                    .font(.caption).foregroundStyle(.secondary)
+                ForEach(Array(model.devices.enumerated()), id: \.element.id) { index, device in
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: device.icon).font(.title3).frame(width: 24).padding(.top, 2)
+                        VStack(alignment: .leading, spacing: 5) {
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Text(device.name).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                                Spacer(minLength: 4)
+                                Text(device.batteryText).font(.caption).monospacedDigit()
+                                    .foregroundStyle(device.battery.map { $0 <= 20 } == true ? Color.orange : Color.primary)
+                            }
+                            Text(device.transport).font(.caption2).foregroundStyle(.secondary)
+                            if let battery = device.battery {
+                                ProgressView(value: Double(battery), total: 100).tint(battery <= 20 ? .orange : .green)
+                            }
+                        }
+                    }.padding(12).accessibilityElement(children: .combine)
+                    if index < model.devices.count - 1 { Divider().padding(.leading, 48).padding(.trailing, 12) }
+                }
+            }.background(.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
+            Toggle("Bluetooth battery discovery", isOn: Binding(get: { model.bluetoothEnabled }, set: model.setBluetooth))
+                .font(.caption).help("Reads supported Bluetooth batteries and AirPods readings supplied by macOS.")
         }
     }
 }

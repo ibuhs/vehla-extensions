@@ -3,20 +3,95 @@ import VehlaDockWidgetSDK
 
 struct QMKProgrammingView: View {
     @ObservedObject var model: PeripheralMatrixModel
+    @State private var showDetails = false
+    @State private var showNames = false
+    private var connection: LayerConnection? { model.layers.first { $0.id == model.editorConnectionID } }
+    private var canReload: Bool { !model.editor.busy && model.editor.changes.isEmpty }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Label("QMK Keyboard Programming", systemImage: "keyboard").font(.title2.bold())
+            HStack(spacing: 12) {
+                Label("Keyboard Programming", systemImage: "keyboard").font(.title3.bold())
                 Spacer()
-                Button("Refresh", systemImage: "arrow.clockwise", action: model.refresh)
-                    .labelStyle(.iconOnly).disabled(model.editor.busy)
+                if model.layers.filter({ $0.keymapProfile != nil }).count > 1 {
+                    Menu("Keyboard") {
+                        ForEach(model.layers.filter { $0.keymapProfile != nil }) { keyboard in
+                            Button(keyboard.name) { model.loadKeymap(keyboard) }
+                        }
+                    }.disabled(!canReload)
+                }
+                Button(action: {
+                    if let connection { model.loadKeymap(connection) } else { model.refresh() }
+                }) { Image(systemName: "arrow.clockwise") }
+                    .disabled(!canReload).help("Reload current keyboard mapping")
+                    .accessibilityLabel("Reload keyboard").accessibilityIdentifier("qmk.reload-keymap")
+                Menu {
+                    Button("Rename layers…") { showNames = true }.disabled(connection == nil)
+                    Button("Test connection") { model.testBridge(); showDetails = true }.disabled(model.editor.busy)
+                    Button("Supported keyboards and diagnostics…") { showDetails = true }
+                } label: { Image(systemName: "ellipsis") }
+                    .menuStyle(.borderlessButton).frame(width: 24).accessibilityLabel("Programming options")
+                    .popover(isPresented: $showDetails) { details.padding(20).frame(width: 380) }
+            }
+            if let profile = model.editor.profile, model.editor.baseline != nil {
+                HStack {
+                    Picker("Editing layer", selection: Binding(get: { model.editor.selectedLayer }, set: { model.editor.selectedLayer = $0 })) {
+                        ForEach(0..<profile.layers, id: \.self) { layer in
+                            Text(model.editorLayerNames[layer]).tag(layer)
+                        }
+                    }.pickerStyle(.segmented).accessibilityIdentifier("qmk.edit-layer")
+                        .disabled(model.editor.busy).frame(maxWidth: 550)
+                    Spacer(minLength: 12)
+                    if let connection, let state = connection.state {
+                        Menu {
+                            ForEach(0..<Int(state.count), id: \.self) { layer in
+                                Button(model.name(connection, layer: UInt8(layer))) { connection.select(UInt8(layer)) }
+                                    .disabled(state.active == UInt8(layer))
+                            }
+                        } label: {
+                            Label("Active: \(model.name(connection, layer: state.active))", systemImage: "checkmark.circle")
+                        }.disabled(model.editor.busy || connection.pendingLayer != nil)
+                            .help("Switch the keyboard's active layer. Editing a layer does not activate it.")
+                    }
+                }.padding(10).background(.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
+            }
+            HStack(spacing: 8) {
+                Text(connection?.name ?? model.editor.profile?.name ?? "Connect your keyboard")
+                    .font(.headline).accessibilityIdentifier("qmk.connected-keyboard")
+                Spacer()
+                if model.editor.baseline != nil && !model.editor.needsReload {
+                    Label("USB connected", systemImage: "circle.fill").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            .popover(isPresented: $showNames) {
+                if let connection {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Layer names").font(.headline)
+                        ForEach(0..<4, id: \.self) { layer in
+                            TextField("Layer \(layer)", text: Binding(get: { model.name(connection, layer: UInt8(layer)) },
+                                set: { model.rename(connection, layer: UInt8(layer), name: $0) }))
+                        }
+                        Button("Done") { showNames = false }
+                    }.padding(20).frame(width: 280)
+                }
             }
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    if let error = model.error {
-                        Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.orange)
+                VStack(alignment: .leading, spacing: 14) {
+                    if let error = model.error { Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.orange) }
+                    if model.editor.profile != nil {
+                        QMKLayerEditorView(editor: model.editor, layerNames: model.editorLayerNames) {
+                            if let connection { model.loadKeymap(connection) }
+                        }
+                    } else {
+                        VStack(spacing: 12) {
+                            Image(systemName: "keyboard").font(.system(size: 38)).foregroundStyle(.secondary)
+                            Text("Ready when you connect").font(.headline)
+                            Text("Plug a supported keyboard directly into your Mac in Cable mode. Its layout and current mapping load automatically.")
+                                .foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 360)
+                            if !model.layers.isEmpty {
+                                Text("The connected keyboard has no verified programming layout.").font(.caption).foregroundStyle(.secondary)
+                            }
+                        }.frame(maxWidth: .infinity).padding(.vertical, 48)
                     }
-                    qmkTab
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
             if model.editor.baseline != nil {
@@ -28,77 +103,13 @@ struct QMKProgrammingView: View {
         .tint(Color(nsColor: model.theme?.primaryTextColor ?? .labelColor))
         .environment(\.colorScheme, model.theme?.isDark == true ? .dark : .light)
     }
-    private var qmkTab: some View {
-        VStack(alignment: .leading, spacing: 18) {
-                HStack {
-                    Text("Keymap layers").font(.headline)
-                    Spacer()
-                    Button(model.editingProfiles ? "Done" : "Rename profiles") { model.editingProfiles.toggle() }
-                }
-                Toggle("Connect programmable keyboards", isOn: Binding(get: { model.bridgeEnabled }, set: model.setBridge))
-                    .accessibilityIdentifier("peripheral.bridge.enabled")
-                    .disabled(model.editor.busy)
-                Button("Test bridge", action: model.testBridge)
-                    .disabled(!model.bridgeEnabled || model.editor.busy)
-                    .accessibilityIdentifier("peripheral.bridge.test")
-                    .accessibilityHint("Reconnect and check the keyboard’s live layer reply without changing its keymap.")
-                if let result = model.bridgeTestResult {
-                    DisclosureGroup("Bridge diagnostics") {
-                        Text(result).font(.caption).textSelection(.enabled)
-                            .accessibilityIdentifier("peripheral.bridge.test-result")
-                    }
-                }
-                Text("Live switching requires the VHLA firmware bridge. Programming uses VIA over USB on recognized keyboards; no bridge flash is needed to edit keys.")
-                    .font(.caption).foregroundStyle(.secondary)
-                DisclosureGroup("Supported keyboards") {
-                    Text("K10 Pro ANSI White · Q1 Max ANSI/ISO/JIS · V1–V6 ANSI, including knob variants where available. USB Cable mode and VIA protocol 12 are required. Other firmware versions are rejected before writes. Knob rotation and lighting are preserved, not edited.").font(.caption).foregroundStyle(.secondary)
-                    Text("Satechi SM1 does not support VIA programming; battery status remains available when the device publishes it.").font(.caption).foregroundStyle(.secondary)
-                }
-                if model.bridgeEnabled && model.layers.isEmpty { Text("No QMK Raw HID interfaces found.").font(.caption).foregroundStyle(.secondary) }
-                ForEach(model.layers) { connection in
-                    if model.editorConnectionID == connection.id, model.editor.baseline != nil, !model.editingProfiles {
-                        DisclosureGroup("\(connection.name) · Active: \(connection.state.map { model.name(connection, layer: $0.active) } ?? "Unknown")") { layerCard(connection) }
-                    } else { layerCard(connection) }
-                }
-            if model.editor.profile != nil {
-                Divider()
-                QMKLayerEditorView(editor: model.editor, layerNames: model.editorLayerNames) {
-                    if let connection = model.layers.first(where: { $0.id == model.editorConnectionID }) { model.loadKeymap(connection) }
-                }
-            }
-        }
-    }
-    private func layerCard(_ connection: LayerConnection) -> some View {
-        GroupBox(connection.name) {
-            VStack(alignment: .leading, spacing: 10) {
-                if connection.keymapProfile != nil {
-                    Button(model.editorConnectionID == connection.id ? "Load / reload keymap" : "Program layers") { model.loadKeymap(connection) }
-                        .disabled(model.editor.busy || !model.editor.changes.isEmpty)
-                        .accessibilityIdentifier("qmk.load-keymap")
-                } else {
-                    Text("Layer switching is available for supported bridge firmware. No verified layout is available for this keyboard.").font(.caption).foregroundStyle(.secondary)
-                }
-                if let state = connection.state {
-                    Label("Active: \(model.name(connection, layer: state.active))", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
-                        .accessibilityIdentifier("peripheral.bridge.active.\(connection.id)")
-                    if connection.pendingLayer != nil { ProgressView("Waiting for keyboard confirmation…").controlSize(.small) }
-                    ForEach(0..<Int(state.count), id: \.self) { number in
-                        let layer = UInt8(number)
-                        HStack {
-                            Text("\(number)").font(.caption.monospaced()).foregroundStyle(.secondary).frame(width: 20)
-                            if model.editingProfiles {
-                                TextField("Profile name", text: Binding(get: { model.name(connection, layer: layer) }, set: { model.rename(connection, layer: layer, name: $0) }))
-                            } else { Text(model.name(connection, layer: layer)) }
-                            Spacer()
-                            Button(state.active == layer ? "Active" : "Switch") { connection.select(layer) }
-                                .disabled(state.active == layer || connection.pendingLayer != nil || model.editor.busy)
-                                .accessibilityLabel("Switch \(connection.name) to \(model.name(connection, layer: layer))")
-                        }
-                    }
-                } else {
-                    Text("Live layer switching requires VHLA bridge firmware. Recognized VIA keyboards can use Program layers without that bridge.").font(.caption).foregroundStyle(.secondary)
-                }
-            }.frame(maxWidth: .infinity, alignment: .leading).padding(6)
-        }
+    private var details: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Keyboard connection").font(.headline)
+            Text("Discovery is always enabled while this window is open. Programming reads VIA over USB. Switching the active layer requires VHLA bridge firmware.")
+            Text("Supported: K10 Pro ANSI White; Q1 Max ANSI/ISO/JIS; V1–V6 ANSI, including knob variants where available. VIA protocol 12 and four firmware layers are required.")
+            Text("Satechi SM1 has no VIA programming support. Knob rotation, lighting, and macro sequences are preserved rather than edited.")
+            if let result = model.bridgeTestResult { Divider(); Text(result).textSelection(.enabled).accessibilityIdentifier("peripheral.bridge.test-result") }
+        }.font(.caption)
     }
 }

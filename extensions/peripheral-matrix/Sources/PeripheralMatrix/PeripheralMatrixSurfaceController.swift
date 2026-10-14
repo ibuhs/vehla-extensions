@@ -13,7 +13,7 @@ final class PeripheralMatrixSurfaceController: NSViewController {
     init(surface: VehlaDockWidgetSurface, model: PeripheralMatrixModel) {
         hosting = MatrixHostingView(rootView: PeripheralMatrixView(surface: surface, model: model))
         switch surface {
-        case .popup: initialSize = NSSize(width: 440, height: 340)
+        case .popup: initialSize = NSSize(width: 440, height: 400)
         case .inline: initialSize = NSSize(width: 240, height: 48)
         default: initialSize = NSSize(width: 48, height: 48)
         }

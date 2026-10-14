@@ -126,13 +126,13 @@ Enabling LE discovery queries already-connected Battery Service and HID devices 
 
 ## Battery popup and keyboard programming
 
-The compact 440 × 340 popup holds battery status, AirPods readings, and LE discovery. **QMK Keyboard Programming** at the bottom opens a separate resizable glass-style window (920 × 780) with live layer switching, profile names, bridge diagnostics, and the keymap editor. The keyboard connection stays active while this window is open, even when the dock popup closes.
+The compact 440 × 400 popup holds battery status, AirPods readings, and LE discovery. **QMK Keyboard Programming** at the bottom opens a separate resizable glass-style window (920 × 780) with live layer switching, profile names, bridge diagnostics, and the keymap editor. The keyboard connection stays active while this window is open, even when the dock popup closes. Layer editing and optional live activation are toolbar controls; connection diagnostics and layer naming are available in the options menu.
 
 ### Program layers
 
 1. Connect a supported keyboard by USB in Cable mode; close VIA/Keychron Launcher before editing.
-2. Open **QMK Keyboard Programming**, enable **Connect programmable keyboards**, and choose **Program layers**. Loading is read-only and captures all four firmware layers and macro storage.
-3. Choose the layer to edit and click a physical key. Assign a basic key, an existing macro, a modifier shortcut, a layer action (MO/TG/TO/DF/OSL), or a 16-bit QMK keycode. Editing a layer does not change which layer is active.
+2. Open **QMK Keyboard Programming**. USB discovery is always enabled while this window is open, and the connected supported keyboard automatically loads its layout and current mapping. Loading is read-only and captures all four firmware layers and macro storage.
+3. Choose the layer in the toolbar above the keyboard and click a physical key. Assign a basic key, an existing macro, a modifier shortcut, a layer action (MO/TG/TO/DF/OSL), or a 16-bit QMK keycode. Editing a layer does not change which layer is active.
 4. Review draft changes and choose **Apply**. A private backup is saved before any write; only changed physical keys are written. Every write is read back, then all layers and macros are verified. Stale mappings and backup failures prevent writes. Interrupted applies attempt to restore only keys they attempted and report when restoration cannot be confirmed.
 
 Supported layouts are matched by exact USB vendor/product IDs, never by keyboard name or size alone:
