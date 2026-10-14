@@ -30,7 +30,6 @@ import VehlaDockWidgetSDK
     private var lastRegistryRead = Date.distantPast
     private var registry: [PeripheralSnapshot] = []
     private var visible = false
-    private var resumeBluetooth = false
     private var resumeBridge = false
     init(readRegistry: (@Sendable () async -> [PeripheralSnapshot])? = nil, bluetooth: (any BluetoothBatteryControlling)? = nil) {
         self.bluetooth = bluetooth ?? BluetoothBattery()
@@ -62,7 +61,7 @@ import VehlaDockWidgetSDK
     func start() {
         guard !visible else { return }
         visible = true
-        if resumeBluetooth { bluetooth.start(); bluetoothEnabled = bluetooth.enabled }
+        bluetooth.start(); bluetoothEnabled = bluetooth.enabled
         if resumeBridge { bridge.start(); bridgeEnabled = bridge.enabled }
         poll?.cancel()
         poll = Task { [weak self] in
@@ -78,7 +77,7 @@ import VehlaDockWidgetSDK
         guard visible else { return }
         visible = false; poll?.cancel(); poll = nil
         registryTask?.cancel(); registryTask = nil
-        resumeBluetooth = bluetoothEnabled; resumeBridge = bridgeEnabled
+        resumeBridge = bridgeEnabled
         bluetooth.stop(); bluetoothEnabled = false
         if programmingVisible { return }
         stopBridgeWhenIdle()
@@ -98,13 +97,7 @@ import VehlaDockWidgetSDK
         hide()
         if bluetooth.enabled { bluetooth.stop(); bluetoothEnabled = false }
         if bridge.enabled && !editor.busy { bridge.stop(); bridgeEnabled = false }
-        resumeBluetooth = false; resumeBridge = false
-    }
-    func setBluetooth(_ enabled: Bool) {
-        bluetoothError = nil
-        enabled ? bluetooth.start() : bluetooth.stop()
-        bluetoothEnabled = bluetooth.enabled; resumeBluetooth = bluetoothEnabled
-        publish()
+        resumeBridge = false
     }
     func setBridge(_ enabled: Bool) {
         guard !editor.busy else { return }

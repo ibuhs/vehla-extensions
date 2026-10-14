@@ -1212,7 +1212,7 @@ Ensure:
 ### Peripheral Matrix
 
 [Native peripheral dock widget](extensions/peripheral-matrix/README.md) with
-published wireless HID batteries and opt-in Bluetooth LE discovery in a compact
+published wireless HID batteries and automatic Bluetooth LE discovery in a compact
 popup. A QMK Keyboard Programming button opens a larger window for live layer switching and VIA keymap programming
 for supported Keychron K10 Pro, Q1 Max, and V-series layouts, with draft edits,
 backups, verification, and recovery.

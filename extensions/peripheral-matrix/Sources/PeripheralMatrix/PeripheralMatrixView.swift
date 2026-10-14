@@ -86,8 +86,9 @@ struct PeripheralMatrixView: View {
                     if index < model.devices.count - 1 { Divider().padding(.leading, 48).padding(.trailing, 12) }
                 }
             }.background(.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
-            Toggle("Bluetooth battery discovery", isOn: Binding(get: { model.bluetoothEnabled }, set: model.setBluetooth))
-                .font(.caption).help("Reads supported Bluetooth batteries and AirPods readings supplied by macOS.")
+            Label("Bluetooth batteries detected automatically", systemImage: "antenna.radiowaves.left.and.right")
+                .font(.caption).foregroundStyle(.secondary)
+                .help("Discovery starts automatically whenever the widget is visible. Battery availability depends on your device and macOS Bluetooth permission.")
         }
     }
 }

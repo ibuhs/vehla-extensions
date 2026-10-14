@@ -19,7 +19,7 @@ The build produces an ad-hoc signed bundle for local use; publication is separat
 ## Battery support
 
 Read-only IOKit discovery reads published wireless HID `BatteryPercent` values.
-Missing or out-of-range values remain unknown. Opt-in Bluetooth discovery reads
+Missing or out-of-range values remain unknown. Automatic Bluetooth discovery reads
 Battery Service `180F` / Battery Level `2A19` and subscribes to notifications.
 It queries connected peripherals by service and scans devices advertising that
 service. Devices that do not advertise the Battery Service may not be found.
@@ -87,8 +87,7 @@ access. Mice, headsets, and proprietary macro-profile protocols remain status-on
 Only complete valid replies update state. A switch stays pending until the
 keyboard reports the requested layer, times out after three seconds, and never
 optimistically updates the display. State expires after ten seconds without a
-reply. HID and BLE discovery stop when hidden, resume only if enabled earlier
-in that widget session, and release resources on close.
+reply. HID and BLE discovery stop when hidden, automatically resume Bluetooth discovery when visible again, and release resources on close.
 
 ## Verification
 
@@ -122,11 +121,11 @@ retries during event tracking, checking that each confirmed result is published.
 
 ## LE refresh behavior
 
-Enabling LE discovery queries already-connected Battery Service and HID devices immediately. Refresh bypasses the normal battery-read cooldown, retries missing services and characteristics, and restarts a bounded battery-service scan without toggling LE off. Disconnected devices are reconnected; stalled connection attempts are released for retry. Background discovery is throttled to once every 30 seconds, scans stop after 10 seconds, and successful battery readings normally refresh once a minute. Devices using unsupported vendor battery protocols may still report unknown.
+Automatic LE discovery queries already-connected Battery Service and HID devices immediately. Refresh bypasses the normal battery-read cooldown, retries missing services and characteristics, and restarts a bounded battery-service scan without a discovery toggle. Disconnected devices are reconnected; stalled connection attempts are released for retry. Background discovery is throttled to once every 30 seconds, scans stop after 10 seconds, and successful battery readings normally refresh once a minute. Devices using unsupported vendor battery protocols may still report unknown.
 
 ## Battery popup and keyboard programming
 
-The compact 440 × 400 popup holds battery status, AirPods readings, and LE discovery. **QMK Keyboard Programming** at the bottom opens a separate resizable glass-style window (920 × 780) with live layer switching, profile names, bridge diagnostics, and the keymap editor. The keyboard connection stays active while this window is open, even when the dock popup closes. Layer editing and optional live activation are toolbar controls; connection diagnostics and layer naming are available in the options menu.
+The compact 440 × 400 popup holds battery status, AirPods readings, and automatic LE discovery. **QMK Keyboard Programming** at the bottom opens a separate resizable glass-style window (920 × 780) with live layer switching, profile names, bridge diagnostics, and the keymap editor. The keyboard connection stays active while this window is open, even when the dock popup closes. Layer editing and optional live activation are toolbar controls; connection diagnostics and layer naming are available in the options menu.
 
 ### Program layers
 
@@ -169,3 +168,5 @@ Bluetooth warnings are scoped to battery discovery and cleared when Core Bluetoo
 In Keyboard Programming, choose **Set up live layer control** beside the layer toolbar when the bridge is unavailable, or **Live layer setup and AI prompt…** in the options menu at any time. The setup assistant explains compatibility, verified backup, model-specific installation, and post-flash verification. **Copy AI setup prompt** copies a self-contained workflow for an AI tool with local hardware access, or a chat assistant guiding local commands. It does not send data to an AI service or flash firmware.
 
 [Read the setup guide](Sources/PeripheralMatrix/Resources/bridge-setup-guide.md) · [Read the AI prompt](Sources/PeripheralMatrix/Resources/bridge-setup-ai-prompt.txt). Both are bundled offline and also included as `firmware/BRIDGE_SETUP.md` and `firmware/AI_SETUP_PROMPT.txt` in the distributable package. Bridge installation is optional for VIA programming, and firmware integration remains verified only for the K10 Pro ANSI White.
+
+Bluetooth LE battery discovery starts automatically whenever the widget becomes visible, including after app restarts. There is no enable checkbox or saved off state. Discovery still releases resources while hidden and respects macOS Bluetooth permission and hardware availability.

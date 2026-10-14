@@ -45,9 +45,28 @@ final class BluetoothRefreshTests: XCTestCase {
         XCTAssertNil(model.bluetoothError)
         XCTAssertEqual(model.error, "QMK connection failed")
         bluetooth.onError?("Bluetooth access denied")
-        model.setBluetooth(false)
+        model.start(); model.hide()
         XCTAssertNil(model.bluetoothError)
         XCTAssertEqual(model.error, "QMK connection failed")
+    }
+    @MainActor func testLEStartsAfterRestartAndResumesWithoutUserToggle() {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let theme = VehlaDockWidgetTheme(isDark: true, accentColor: .white, primaryTextColor: .white, secondaryTextColor: .gray, surfaceColor: .black)
+        for _ in 0..<2 {
+            let bluetooth = BatteryStub()
+            let model = PeripheralMatrixModel(readRegistry: { [] }, bluetooth: bluetooth)
+            model.configure(.init(packageID: "test", widgetID: "peripheral-matrix", dataDirectory: directory, theme: theme, invalidationHandler: {}, actionHandler: { _ in }))
+            model.start(); model.start()
+            XCTAssertTrue(model.bluetoothEnabled)
+            XCTAssertEqual(bluetooth.starts, 1)
+            model.hide()
+            XCTAssertFalse(bluetooth.enabled)
+            model.start()
+            XCTAssertTrue(model.bluetoothEnabled)
+            XCTAssertEqual(bluetooth.starts, 2)
+            model.close()
+            XCTAssertFalse(bluetooth.enabled)
+        }
     }
     @MainActor func testRefreshGetsMissingBatteryWithoutTogglingLE() async {
         let bluetooth = BatteryStub()
@@ -55,9 +74,10 @@ final class BluetoothRefreshTests: XCTestCase {
         let theme = VehlaDockWidgetTheme(isDark: true, accentColor: .white, primaryTextColor: .white, secondaryTextColor: .gray, surfaceColor: .black)
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         model.configure(.init(packageID: "test", widgetID: "peripheral-matrix", dataDirectory: directory, theme: theme, invalidationHandler: {}, actionHandler: { _ in }))
-        model.setBluetooth(true)
+        model.start()
         await model.waitForRegistryRefresh()
         XCTAssertNil(model.lowestBattery)
+        bluetooth.batteryAvailable = true
         model.refresh()
         await model.waitForRegistryRefresh()
         XCTAssertEqual(model.lowestBattery, 15)
@@ -74,10 +94,11 @@ final class BluetoothRefreshTests: XCTestCase {
     var onError: ((String?) -> Void)?
     var starts = 0, stops = 0
     var forced = false
+    var batteryAvailable = false
     func start() { enabled = true; starts += 1 }
-    func stop() { enabled = false; stops += 1 }
+    func stop() { enabled = false; stops += 1; onError?(nil) }
     func refresh(force: Bool) {
         forced = force
-        if force { snapshots[UUID()] = .init(id: "battery", name: "Mouse", transport: "Bluetooth LE", kind: "Peripheral", battery: 15); onChange?() }
+        if force && batteryAvailable { snapshots[UUID()] = .init(id: "battery", name: "Mouse", transport: "Bluetooth LE", kind: "Peripheral", battery: 15); onChange?() }
     }
 }
