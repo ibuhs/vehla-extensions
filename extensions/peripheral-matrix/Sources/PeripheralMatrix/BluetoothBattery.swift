@@ -5,7 +5,7 @@ import Foundation
     var enabled: Bool { get }
     var snapshots: [UUID: PeripheralSnapshot] { get }
     var onChange: (() -> Void)? { get set }
-    var onError: ((String) -> Void)? { get set }
+    var onError: ((String?) -> Void)? { get set }
     func start()
     func stop()
     func refresh(force: Bool)
@@ -28,6 +28,17 @@ enum BatteryRefreshPolicy {
     }
 }
 
+enum BluetoothStateWarning {
+    @MainActor static func schedule(delay: Duration = .seconds(2), isStillOff: @escaping @MainActor () -> Bool,
+                                    report: @escaping @MainActor () -> Void) -> Task<Void, Never> {
+        Task {
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled, isStillOff() else { return }
+            report()
+        }
+    }
+}
+
 @MainActor final class BluetoothBattery: NSObject, BluetoothBatteryControlling, @preconcurrency CBCentralManagerDelegate, @preconcurrency CBPeripheralDelegate {
     private var central: CBCentralManager?
     private var peripherals: [UUID: CBPeripheral] = [:]
@@ -36,9 +47,10 @@ enum BatteryRefreshPolicy {
     private var connectingSince: [UUID: Date] = [:]
     private var lastDiscovery = Date.distantPast
     private var scanTask: Task<Void, Never>?
+    private var stateWarningTask: Task<Void, Never>?
     private(set) var snapshots: [UUID: PeripheralSnapshot] = [:]
     var onChange: (() -> Void)?
-    var onError: ((String) -> Void)?
+    var onError: ((String?) -> Void)?
     private let batteryService = CBUUID(string: "180F")
     private let hidService = CBUUID(string: "1812")
     private let batteryLevel = CBUUID(string: "2A19")
@@ -54,6 +66,8 @@ enum BatteryRefreshPolicy {
     }
     func stop() {
         enabled = false; scanTask?.cancel(); scanTask = nil
+        stateWarningTask?.cancel(); stateWarningTask = nil
+        onError?(nil)
         central?.stopScan()
         for peripheral in peripherals.values { peripheral.delegate = nil; central?.cancelPeripheralConnection(peripheral) }
         peripherals.removeAll(); snapshots.removeAll(); lastRead.removeAll(); lastProbe.removeAll(); connectingSince.removeAll()
@@ -62,10 +76,21 @@ enum BatteryRefreshPolicy {
     }
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         guard enabled, self.central === central else { return }
+        stateWarningTask?.cancel(); stateWarningTask = nil
+        onError?(nil)
         switch central.state {
         case .poweredOn: refresh(force: true)
         case .unauthorized: onError?("Bluetooth access is denied. Allow Vehla in System Settings → Privacy & Security → Bluetooth."); clearDisconnected()
-        case .poweredOff: onError?("Bluetooth is turned off."); clearDisconnected()
+        case .poweredOff:
+            clearDisconnected()
+            // Core Bluetooth can briefly report off during wake/startup. Only
+            // show a warning if the same active manager still reports off later.
+            stateWarningTask = BluetoothStateWarning.schedule(isStillOff: { [weak self, weak central] in
+                guard let self, let central else { return false }
+                return self.enabled && self.central === central && central.state == .poweredOff
+            }, report: { [weak self] in
+                self?.onError?("Bluetooth LE discovery is unavailable while macOS reports Bluetooth off.")
+            })
         case .unsupported: onError?("Bluetooth LE is unavailable on this Mac."); clearDisconnected()
         case .resetting: clearDisconnected()
         default: break
@@ -145,6 +170,7 @@ enum BatteryRefreshPolicy {
     }
     func refresh(force: Bool = false) {
         guard enabled, let central, central.state == .poweredOn else { return }
+        onError?(nil)
         if force || Date().timeIntervalSince(lastDiscovery) >= 30 {
             lastDiscovery = Date()
             // HID devices often advertise 1812 rather than their battery service.

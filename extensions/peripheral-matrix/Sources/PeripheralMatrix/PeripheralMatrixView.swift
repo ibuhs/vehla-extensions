@@ -38,7 +38,7 @@ struct PeripheralMatrixView: View {
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    if let error = model.error { Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.orange).textSelection(.enabled) }
+                    if let error = model.bluetoothError { Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.orange).textSelection(.enabled) }
                     devicesTab
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }

@@ -17,6 +17,38 @@ final class BluetoothRefreshTests: XCTestCase {
         XCTAssertEqual(BatteryRefreshPolicy.action(state: .connected, hasService: true, hasReadableLevel: true, lastRead: now, force: true, now: now), .read)
         XCTAssertEqual(BatteryRefreshPolicy.action(state: .connected, hasService: true, hasReadableLevel: true, lastRead: nil, force: false, now: now), .read)
     }
+    @MainActor func testTransientOffAndCancelledManagerNeverPublishOffWarning() async {
+        var off = true
+        var warnings = 0
+        let recovered = BluetoothStateWarning.schedule(delay: .milliseconds(10), isStillOff: { off }, report: { warnings += 1 })
+        off = false
+        await recovered.value
+        XCTAssertEqual(warnings, 0)
+        let cancelled = BluetoothStateWarning.schedule(delay: .milliseconds(10), isStillOff: { true }, report: { warnings += 1 })
+        cancelled.cancel()
+        await cancelled.value
+        XCTAssertEqual(warnings, 0)
+        let sustained = BluetoothStateWarning.schedule(delay: .milliseconds(10), isStillOff: { true }, report: { warnings += 1 })
+        await sustained.value
+        XCTAssertEqual(warnings, 1)
+    }
+    @MainActor func testBluetoothRecoveryClearsOnlyItsOwnWarning() {
+        let bluetooth = BatteryStub()
+        let model = PeripheralMatrixModel(readRegistry: { [] }, bluetooth: bluetooth)
+        let theme = VehlaDockWidgetTheme(isDark: true, accentColor: .white, primaryTextColor: .white, secondaryTextColor: .gray, surfaceColor: .black)
+        model.configure(.init(packageID: "test", widgetID: "peripheral-matrix", dataDirectory: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString), theme: theme, invalidationHandler: {}, actionHandler: { _ in }))
+        defer { model.close() }
+        model.error = "QMK connection failed"
+        bluetooth.onError?("Bluetooth is turned off.")
+        XCTAssertNotNil(model.bluetoothError)
+        bluetooth.onError?(nil) // The manager recovered to poweredOn.
+        XCTAssertNil(model.bluetoothError)
+        XCTAssertEqual(model.error, "QMK connection failed")
+        bluetooth.onError?("Bluetooth access denied")
+        model.setBluetooth(false)
+        XCTAssertNil(model.bluetoothError)
+        XCTAssertEqual(model.error, "QMK connection failed")
+    }
     @MainActor func testRefreshGetsMissingBatteryWithoutTogglingLE() async {
         let bluetooth = BatteryStub()
         let model = PeripheralMatrixModel(readRegistry: { [.init(id: "mouse", name: "Mouse", transport: "Bluetooth", kind: "Mouse", battery: nil)] }, bluetooth: bluetooth)
@@ -39,7 +71,7 @@ final class BluetoothRefreshTests: XCTestCase {
     var enabled = false
     var snapshots: [UUID: PeripheralSnapshot] = [:]
     var onChange: (() -> Void)?
-    var onError: ((String) -> Void)?
+    var onError: ((String?) -> Void)?
     var starts = 0, stops = 0
     var forced = false
     func start() { enabled = true; starts += 1 }

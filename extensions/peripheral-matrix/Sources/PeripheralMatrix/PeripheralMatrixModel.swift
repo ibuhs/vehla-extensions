@@ -17,6 +17,7 @@ import VehlaDockWidgetSDK
     @Published var bridgeEnabled = false
     @Published var theme: VehlaDockWidgetTheme?
     @Published var error: String?
+    @Published var bluetoothError: String?
     @Published var bridgeTestResult: String?
     @Published var profileNames: [String: [String: String]] = [:]
     private var editorChanges: AnyCancellable?
@@ -53,7 +54,7 @@ import VehlaDockWidgetSDK
         if let data = try? Data(contentsOf: context.dataDirectory.appendingPathComponent("profile-names.json")),
            let names = try? JSONDecoder().decode([String: [String: String]].self, from: data) { profileNames = names }
         bluetooth.onChange = { [weak self] in self?.publish() }
-        bluetooth.onError = { [weak self] in self?.error = $0 }
+        bluetooth.onError = { [weak self] in self?.bluetoothError = $0 }
         bridge.onChange = { [weak self] in self?.publish(layerChanged: true) }
         bridge.onError = { [weak self] in self?.error = $0 }
         refresh()
@@ -100,7 +101,7 @@ import VehlaDockWidgetSDK
         resumeBluetooth = false; resumeBridge = false
     }
     func setBluetooth(_ enabled: Bool) {
-        error = nil
+        bluetoothError = nil
         enabled ? bluetooth.start() : bluetooth.stop()
         bluetoothEnabled = bluetooth.enabled; resumeBluetooth = bluetoothEnabled
         publish()

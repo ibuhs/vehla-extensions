@@ -161,3 +161,5 @@ Backups live in the SDK data directory under `qmk-backups/`, with directory mode
 Programming uses the [QMK VIA dynamic-keymap protocol](https://github.com/Keychron/qmk_firmware/blob/618127a725a1773e85f13455602cf6f72ab4de17/quantum/via.h). Firmware reset, raw EEPROM, macro-write, and flash commands are excluded. Background layer queries pause while a keymap transaction owns the connection.
 
 Set `VEHLA_QMK_INTEGRATION=1` when running tests for a read-only native VIA check on the connected keyboard. Automated apply/rollback tests use simulated device storage and do not change a real keyboard's mappings.
+
+Bluetooth warnings are scoped to battery discovery and cleared when Core Bluetooth recovers, on a powered-on refresh, or when discovery stops. A powered-off warning is shown only after the same active manager remains off for two seconds, avoiding transient startup/wake alerts. Recovery never clears unrelated QMK errors.
