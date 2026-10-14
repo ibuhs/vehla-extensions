@@ -30,8 +30,9 @@ struct QMKProgrammingView: View {
                     Button("Rename layers…") { showNames = true }.disabled(connection == nil)
                     Button("Test connection") { model.testBridge(); showDetails = true }.disabled(model.editor.busy)
                     Button("Supported keyboards and diagnostics…") { showDetails = true }
-                } label: { Image(systemName: "ellipsis") }
-                    .menuStyle(.borderlessButton).frame(width: 24).accessibilityLabel("Programming options")
+                } label: { Image(systemName: "ellipsis").frame(width: 28, height: 24).contentShape(Rectangle()) }
+                    .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                    .help("Programming options").accessibilityLabel("Programming options")
                     .popover(isPresented: $showDetails) { details.padding(20).frame(width: 380) }
             }
             if let profile = model.editor.profile, model.editor.baseline != nil {
@@ -40,7 +41,8 @@ struct QMKProgrammingView: View {
                         ForEach(0..<profile.layers, id: \.self) { layer in
                             Text(model.editorLayerNames[layer]).tag(layer)
                         }
-                    }.pickerStyle(.segmented).accessibilityIdentifier("qmk.edit-layer")
+                    }.pickerStyle(.segmented).labelsHidden().accessibilityLabel("Editing layer")
+                        .accessibilityIdentifier("qmk.edit-layer")
                         .disabled(model.editor.busy).frame(maxWidth: 550)
                     Spacer(minLength: 12)
                     if let connection, let state = connection.state {
