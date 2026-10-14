@@ -1,0 +1,46 @@
+name: Peripheral and Volume Widgets
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/peripheral-volume-widgets.yml"
+      - "extensions/peripheral-matrix/**"
+      - "extensions/volume-matrix/**"
+      - "sdk/swift/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/peripheral-volume-widgets.yml"
+      - "extensions/peripheral-matrix/**"
+      - "extensions/volume-matrix/**"
+      - "sdk/swift/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: peripheral-volume-widgets-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Test, build, and validate ${{ matrix.product }}
+    runs-on: macos-15
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - extension: peripheral-matrix
+            product: PeripheralMatrix
+          - extension: volume-matrix
+            product: VolumeMatrix
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Run tests
+        run: swift test --package-path extensions/${{ matrix.extension }}
+      - name: Build widget bundle
+        run: zsh extensions/${{ matrix.extension }}/build.sh
+      - name: Validate widget package
+        run: swift run --package-path sdk/swift vehla-swift validate extensions/${{ matrix.extension }}/dist/${{ matrix.product }}

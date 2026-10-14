@@ -1,0 +1,7 @@
+.build/
+.swiftpm/
+bin/
+dist/
+
+firmware/keychron-k10-pro/private-backups/
+__pycache__/

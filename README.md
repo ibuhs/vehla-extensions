@@ -1209,6 +1209,21 @@ Ensure:
 
 ## Included examples
 
+### Peripheral Matrix
+
+[Native peripheral dock widget](extensions/peripheral-matrix/README.md) with
+published wireless HID batteries and automatic Bluetooth LE discovery in a compact
+popup. A QMK Keyboard Programming button opens a larger window for live layer switching and VIA keymap programming
+for supported Keychron K10 Pro, Q1 Max, and V-series layouts, with draft edits,
+backups, verification, and recovery.
+Unsupported vendor devices remain status-only.
+
+### Volume Matrix
+
+[Native volume dock widget](extensions/volume-matrix/README.md) with mounted and
+connected unmounted volumes, APFS shared-space accounting, physical-disk read/write
+activity, and asynchronous mount, unmount, and eject controls.
+
 ### Hello Store
 
 Minimal SDK and manifest introduction.
