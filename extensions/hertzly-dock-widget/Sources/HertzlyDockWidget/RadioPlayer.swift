@@ -13,21 +13,28 @@ final class RadioPlayer: ObservableObject {
     var onPrevious: (() -> Void)?
 
     private let player = AVPlayer()
-    private var stateTimer: Timer?
+    // The player's own change notifications drive the state. A 0.25 s timer used to write every property four
+    // times a second, and each @Published write redraws every tile watching the player, even when nothing changed.
+    private var statusObserver: NSKeyValueObservation?
+    private var itemObserver: NSKeyValueObservation?
     private var failedObserver: NSObjectProtocol?
     private var remoteTargets: [Any] = []
+    /// What macOS was last told is playing, so it's only told again when that changes.
+    private var publishedNowPlaying: (name: String, rate: Int)?
 
     init() {
         player.automaticallyWaitsToMinimizeStalling = true
         setupRemoteCommands()
-        stateTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+        statusObserver = player.observe(\.timeControlStatus, options: [.new]) { [weak self] _, _ in
             Task { @MainActor [weak self] in self?.synchronizeState() }
         }
     }
 
     func shutdown() {
-        stateTimer?.invalidate()
-        stateTimer = nil
+        statusObserver?.invalidate()
+        statusObserver = nil
+        itemObserver?.invalidate()
+        itemObserver = nil
         if let failedObserver {
             NotificationCenter.default.removeObserver(failedObserver)
             self.failedObserver = nil
@@ -58,6 +65,9 @@ final class RadioPlayer: ObservableObject {
             errorMessage = nil
             isLoading = true
             let item = AVPlayerItem(url: url)
+            itemObserver = item.observe(\.status, options: [.new]) { [weak self] _, _ in
+                Task { @MainActor [weak self] in self?.synchronizeState() }
+            }
             failedObserver = NotificationCenter.default.addObserver(
                 forName: .AVPlayerItemFailedToPlayToEndTime,
                 object: item,
@@ -66,10 +76,11 @@ final class RadioPlayer: ObservableObject {
                 let message = (notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error)?
                     .localizedDescription ?? "Unable to play this station."
                 Task { @MainActor [weak self] in
-                    self?.errorMessage = message
-                    self?.isLoading = false
-                    self?.isPlaying = false
-                    self?.updateNowPlaying()
+                    guard let self else { return }
+                    if errorMessage != message { errorMessage = message }
+                    if isLoading { isLoading = false }
+                    if isPlaying { isPlaying = false }
+                    updateNowPlaying()
                 }
             }
             player.replaceCurrentItem(with: item)
@@ -92,22 +103,27 @@ final class RadioPlayer: ObservableObject {
     }
 
     func stop() {
+        itemObserver?.invalidate()
+        itemObserver = nil
         player.pause()
         player.replaceCurrentItem(with: nil)
         station = nil
-        isPlaying = false
-        isLoading = false
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        if isPlaying { isPlaying = false }
+        if isLoading { isLoading = false }
+        updateNowPlaying()
     }
 
     func setVolume(_ volume: Float) {
         player.volume = min(max(volume, 0), 1)
     }
 
+    /// Reads the player and writes only what changed, so watching views redraw only on a real change.
     private func synchronizeState() {
-        isPlaying = player.timeControlStatus == .playing
-        isLoading = player.timeControlStatus == .waitingToPlayAtSpecifiedRate
-        if let itemError = player.currentItem?.error {
+        let playing = player.timeControlStatus == .playing
+        let loading = player.timeControlStatus == .waitingToPlayAtSpecifiedRate
+        if isPlaying != playing { isPlaying = playing }
+        if isLoading != loading { isLoading = loading }
+        if let itemError = player.currentItem?.error, errorMessage != itemError.localizedDescription {
             errorMessage = itemError.localizedDescription
         }
         updateNowPlaying()
@@ -115,9 +131,15 @@ final class RadioPlayer: ObservableObject {
 
     private func updateNowPlaying() {
         guard let station else {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+            if publishedNowPlaying != nil {
+                publishedNowPlaying = nil
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+            }
             return
         }
+        let rate = isPlaying ? 1 : 0
+        if let published = publishedNowPlaying, published.name == station.name, published.rate == rate { return }
+        publishedNowPlaying = (station.name, rate)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = [
             MPMediaItemPropertyTitle: station.name,
             MPMediaItemPropertyArtist: "Live Radio",

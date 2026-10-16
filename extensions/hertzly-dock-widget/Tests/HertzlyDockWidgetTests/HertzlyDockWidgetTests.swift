@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import XCTest
 @testable import HertzlyDockWidget
@@ -87,5 +88,18 @@ final class HertzlyDockWidgetTests: XCTestCase {
             codec: "MP3",
             bitrate: 128
         )
+    }
+
+    /// An idle player must not redraw its tiles: it used to write its state four times a second, and every
+    /// @Published write notified every tile, on every display Doki shows it on.
+    @MainActor
+    func testIdlePlayerPublishesNothing() async throws {
+        let player = RadioPlayer()
+        defer { player.shutdown() }
+        var changes = 0
+        let subscription = player.objectWillChange.sink { changes += 1 }
+        try await Task.sleep(for: .seconds(1.2))
+        subscription.cancel()
+        XCTAssertEqual(changes, 0, "an idle radio published \(changes) changes in 1.2 s")
     }
 }

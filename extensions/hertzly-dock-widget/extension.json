@@ -2,7 +2,7 @@
   "apiVersion": 3,
   "id": "com.ibuhs.vehla.hertzly",
   "name": "Hertzly Radio Dock Widget",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tune into internet radio from the Dock with country browsing, favorites, and an FM-inspired dial.",
   "author": "ibuhs",
   "runtime": "dockWidget",
