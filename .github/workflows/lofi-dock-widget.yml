@@ -1,0 +1,36 @@
+name: Lofi Dock Widget
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/lofi-dock-widget.yml"
+      - "extensions/Lofi/**"
+      - "sdk/swift/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/lofi-dock-widget.yml"
+      - "extensions/Lofi/**"
+      - "sdk/swift/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lofi-dock-widget-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Test, build, and validate Lofi
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Run local-library tests
+        run: swift test --package-path extensions/Lofi
+      - name: Build widget bundle
+        run: zsh extensions/Lofi/build.sh
+      - name: Validate widget package
+        run: swift run --package-path sdk/swift vehla-swift validate extensions/Lofi/dist/LofiDockWidget
