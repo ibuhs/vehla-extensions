@@ -460,8 +460,8 @@ struct CompressionEngine: Sendable {
     /// Saves a copy of the original in the destination and returns where it
     /// went, or nil when the original already lives in the destination.
     private func copyOriginal(_ source: URL) throws -> URL? {
-        let parent = source.deletingLastPathComponent().standardizedFileURL.path
-        if parent == destination.standardizedFileURL.path { return nil } // already there
+        let parent = Self.resolvedPath(source.deletingLastPathComponent())
+        if parent == Self.resolvedPath(destination) { return nil } // already there
         let target = Self.uniqueURL(in: destination, name: source.lastPathComponent)
         try FileManager.default.copyItem(at: source, to: target)
         return target
@@ -530,8 +530,12 @@ struct CompressionEngine: Sendable {
     }
 
     static func isInside(_ child: URL, _ parent: URL) -> Bool {
-        let c = child.standardizedFileURL.path, p = parent.standardizedFileURL.path
+        let c = resolvedPath(child), p = resolvedPath(parent)
         return c == p || c.hasPrefix(p + "/")
+    }
+
+    private static func resolvedPath(_ url: URL) -> String {
+        url.standardizedFileURL.resolvingSymlinksInPath().path
     }
 
     private static func friendly(_ error: Error, destination: URL) -> String {

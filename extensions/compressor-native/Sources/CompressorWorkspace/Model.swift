@@ -428,10 +428,19 @@ final class CompressorModel: ObservableObject {
             return
         }
         var combined = FolderExpansion.aggregate(results, fileCount: indices.count)
-        // Every file went to the Trash: the folder is now empty, so tidy it away too.
+        // Every processed file went to the Trash. Only move the folder itself
+        // when it is truly empty: enumeration deliberately skips hidden files
+        // and symbolic links, which must remain recoverable in their folder.
         if trashOriginals, combined.movedToTrash, results.count == indices.count,
-           FolderExpansion.stats(of: item.url).files == 0 {
-            if (try? trashAction(item.url)) != nil { combined.trashNote = "Original folder moved to the Trash." }
+           let contents = try? FileManager.default.contentsOfDirectory(atPath: item.url.path) {
+            if contents.isEmpty {
+                if (try? trashAction(item.url)) != nil {
+                    combined.trashNote = "Original folder moved to the Trash."
+                }
+            } else {
+                combined.movedToTrash = false
+                combined.trashNote = "Processed originals moved to the Trash. The original folder was kept because it contains skipped files."
+            }
         }
         setState(owner, .done(combined))
     }

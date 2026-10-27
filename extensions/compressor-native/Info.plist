@@ -8,8 +8,8 @@
     <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
     <key>CFBundleName</key><string>CompressorWorkspace</string>
     <key>CFBundlePackageType</key><string>BNDL</string>
-    <key>CFBundleShortVersionString</key><string>1.4.1</string>
-    <key>CFBundleVersion</key><string>9</string>
+    <key>CFBundleShortVersionString</key><string>1.4.2</string>
+    <key>CFBundleVersion</key><string>10</string>
     <key>NSPrincipalClass</key><string>CompressorPlugin</string>
 </dict>
 </plist>

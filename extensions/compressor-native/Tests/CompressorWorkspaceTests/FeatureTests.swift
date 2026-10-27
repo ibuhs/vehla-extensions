@@ -297,6 +297,7 @@ final class ModelFeatureTests: XCTestCase {
         for name in ["a.txt", "b.txt", "2025/c.txt"] {
             try String(repeating: "report \(name) ", count: 30_000).write(to: folder.appendingPathComponent(name), atomically: true, encoding: .utf8)
         }
+        try "keep me".write(to: folder.appendingPathComponent(".private"), atomically: true, encoding: .utf8)
         let single = work.appendingPathComponent("single.txt")
         try String(repeating: "single ", count: 30_000).write(to: single, atomically: true, encoding: .utf8)
 
@@ -314,8 +315,9 @@ final class ModelFeatureTests: XCTestCase {
         XCTAssertEqual(model.runCounts.done, 2)
         guard case .done(let folderResult) = model.items[0].state else { return XCTFail("folder not done") }
         XCTAssertEqual(folderResult.message, "3 of 3 files compressed")
-        XCTAssertEqual(folderResult.trashNote, "Original folder moved to the Trash.")
-        XCTAssertFalse(fm.fileExists(atPath: folder.path), "emptied folder goes to the Trash too")
+        XCTAssertEqual(folderResult.trashNote, "Processed originals moved to the Trash. The original folder was kept because it contains skipped files.")
+        XCTAssertTrue(fm.fileExists(atPath: folder.appendingPathComponent(".private").path),
+                      "a skipped hidden file must keep its original folder out of the Trash")
         XCTAssertTrue(fm.fileExists(atPath: out.appendingPathComponent("Reports/2025/c.txt.zip").path))
         XCTAssertTrue(fm.fileExists(atPath: out.appendingPathComponent("Reports/2025/c.txt").path), "verified copy kept")
 

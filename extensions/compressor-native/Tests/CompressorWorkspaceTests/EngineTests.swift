@@ -71,6 +71,16 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(result.status, .failed)
     }
 
+    func testDestinationSymlinkedInsideFolderIsRejected() async throws {
+        let folder = input.appendingPathComponent("folder", isDirectory: true)
+        let inner = folder.appendingPathComponent("out", isDirectory: true)
+        let alias = work.appendingPathComponent("linked-out", isDirectory: true)
+        try FileManager.default.createDirectory(at: inner, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(at: alias, withDestinationURL: inner)
+        let result = await CompressionEngine(destination: alias).compress(folder, isDirectory: true) { _ in }
+        XCTAssertEqual(result.status, .failed)
+    }
+
     func testJPEGIsCompressed() async throws {
         let file = input.appendingPathComponent("photo.jpg")
         try await ffmpeg(["-f", "lavfi", "-i", "mandelbrot=s=2000x1400", "-frames:v", "1", "-q:v", "1", file.path])

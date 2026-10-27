@@ -2,7 +2,7 @@
   "apiVersion": 2,
   "id": "com.ahmadjerow.compressor-glass",
   "name": "Compressor Glass",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Compress images, videos, PDFs and files without visible quality loss, in a tinted Liquid Glass window.",
   "author": "Ahmad Jerow",
   "runtime": "nativeUI",
@@ -17,7 +17,7 @@
       "workspaceID": "compressor"
     }
   ],
-  "capabilities": ["persistentStorage", "notifications"],
+  "capabilities": ["persistentStorage", "notifications", "clipboardWrite", "openURL", "userSelectedFiles"],
   "workspaces": [
     {
       "id": "compressor",
