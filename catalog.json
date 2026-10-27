@@ -3,6 +3,46 @@
   "packages": [
     {
       "manifest": {
+        "apiVersion": 3,
+        "id": "com.ibuhs.vehla.lofi",
+        "name": "Lofi",
+        "version": "1.1.1",
+        "description": "A cozy local music player with a user-selected source folder, fair shuffle, and playback controls.",
+        "author": "ibuhs",
+        "runtime": "dockWidget",
+        "entrypoint": "bin/LofiDockWidget.bundle",
+        "capabilities": [
+          "persistentStorage"
+        ],
+        "dockWidgets": [
+          {
+            "id": "lofi",
+            "title": "Lofi",
+            "subtitle": "Music from your chosen folder",
+            "systemImage": "music.note",
+            "preferredPopupWidth": 420,
+            "preferredPopupHeight": 720,
+            "supportedSurfaces": [
+              "compact",
+              "inline",
+              "popup"
+            ]
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/Lofi-1.1.1.zip",
+      "sha256": "2ec175c7d0b9cc692816252517f25a95bd81a99d42622bb579803c45de0ba0d2",
+      "archiveRoot": "Lofi",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "aiyTajTzHjhirDrEdd1Vj1H/pP+nB4CTNg/+cNBlnUexwlB7QNnEE5HLzBAwXRduQA1HMm/PqMYQjhuK9qncDw=="
+    },
+    {
+      "manifest": {
         "apiVersion": 2,
         "id": "com.ibuhs.vehla.capture-hub",
         "name": "Capture Hub",
@@ -1292,6 +1332,46 @@
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
       "signature": "fwifupkePsCzECMJfJS+Ks3NB0RKf/TzxiBSbtMim7hrTzrF4erY7w3M20KMLLy9JW7ghHhZWPPdHBe9OGg/AQ=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 3,
+        "id": "com.ibuhs.vehla.peripheral-matrix",
+        "name": "Peripheral Matrix",
+        "version": "1.1.5",
+        "description": "Device batteries, live QMK layers, and keymap programming.",
+        "author": "ibuhs",
+        "runtime": "dockWidget",
+        "entrypoint": "bin/PeripheralMatrix.bundle",
+        "capabilities": [
+          "persistentStorage"
+        ],
+        "dockWidgets": [
+          {
+            "id": "peripheral-matrix",
+            "title": "Peripheral Matrix",
+            "subtitle": "Device batteries, live QMK layers, and keymap programming.",
+            "systemImage": "keyboard",
+            "preferredPopupWidth": 440,
+            "preferredPopupHeight": 400,
+            "supportedSurfaces": [
+              "compact",
+              "inline",
+              "popup"
+            ]
+          }
+        ]
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/peripheral-matrix-1.1.5.zip",
+      "sha256": "61d1411b9096f4180c4d2b87f33070442c56b5056826e89fbb1869fa552bfcd5",
+      "archiveRoot": "peripheral-matrix",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "p7VBa5JVvAJ7rxtYxLzQQuvBBcICDQURAs7bHbqhZqDw/v1U1q+xayTBPWW1uxItvxrfTHAbyGNMRK+AfsdpCg=="
     },
     {
       "manifest": {

@@ -1,0 +1,40 @@
+name: Peripheral Matrix
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/peripheral-matrix.yml"
+      - "extensions/peripheral-matrix/**"
+      - "sdk/swift/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/peripheral-matrix.yml"
+      - "extensions/peripheral-matrix/**"
+      - "sdk/swift/**"
+
+concurrency:
+  group: peripheral-matrix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Test, build, and validate Peripheral Matrix
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: swift test --package-path extensions/peripheral-matrix
+
+      - name: Build widget bundle
+        run: zsh extensions/peripheral-matrix/build.sh
+
+      - name: Validate widget package
+        run: |
+          swift run --package-path sdk/swift vehla-swift validate \
+            extensions/peripheral-matrix/dist/PeripheralMatrix
