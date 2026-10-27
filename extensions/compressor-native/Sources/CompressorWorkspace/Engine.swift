@@ -73,6 +73,12 @@ enum QualityPreset: String, CaseIterable, Identifiable, Sendable {
     var videoCRF: Int {
         switch self { case .smaller: 28; case .balanced: 24; case .best: 20 }
     }
+    /// Apple hardware encoder (hevc_videotoolbox) quality matched to the
+    /// software CRF above by SSIM: files come out about 8-28% larger but
+    /// encode roughly 6x faster.
+    var hardwareVideoQuality: Int {
+        switch self { case .smaller: 45; case .balanced: 52; case .best: 62 }
+    }
     var jpegQuality: Int {
         switch self { case .smaller: 75; case .balanced: 85; case .best: 92 }
     }
@@ -101,6 +107,12 @@ struct CompressionResult: Sendable, Equatable {
     var after: Int64 = 0
     var outputName: String?
     var message: String?
+    /// For folders compressed file by file: how many files were in it and how many failed.
+    var fileCount = 1
+    var failedCount = 0
+    /// What happened to the original when "move originals to Trash" is on.
+    var trashNote: String?
+    var movedToTrash = false
 
     var savedBytes: Int64 { status == .compressed ? before - after : 0 }
 
@@ -232,6 +244,14 @@ func runProcess(
 struct CompressionEngine: Sendable {
     let destination: URL
     var quality: QualityPreset = .balanced
+    /// Use the Mac's hardware video encoder: much faster, somewhat larger files.
+    var fastVideo = false
+    /// Move the original to the Trash once its compressed version and a
+    /// verified copy are safely in the destination.
+    var trashOriginal = false
+    /// Overridable for tests.
+    var hardwareEncoder = "hevc_videotoolbox"
+    var trash: @Sendable (URL) throws -> Void = { try FileManager.default.trashItem(at: $0, resultingItemURL: nil) }
 
     /// A result must be at least this much smaller than the original to be kept.
     static let minimumSaving = 0.97
@@ -283,11 +303,11 @@ struct CompressionEngine: Sendable {
             try fm.copyItem(at: source, to: stagedIn)
             try Task.checkCancellation()
 
-            let plan = try await makePlan(kind, source: source, stagedIn: stagedIn)
+            var plan = try await makePlan(kind, source: source, stagedIn: stagedIn, hardware: fastVideo)
             let finalURL = Self.uniqueURL(in: destination, name: plan.outputName)
             let stagedOut = stage.appendingPathComponent("result.\(finalURL.pathExtension)")
 
-            let output: ProcessOutput
+            var output: ProcessOutput
             if plan.isZip {
                 let target = isDirectory ? "./\(stagedIn.lastPathComponent)" : stagedIn.path
                 let flags = isDirectory ? ["-9", "-q", "-r", "-X"] : ["-9", "-q", "-X", "-j"]
@@ -295,11 +315,16 @@ struct CompressionEngine: Sendable {
             } else {
                 var duration: Double?
                 if kind == .video { duration = await Self.videoDuration(stagedIn) }
-                output = await runProcess(
-                    plan.executable,
-                    plan.arguments(stagedIn, stagedOut),
-                    onStdoutLine: kind == .video ? Self.progressParser(duration: duration, progress) : nil
-                )
+                let parser = kind == .video ? Self.progressParser(duration: duration, progress) : nil
+                output = await runProcess(plan.executable, plan.arguments(stagedIn, stagedOut), onStdoutLine: parser)
+                // If the hardware encoder can't handle this video, fall back to the standard one.
+                if output.status != 0, kind == .video, fastVideo, !Task.isCancelled {
+                    try? fm.removeItem(at: stagedOut)
+                    progress(0)
+                    plan = try await makePlan(kind, source: source, stagedIn: stagedIn, hardware: false)
+                    output = await runProcess(plan.executable, plan.arguments(stagedIn, stagedOut), onStdoutLine: parser)
+                    result.message = "The hardware encoder couldn't handle this video, so the standard encoder was used."
+                }
             }
             try Task.checkCancellation()
 
@@ -310,7 +335,7 @@ struct CompressionEngine: Sendable {
             }
 
             let after = Self.size(of: stagedOut)
-            _ = try copyOriginal(source)
+            let originalCopy = try copyOriginal(source)
 
             if Double(after) < Double(result.before) * Self.minimumSaving {
                 let partial = destination.appendingPathComponent(".\(finalURL.lastPathComponent).partial")
@@ -324,6 +349,7 @@ struct CompressionEngine: Sendable {
                 result.status = .compressed
                 result.after = after
                 result.outputName = finalURL.lastPathComponent
+                if trashOriginal { moveOriginalToTrash(source, copy: originalCopy, into: &result) }
             } else {
                 result.status = .alreadyOptimal
                 result.after = result.before
@@ -342,7 +368,7 @@ struct CompressionEngine: Sendable {
 
     // MARK: Plans
 
-    private func makePlan(_ kind: MediaKind, source: URL, stagedIn: URL) async throws -> Plan {
+    private func makePlan(_ kind: MediaKind, source: URL, stagedIn: URL, hardware: Bool = false) async throws -> Plan {
         let stem = source.deletingPathExtension().lastPathComponent
         let ext = source.pathExtension
         let name = "\(stem)-compressed.\(ext)"
@@ -384,10 +410,13 @@ struct CompressionEngine: Sendable {
             let codecs = await Self.audioCodecs(stagedIn)
             let copyAudio = !codecs.isEmpty && codecs.allSatisfy(Self.copyableAudio.contains)
             let container = codecs.contains("apple_apac") ? "mov" : "mp4" // APAC only lives in QuickTime
+            let encoder = hardware
+                ? ["-c:v", hardwareEncoder, "-q:v", "\(q.hardwareVideoQuality)"]
+                : ["-c:v", "libx265", "-crf", "\(q.videoCRF)", "-preset", "medium"]
             return Plan(outputName: "\(stem)-compressed.\(container)", executable: ffmpeg) {
                 ["-v", "error", "-y", "-progress", "pipe:1", "-nostats", "-i", $0.path,
-                 "-map", "0:v:0", "-map", "0:a?", "-sn", "-dn",
-                 "-c:v", "libx265", "-crf", "\(q.videoCRF)", "-preset", "medium", "-tag:v", "hvc1"]
+                 "-map", "0:v:0", "-map", "0:a?", "-sn", "-dn"]
+                + encoder + ["-tag:v", "hvc1"]
                 + (copyAudio ? ["-c:a", "copy"] : ["-c:a", "aac", "-b:a", "160k"])
                 + ["-movflags", "+faststart", $1.path]
             }
@@ -428,27 +457,58 @@ struct CompressionEngine: Sendable {
 
     // MARK: Files
 
-    private func copyOriginal(_ source: URL) throws -> String? {
+    /// Saves a copy of the original in the destination and returns where it
+    /// went, or nil when the original already lives in the destination.
+    private func copyOriginal(_ source: URL) throws -> URL? {
         let parent = source.deletingLastPathComponent().standardizedFileURL.path
         if parent == destination.standardizedFileURL.path { return nil } // already there
         let target = Self.uniqueURL(in: destination, name: source.lastPathComponent)
         try FileManager.default.copyItem(at: source, to: target)
-        return target.lastPathComponent
+        return target
     }
+
+    /// Trashes the original only when a byte-for-byte identical copy exists in
+    /// the destination. The Trash keeps it recoverable.
+    private func moveOriginalToTrash(_ source: URL, copy: URL?, into result: inout CompressionResult) {
+        guard let copy else {
+            result.trashNote = "Original kept: it is already in the destination folder."
+            return
+        }
+        guard FileManager.default.contentsEqual(atPath: source.path, andPath: copy.path) else {
+            result.trashNote = "Original kept: its copy in the destination couldn't be verified."
+            return
+        }
+        do {
+            try trash(source)
+            result.movedToTrash = true
+            result.trashNote = "Original moved to the Trash."
+        } catch {
+            result.trashNote = "Original kept: \(error.localizedDescription)"
+        }
+    }
+
+    /// Names handed out during this run, so files compressed in parallel never
+    /// pick the same output name before either has been written.
+    private static let reserved = NameReservations()
+
+    static func resetNameReservations() { reserved.reset() }
 
     /// "photo.jpg" -> "photo (1).jpg" when the name is taken.
     static func uniqueURL(in directory: URL, name: String) -> URL {
-        let fm = FileManager.default
-        var candidate = directory.appendingPathComponent(name)
-        guard fm.fileExists(atPath: candidate.path) else { return candidate }
-        let base = (name as NSString).deletingPathExtension
-        let ext = (name as NSString).pathExtension
-        var n = 1
-        repeat {
-            candidate = directory.appendingPathComponent(ext.isEmpty ? "\(base) (\(n))" : "\(base) (\(n)).\(ext)")
-            n += 1
-        } while fm.fileExists(atPath: candidate.path)
-        return candidate
+        reserved.claim { taken in
+            let fm = FileManager.default
+            func free(_ url: URL) -> Bool { !fm.fileExists(atPath: url.path) && !taken.contains(url.standardizedFileURL.path) }
+            var candidate = directory.appendingPathComponent(name)
+            guard !free(candidate) else { return candidate }
+            let base = (name as NSString).deletingPathExtension
+            let ext = (name as NSString).pathExtension
+            var n = 1
+            repeat {
+                candidate = directory.appendingPathComponent(ext.isEmpty ? "\(base) (\(n))" : "\(base) (\(n)).\(ext)")
+                n += 1
+            } while !free(candidate)
+            return candidate
+        }
     }
 
     static func size(of url: URL) -> Int64 {
@@ -469,7 +529,7 @@ struct CompressionEngine: Sendable {
         return total
     }
 
-    private static func isInside(_ child: URL, _ parent: URL) -> Bool {
+    static func isInside(_ child: URL, _ parent: URL) -> Bool {
         let c = child.standardizedFileURL.path, p = parent.standardizedFileURL.path
         return c == p || c.hasPrefix(p + "/")
     }
@@ -485,6 +545,22 @@ struct CompressionEngine: Sendable {
     }
 }
 
+final class NameReservations: @unchecked Sendable {
+    private let lock = NSLock()
+    private var taken: Set<String> = []
+
+    func claim(_ pick: (Set<String>) -> URL) -> URL {
+        lock.lock(); defer { lock.unlock() }
+        let url = pick(taken)
+        taken.insert(url.standardizedFileURL.path)
+        return url
+    }
+
+    func reset() {
+        lock.lock(); taken.removeAll(); lock.unlock()
+    }
+}
+
 // MARK: - Free space
 
 enum Preflight {
@@ -493,10 +569,25 @@ enum Preflight {
     /// needs about twice its size in the destination and twice its largest
     /// file in temp. Returns a message when there isn't room, else nil.
     static func check(sizes: [Int64], destination: URL, temporary: URL = FileManager.default.temporaryDirectory) -> String? {
-        guard let largest = sizes.max() else { return nil }
+        check(destinationBytes: sizes.reduce(0, +), stagingSizes: sizes, parallel: 1,
+              destination: destination, temporary: temporary)
+    }
+
+    /// `stagingSizes` are the amounts copied into temp at once per job (a
+    /// folder compressed file by file only stages its largest file);
+    /// `parallel` jobs can be staged at the same time.
+    static func check(
+        destinationBytes: Int64,
+        stagingSizes: [Int64],
+        parallel: Int,
+        destination: URL,
+        temporary: URL = FileManager.default.temporaryDirectory
+    ) -> String? {
+        guard !stagingSizes.isEmpty else { return nil }
         let margin = 1.05
-        let destinationNeeded = Int64(Double(sizes.reduce(0, +)) * 2 * margin)
-        let temporaryNeeded = Int64(Double(largest) * 2 * margin)
+        let destinationNeeded = Int64(Double(destinationBytes) * 2 * margin)
+        let concurrent = stagingSizes.sorted(by: >).prefix(max(1, parallel)).reduce(0, +)
+        let temporaryNeeded = Int64(Double(concurrent) * 2 * margin)
 
         func available(_ url: URL) -> (free: Int64, volume: URL?)? {
             let keys: Set<URLResourceKey> = [.volumeAvailableCapacityForImportantUsageKey, .volumeURLKey]

@@ -7,10 +7,15 @@ Compress images, videos, PDFs and other files from inside [Vehla](https://github
 ## Features
 
 - **Drag and drop, or pick files.** Images, videos, PDFs, documents and folders, in batches.
+- **Change your mind any time.** The ⓧ on each row removes it before, during or after compressing. During a batch it stops just that item; files already saved are kept.
+- **Fast batches.** Images, PDFs and zips are compressed up to four at a time (about 3x faster on a batch of photos), while videos run one at a time alongside them.
+- **Folders your way.** For each folder, choose **Zip folder** (one lossless archive) or **Compress each file**, which compresses every file inside and recreates the folder's structure in the destination.
 - **Original kept.** Every compressed file is saved in your destination folder beside an untouched copy of the original. Name clashes become `name (1).ext`, so nothing is overwritten.
 - **Never bigger.** A result is kept only if it is meaningfully smaller. Otherwise you get the original and a note saying it is already well optimised.
 - **Quality presets.** Smaller, Balanced (the default, visually lossless) and Best quality.
-- **Live progress** for video, with the total space saved shown in the header.
+- **Animated progress.** Each item and the whole batch get a glowing progress bar with a slider-style thumb, with the total space saved shown when done.
+- **Fast video (optional).** Uses the Mac's hardware encoder: about 6x faster, with files roughly 8-28% larger at the same visual quality. Falls back to the standard encoder automatically if needed.
+- **Move originals to Trash (optional, off by default).** After a file is compressed, its copy in the destination is checked byte for byte before the original is moved to the Trash. Originals are never touched when the destination is their own folder.
 - **Free-space check** before a batch starts, so a big job doesn't fail halfway.
 - **Keeps your Mac awake** while a batch is running.
 - **Missing-tool check.** If a required Homebrew tool isn't installed, the window says what's missing and gives you the install command.
@@ -20,7 +25,7 @@ Compress images, videos, PDFs and other files from inside [Vehla](https://github
 |---|---|---|
 | JPEG, HEIC, WebP | macOS `sips` / `cwebp` | High-quality re-encode, set by the preset |
 | PNG | `oxipng` if installed, otherwise `ffmpeg` | Lossless |
-| Video | `ffmpeg`, H.265 | CRF 28 / 24 / 20 by preset |
+| Video | `ffmpeg`, H.265 | CRF 28 / 24 / 20 by preset, or Apple's hardware encoder with Fast video |
 | PDF | Ghostscript | `/ebook`, `/printer` or `/prepress` by preset |
 | Other files and folders | `zip -9` | Lossless |
 
@@ -39,21 +44,27 @@ iPhone videos with spatial audio (Apple's APAC codec) keep that audio unchanged,
 
 - To build it yourself: Xcode with Swift 6 or later.
 
+## Download
+
+Get the latest package from [Releases](https://github.com/aj-salafee/vehla-compressor/releases/latest): no Xcode needed. The release notes explain how to install it, including one Terminal command to clear macOS's download flag (the package isn't notarised by Apple).
+
 ## Build and install
 
+To build it yourself instead:
+
 ```sh
-cd extensions/compressor-native
+cd compressor-native
 ./build.sh
 ```
 
-Then, in Vehla, open **Settings → Store → Install Local Package** and choose `dist/CompressorGlass`. Open **Compressor** from the palette (`compressor`, `squeeze` or `shrink`).
+Then, in Vehla, open **Settings → Store → Install Local Package** and choose `compressor-native/dist/CompressorGlass`. Open **Compressor** from the palette (`compressor`, `squeeze` or `shrink`).
 
 Compressor is a Vehla *native workspace*. It runs inside Vehla's own process with full app access, so Vehla shows a risk warning and asks for your consent the first time you open it and after every update. Vehla runs its own copy of the package, so reinstall it after any change.
 
 ## Tests
 
 ```sh
-cd extensions/compressor-native
+cd compressor-native
 swift test
 ```
 

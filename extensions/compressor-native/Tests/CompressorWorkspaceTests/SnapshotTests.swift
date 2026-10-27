@@ -114,6 +114,31 @@ final class SnapshotTests: XCTestCase {
         try render(noBrew, theme: theme(dark: true), to: "\(dir)/10-no-homebrew-dark.png")
         let tip = CompressorModel(context: context, toolFinder: { $0 == "oxipng" ? nil : Tools.find($0) })
         try render(tip, theme: theme(dark: true), to: "\(dir)/11-optional-tip-dark.png")
+
+        // New in 1.4: folder modes, options, and the animated progress bars mid-run.
+        let album = inp.appendingPathComponent("Summer album", isDirectory: true)
+        try fm.createDirectory(at: album, withIntermediateDirectories: true)
+        for i in 0..<6 {
+            _ = await runProcess(ff, ["-v", "error", "-y", "-f", "lavfi", "-i", "mandelbrot=s=2400x1600:start_scale=\(3 + Double(i) * 0.2)",
+                                      "-frames:v", "1", "-q:v", "1", album.appendingPathComponent("IMG_\(100 + i).jpg").path])
+        }
+        let longClip = inp.appendingPathComponent("Beach day.mov")
+        _ = await runProcess(ff, ["-v", "error", "-y", "-f", "lavfi", "-i", "mandelbrot=s=1920x1080:r=30", "-vf", "noise=alls=6:allf=t",
+                                  "-t", "8", "-c:v", "libx264", "-crf", "10", "-preset", "ultrafast", longClip.path])
+        let live = CompressorModel(context: context, toolFinder: { Tools.find($0) })
+        live.openWhenDone = false
+        live.setTinted(false)
+        live.setQuality(.balanced)
+        live.setFastVideo(false)
+        live.addFiles([album, longClip, inp.appendingPathComponent("Notes.txt")])
+        live.setFolderMode(try XCTUnwrap(live.items.first?.id), .contents)
+        try render(live, theme: theme(dark: true), to: "\(dir)/12-folder-options-dark.png")
+        live.start()
+        try await Task.sleep(nanoseconds: 2_500_000_000)
+        try render(live, theme: theme(dark: true), to: "\(dir)/13-running-dark.png")
+        try render(live, theme: theme(dark: false), to: "\(dir)/14-running-light.png")
+        while live.phase == .running { try await Task.sleep(nanoseconds: 100_000_000) }
+        try render(live, theme: theme(dark: true), to: "\(dir)/15-done-dark.png")
         try? fm.removeItem(at: work)
     }
 }
