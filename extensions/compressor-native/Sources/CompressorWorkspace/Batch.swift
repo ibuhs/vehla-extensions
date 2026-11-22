@@ -168,6 +168,28 @@ enum FolderExpansion {
         return units
     }
 
+    /// Finder metadata that is regenerated on demand and carries no user content.
+    private static let disposable: Set<String> = [".DS_Store", ".localized"]
+
+    /// Everything still inside `folder` that "Compress each file" never copied
+    /// to the mirror: hidden files, symbolic links, and packages or files that
+    /// were added since. A folder with leftovers is not empty and must not be
+    /// trashed, or those items would exist nowhere else.
+    static func leftovers(in folder: URL) -> [URL] {
+        let keys: [URLResourceKey] = [.isRegularFileKey, .isSymbolicLinkKey, .isPackageKey]
+        guard let walker = FileManager.default.enumerator(
+            at: folder, includingPropertiesForKeys: keys, options: [.skipsPackageDescendants]
+        ) else { return [] }
+        var found: [URL] = []
+        for case let url as URL in walker where !disposable.contains(url.lastPathComponent) {
+            let values = try? url.resourceValues(forKeys: Set(keys))
+            if values?.isSymbolicLink == true || values?.isPackage == true || values?.isRegularFile == true {
+                found.append(url)
+            }
+        }
+        return found
+    }
+
     /// Regular files, plus packages treated as single items.
     private static func entries(in folder: URL) -> [(URL, Bool)] {
         let keys: [URLResourceKey] = [.isRegularFileKey, .isSymbolicLinkKey, .isPackageKey]

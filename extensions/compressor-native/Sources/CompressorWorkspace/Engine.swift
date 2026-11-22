@@ -335,6 +335,13 @@ struct CompressionEngine: Sendable {
             }
 
             let after = Self.size(of: stagedOut)
+            // The tools worked on the snapshot taken at the start. If the file
+            // changed meanwhile (still downloading, syncing or recording), the
+            // compressed output is stale: say so, and never trash on its strength.
+            let changedDuringCompression = !FileManager.default.contentsEqual(atPath: source.path, andPath: stagedIn.path)
+            if changedDuringCompression {
+                result.message = "The file changed while it was being compressed, so the compressed copy is from before the change."
+            }
             let originalCopy = try copyOriginal(source)
 
             if Double(after) < Double(result.before) * Self.minimumSaving {
@@ -349,7 +356,11 @@ struct CompressionEngine: Sendable {
                 result.status = .compressed
                 result.after = after
                 result.outputName = finalURL.lastPathComponent
-                if trashOriginal { moveOriginalToTrash(source, copy: originalCopy, into: &result) }
+                if trashOriginal {
+                    // Removing the row mid-batch must not reach this step.
+                    try Task.checkCancellation()
+                    moveOriginalToTrash(source, copy: originalCopy, changed: changedDuringCompression, into: &result)
+                }
             } else {
                 result.status = .alreadyOptimal
                 result.after = result.before
@@ -469,9 +480,13 @@ struct CompressionEngine: Sendable {
 
     /// Trashes the original only when a byte-for-byte identical copy exists in
     /// the destination. The Trash keeps it recoverable.
-    private func moveOriginalToTrash(_ source: URL, copy: URL?, into result: inout CompressionResult) {
+    private func moveOriginalToTrash(_ source: URL, copy: URL?, changed: Bool, into result: inout CompressionResult) {
         guard let copy else {
             result.trashNote = "Original kept: it is already in the destination folder."
+            return
+        }
+        guard !changed else {
+            result.trashNote = "Original kept: it changed while it was being compressed."
             return
         }
         guard FileManager.default.contentsEqual(atPath: source.path, andPath: copy.path) else {
@@ -534,6 +549,7 @@ struct CompressionEngine: Sendable {
         return c == p || c.hasPrefix(p + "/")
     }
 
+    /// Symbolic links resolved, so a folder reached through a link is still seen as the same folder.
     private static func resolvedPath(_ url: URL) -> String {
         url.standardizedFileURL.resolvingSymlinksInPath().path
     }
