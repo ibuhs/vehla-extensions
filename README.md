@@ -28,6 +28,7 @@ Supported:
 - Native Swift executable extensions built with Swift 6.
 - Store API 2 native SwiftUI/AppKit workspaces hosted in Vehla.
 - Store API 3 signed Swift Dock widgets with compact, inline, and popup surfaces.
+- Store API 4 signed Swift Notch / Island extensions: live activities and tabs.
 - Asynchronous handlers.
 - Clipboard and selected-text context.
 - Network requests.
@@ -58,6 +59,16 @@ Dock widgets use the same trusted in-process model. Their signed bundles can
 provide compact, inline, and popup surfaces beside the macOS Dock. They must
 declare persistent storage, support the compact surface, and stop cancellable
 background work when Vehla reports that the widget is hidden or closing.
+
+Notch / Island extensions (`runtime: "notch"`, Store API 4) also run in
+process. They add live activities to the closed Notch, described as data and
+drawn by Vehla, and tabs to the open Notch drawn by their own view controller.
+Each one is off until the user turns it on in Settings › Notch / Island ›
+Extensions, and is loaded only when it is needed: when one of its tabs is first
+opened, or when the Notch starts if its manifest sets `"background": true`.
+`VehlaNotchSDK` is a static library, so Vehla embeds no framework for it. See
+[`sdk/README.md`](sdk/README.md#notch--island-extensions) and the
+[`notch-lab`](extensions/notch-lab) sample.
 
 Not yet supported:
 
@@ -91,10 +102,12 @@ vehla-extensions/
 │       ├── Sources/VehlaStoreSDK/
 │       ├── Sources/VehlaNativeUISDK/
 │       ├── Sources/VehlaDockWidgetSDK/
+│       ├── Sources/VehlaNotchSDK/
 │       ├── Sources/VehlaSwiftCLI/
 │       ├── Tests/VehlaStoreSDKTests/
 │       ├── Tests/VehlaNativeUISDKTests/
 │       ├── Tests/VehlaDockWidgetSDKTests/
+│       ├── Tests/VehlaNotchSDKTests/
 │       └── README.md
 └── extensions/
     ├── hello-store/
@@ -1328,7 +1341,7 @@ The build script:
 
 1. Finds every directory under `extensions/` containing `extension.json`.
 2. Runs `npm install --install-links` for Node packages or `build.sh` for
-   executable, Native UI, and Dock Widget packages.
+   executable, Native UI, Dock Widget, and Notch packages.
 3. Reuses an immutable matching archive or creates `packages/<directory>-<version>.zip`.
 4. Calculates each archive’s SHA-256 checksum.
 5. Optionally signs the exact archive bytes with an Ed25519 publisher key.

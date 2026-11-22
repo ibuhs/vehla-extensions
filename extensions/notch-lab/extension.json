@@ -1,0 +1,26 @@
+{
+  "apiVersion": 4,
+  "id": "com.ibuhs.vehla.notch-lab",
+  "name": "Notch Lab",
+  "version": "1.0.1",
+  "description": "A test bench for the Notch SDK: a tab that starts, updates and ends live activities.",
+  "author": "ibuhs",
+  "runtime": "notch",
+  "entrypoint": "bin/NotchLab.bundle",
+  "capabilities": [
+    "persistentStorage",
+    "clipboardWrite",
+    "openURL"
+  ],
+  "notch": {
+    "background": false,
+    "tabs": [
+      { "id": "lab", "title": "Notch Lab", "systemImage": "flask.fill" }
+    ],
+    "activities": [
+      { "id": "message", "title": "Message" },
+      { "id": "countdown", "title": "Countdown" },
+      { "id": "progress", "title": "Progress" }
+    ]
+  }
+}

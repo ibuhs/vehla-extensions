@@ -249,7 +249,7 @@ def main() -> None:
                 ],
                 check=True,
             )
-        elif runtime in {"executable", "nativeUI", "dockWidget"}:
+        elif runtime in {"executable", "nativeUI", "dockWidget", "notch"}:
             build_script = extension_root / "build.sh"
             if not build_script.is_file():
                 raise SystemExit(

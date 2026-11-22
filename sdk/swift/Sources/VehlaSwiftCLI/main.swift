@@ -14,6 +14,16 @@ private struct ExtensionManifest: Decodable {
         let title: String
     }
 
+    struct Notch: Decodable {
+        struct Item: Decodable {
+            let id: String
+            let title: String
+        }
+        let background: Bool?
+        let tabs: [Item]?
+        let activities: [Item]?
+    }
+
     struct DockWidget: Decodable {
         let id: String
         let title: String
@@ -66,10 +76,11 @@ private struct ExtensionManifest: Decodable {
     let capabilities: [StoreCapability]?
     let workspaces: [Workspace]?
     let dockWidgets: [DockWidget]?
+    let notch: Notch?
 
     private enum CodingKeys: String, CodingKey {
         case apiVersion, id, name, version, runtime, entrypoint
-        case commands, capabilities, workspaces, dockWidgets
+        case commands, capabilities, workspaces, dockWidgets, notch
     }
 
     init(from decoder: Decoder) throws {
@@ -96,6 +107,7 @@ private struct ExtensionManifest: Decodable {
             [DockWidget].self,
             forKey: .dockWidgets
         )
+        notch = try container.decodeIfPresent(Notch.self, forKey: .notch)
     }
 }
 
@@ -328,7 +340,7 @@ private struct VehlaSwiftCLI {
     private static func validatePackage(at path: String) throws -> Package {
         let package = try loadPackage(at: path)
         let manifest = package.manifest
-        guard (1...3).contains(manifest.apiVersion) else {
+        guard (1...4).contains(manifest.apiVersion) else {
             throw CLIError.invalidPackage(
                 "Unsupported Store API version \(manifest.apiVersion)."
             )
@@ -336,10 +348,34 @@ private struct VehlaSwiftCLI {
         let runtime = manifest.runtime ?? "node"
         guard runtime == "executable"
                 || runtime == "nativeUI"
-                || runtime == "dockWidget" else {
+                || runtime == "dockWidget"
+                || runtime == "notch" else {
             throw CLIError.invalidPackage(
-                "Swift extensions require runtime executable, nativeUI, or dockWidget."
+                "Swift extensions require runtime executable, nativeUI, dockWidget, or notch."
             )
+        }
+        if runtime == "notch" {
+            let tabs = manifest.notch?.tabs ?? [], activities = manifest.notch?.activities ?? []
+            let ids = (tabs + activities).map(\.id)
+            guard manifest.apiVersion == 4,
+                  manifest.workspaces?.isEmpty != false,
+                  manifest.commands.isEmpty,
+                  (manifest.capabilities ?? []).contains(.persistentStorage),
+                  !(tabs.isEmpty && activities.isEmpty),
+                  tabs.count <= 3, activities.count <= 8,
+                  Set(tabs.map(\.id)).count == tabs.count,
+                  Set(activities.map(\.id)).count == activities.count,
+                  ids.allSatisfy(validIdentifier),
+                  (tabs + activities).allSatisfy({
+                      !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                  }),
+                  activities.isEmpty || manifest.notch?.background == true || !tabs.isEmpty else {
+                throw CLIError.invalidPackage(
+                    "Notch packages require API 4, persistentStorage, no commands or workspaces, and up to 3 tabs and 8 activities with unique valid IDs and titles."
+                )
+            }
+        } else if manifest.notch != nil {
+            throw CLIError.invalidPackage("Only notch packages may declare notch.")
         }
         if runtime == "nativeUI" {
             guard manifest.apiVersion == 2,
@@ -401,7 +437,7 @@ private struct VehlaSwiftCLI {
                 "Package identity or version is invalid."
             )
         }
-        guard runtime == "dockWidget" || !manifest.commands.isEmpty,
+        guard runtime == "dockWidget" || runtime == "notch" || !manifest.commands.isEmpty,
               Set(manifest.commands.map(\.id)).count
                 == manifest.commands.count,
               manifest.commands.allSatisfy({
@@ -422,7 +458,7 @@ private struct VehlaSwiftCLI {
             )
         }
         let nativeExecutable: URL
-        if runtime == "nativeUI" || runtime == "dockWidget" {
+        if runtime == "nativeUI" || runtime == "dockWidget" || runtime == "notch" {
             guard package.entrypoint.pathExtension == "bundle",
                   let bundle = Bundle(url: package.entrypoint),
                   let executableURL = bundle.executableURL else {
@@ -683,6 +719,12 @@ private struct VehlaSwiftCLI {
             print(
                 "Execution: in-process dock widgets with full app access "
                     + "(\(package.manifest.dockWidgets?.count ?? 0))"
+            )
+        case "notch":
+            print(
+                "Execution: in-process Notch extension with full app access "
+                    + "(tabs \(package.manifest.notch?.tabs?.count ?? 0), activities \(package.manifest.notch?.activities?.count ?? 0), "
+                    + "\(package.manifest.notch?.background == true ? "runs with the Notch" : "loaded when a tab opens"))"
             )
         default:
             print("Execution: background-only")

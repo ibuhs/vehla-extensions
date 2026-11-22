@@ -4,6 +4,11 @@
 
 ### Added
 
+- Published `VehlaNotchSDK` for Store API 4 Notch / Island extensions: live
+  activities described as data and tabs backed by a view controller. It is a
+  static library; Vehla embeds no framework for it.
+- `vehla-swift validate` accepts `runtime: "notch"`.
+- Added the Notch Lab sample extension.
 - Published `VehlaNativeUISDK` for Store API 2 hosted SwiftUI/AppKit workspaces.
 - Published `VehlaDockWidgetSDK` for Store API 3 compact, inline, and popup
   Dock widget surfaces.

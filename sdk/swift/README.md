@@ -259,13 +259,75 @@ cancellable actor-backed background lifecycle. Its `build.sh` rewrites the
 SwiftPM SDK dylib reference to the framework embedded by Vehla; custom widget
 build scripts must preserve that step.
 
+## Notch / Island extensions
+
+`VehlaNotchSDK` defines Store API 4's in-process Notch contract. A bundle's
+principal class conforms to `VehlaNotchPlugin`; Vehla hands it a
+`VehlaNotchHost`, usually wrapped in `VehlaNotch`:
+
+```swift
+import AppKit
+import SwiftUI
+import VehlaNotchSDK
+
+@objc(MyNotchPlugin)
+public final class MyNotchPlugin: NSObject, VehlaNotchPlugin {
+    public let apiVersion = VehlaNotchAPIVersion
+    private var notch: VehlaNotch?
+
+    public func notchDidStart(_ host: any VehlaNotchHost) {
+        notch = VehlaNotch(host)
+    }
+
+    public func notchWillStop() {
+        notch = nil
+    }
+
+    public func makeTabViewController(_ tabID: String) -> NSViewController? {
+        NSHostingController(rootView: Text("Hello"))
+    }
+
+    public func activity(_ activityID: String, performAction actionID: String) {
+        if actionID == "stop" { notch?.end(activityID) }
+    }
+}
+```
+
+Show a live activity with `notch.show(VehlaNotchActivity(...))`: a symbol, a
+title, a detail or a clock (`timerEnd` / `timerStart`), an optional `progress`
+ring, a `tintHex` colour and up to two buttons. Calling `show` again with the
+same id updates it in place; `end` removes it.
+
+```json
+{
+  "apiVersion": 4,
+  "runtime": "notch",
+  "entrypoint": "bin/MyNotch.bundle",
+  "capabilities": ["persistentStorage"],
+  "notch": {
+    "background": false,
+    "tabs": [{ "id": "main", "title": "My Tab", "systemImage": "star.fill" }],
+    "activities": [{ "id": "status", "title": "Status" }]
+  }
+}
+```
+
+Unlike the other hosted SDKs this product is a static library: it is compiled
+into the bundle, Vehla embeds no framework for it, and `build.sh` has no dylib
+reference to rewrite. Vehla loads the bundle only once the user turned the
+extension on, and then only when a tab is first opened, or at Notch start with
+`"background": true`. A tab's view controller is released when the tab leaves
+the screen. Limits and the full rules are in
+[`../README.md`](../README.md#notch--island-extensions); the
+[`notch-lab`](../../extensions/notch-lab) package is a complete sample.
+
 ## Requirements
 
 - macOS 14 or newer.
 - An Apple Silicon Mac. Intel executables are not supported.
 - Swift 6 or newer.
-- A manifest runtime matching the package: `executable`, `nativeUI`, or
-  `dockWidget`.
+- A manifest runtime matching the package: `executable`, `nativeUI`,
+  `dockWidget`, or `notch`.
 - A compiled executable or signed native bundle included inside the package.
 - A valid Mach-O code signature. Ad hoc signing is supported for local development.
 - A Vehla build that supports the executable Store runtime.

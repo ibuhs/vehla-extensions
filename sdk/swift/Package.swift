@@ -22,6 +22,11 @@ let package = Package(
             type: .dynamic,
             targets: ["VehlaDockWidgetSDK"]
         ),
+        // Static on purpose: compiled into the extension's bundle, so Vehla embeds no framework for it.
+        .library(
+            name: "VehlaNotchSDK",
+            targets: ["VehlaNotchSDK"]
+        ),
         .executable(
             name: "vehla-swift",
             targets: ["VehlaSwiftCLI"]
@@ -31,6 +36,7 @@ let package = Package(
         .target(name: "VehlaStoreSDK"),
         .target(name: "VehlaNativeUISDK"),
         .target(name: "VehlaDockWidgetSDK"),
+        .target(name: "VehlaNotchSDK"),
         .executableTarget(
             name: "VehlaSwiftCLI",
             dependencies: ["VehlaStoreSDK"]
@@ -42,6 +48,10 @@ let package = Package(
         .testTarget(
             name: "VehlaNativeUISDKTests",
             dependencies: ["VehlaNativeUISDK"]
+        ),
+        .testTarget(
+            name: "VehlaNotchSDKTests",
+            dependencies: ["VehlaNotchSDK"]
         ),
         .testTarget(
             name: "VehlaDockWidgetSDKTests",
