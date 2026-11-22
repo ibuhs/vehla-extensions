@@ -467,6 +467,12 @@ public final class TerminalEmulator {
         } else {
             isAlternateScreen = false
             if let saved = savedPrimary { screen = saved }
+            // Whatever was saved, the screen always has exactly `rows` lines of `cols` cells.
+            if screen.count > rows { screen.removeLast(screen.count - rows) }
+            while screen.count < rows { screen.append(blankLine()) }
+            for r in screen.indices where screen[r].count != cols {
+                screen[r] = Array(screen[r].prefix(cols)) + Array(repeating: TermCell(), count: max(0, cols - screen[r].count))
+            }
             if let c = savedPrimaryCursor { cursorRow = min(c.row, rows - 1); cursorCol = min(c.col, cols - 1) }
             savedPrimary = nil; savedPrimaryCursor = nil
         }
@@ -640,7 +646,15 @@ public final class TerminalEmulator {
         } else if newRows > rows {
             screen += (0..<(newRows - rows)).map { _ in Array(repeating: TermCell(), count: newCols) }
         }
-        if let saved = savedPrimary { savedPrimary = Array(saved.map(fit).prefix(newRows)) }
+        if let saved = savedPrimary {
+            // The screen waiting behind a full-screen program is resized too, taller as well as shorter:
+            // left short, leaving that program put back a screen with fewer lines than `rows`.
+            var kept = Array(saved.map(fit).prefix(newRows))
+            if kept.count < newRows {
+                kept += (0..<(newRows - kept.count)).map { _ in Array(repeating: TermCell(), count: newCols) }
+            }
+            savedPrimary = kept
+        }
         cols = newCols; rows = newRows
         scrollTop = 0; scrollBottom = rows - 1
         cursorRow = min(cursorRow, rows - 1); cursorCol = min(cursorCol, cols - 1)

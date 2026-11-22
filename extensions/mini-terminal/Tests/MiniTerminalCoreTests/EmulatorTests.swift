@@ -356,6 +356,22 @@ private func screen(_ t: TerminalEmulator) -> [String] { (0..<t.rows).map { t.te
         #expect(t.cursorRow >= 0 && t.cursorRow < t.rows && t.cursorCol >= 0 && t.cursorCol < t.cols)
     }
 
+    @Test func growingWhileAFullScreenProgramRunsThenLeavingIt() {
+        let t = term(20, 5)
+        t.feed("prompt")
+        t.feed("\u{1B}[?1049h")                 // a full-screen program starts (Claude Code, vim, less)
+        t.resize(cols: 30, rows: 14)            // the Notch tab is pulled taller
+        t.feed("\u{1B}[?1049l")                 // and the program quits
+        t.feed("\u{1B}[14;1H\u{1B}[J\u{1B}[2J\u{1B}[1J") // erasing below, all and above reaches every line
+        t.feed("\u{1B}[14;30Hx")
+        #expect(t.rows == 14 && t.text(row: 13).hasSuffix("x"))
+        // Shrinking and narrowing behind a full-screen program is safe as well.
+        t.feed("\u{1B}[?1049h")
+        t.resize(cols: 8, rows: 3)
+        t.feed("\u{1B}[?1049l\u{1B}[3;8H\u{1B}[J\u{1B}[2Jok")
+        #expect(t.rows == 3)
+    }
+
     @Test func resizeDuringGarbageDoesNotCrash() {
         let t = term(30, 10)
         var rng = SplitMix(seed: 7)

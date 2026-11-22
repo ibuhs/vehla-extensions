@@ -2,7 +2,7 @@
   "apiVersion": 4,
   "id": "com.michaelwiseman.vehla.mini-terminal",
   "name": "Mini Terminal",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A real shell in the Notch: searchable history, quick commands, sessions, and a live Notch activity while a command runs. Requires Vehla 9.2 or later.",
   "author": "Michael Wiseman",
   "runtime": "notch",
