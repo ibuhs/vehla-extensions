@@ -1,0 +1,30 @@
+{
+  "apiVersion": 4,
+  "id": "com.michaelwiseman.vehla.mini-terminal",
+  "name": "Mini Terminal",
+  "version": "1.0.0",
+  "description": "A real shell in the Notch: searchable history, quick commands, sessions, and a live Notch activity while a command runs.",
+  "author": "Michael Wiseman",
+  "runtime": "notch",
+  "entrypoint": "bin/MiniTerminal.bundle",
+  "capabilities": [
+    "persistentStorage",
+    "clipboardWrite"
+  ],
+  "notch": {
+    "background": false,
+    "tabs": [
+      {
+        "id": "terminal",
+        "title": "Terminal",
+        "systemImage": "greaterthan.square.fill"
+      }
+    ],
+    "activities": [
+      {
+        "id": "run",
+        "title": "Running command"
+      }
+    ]
+  }
+}
