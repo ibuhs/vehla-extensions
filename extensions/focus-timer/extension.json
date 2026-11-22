@@ -2,8 +2,8 @@
   "apiVersion": 4,
   "id": "com.ibuhs.vehla.focus-timer",
   "name": "Focus Timer",
-  "version": "1.0.0",
-  "description": "Start a focus timer from the palette and watch it count down in the Notch.",
+  "version": "1.0.1",
+  "description": "Start a focus timer from the palette and watch it count down in the Notch. Requires Vehla 9.2 or later.",
   "author": "ibuhs",
   "entrypoint": "index.js",
   "commands": [
