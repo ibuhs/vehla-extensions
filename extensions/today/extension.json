@@ -1,0 +1,63 @@
+{
+  "apiVersion": 4,
+  "id": "com.michaelwiseman.vehla.today",
+  "name": "Today",
+  "version": "1.0.0",
+  "description": "Your day at a glance: a short brief of your schedule, reminders and weather, with an optional AI summary from Anthropic, OpenAI, Gemini, DeepSeek or any compatible endpoint, plus a meeting countdown with a Join button.",
+  "author": "Michael Wiseman",
+  "runtime": "notch",
+  "entrypoint": "bin/Today.bundle",
+  "capabilities": [
+    "persistentStorage",
+    "networkAccess",
+    "openURL"
+  ],
+  "secrets": [
+    {
+      "id": "anthropicKey",
+      "label": "Anthropic API key (optional)",
+      "description": "Only used if you turn on AI brief and pick Anthropic. Sent only to api.anthropic.com.",
+      "required": false
+    },
+    {
+      "id": "openaiKey",
+      "label": "OpenAI API key (optional)",
+      "description": "Only used if you turn on AI brief and pick OpenAI. Sent only to api.openai.com.",
+      "required": false
+    },
+    {
+      "id": "geminiKey",
+      "label": "Google Gemini API key (optional)",
+      "description": "Only used if you turn on AI brief and pick Gemini. Sent only to generativelanguage.googleapis.com.",
+      "required": false
+    },
+    {
+      "id": "deepseekKey",
+      "label": "DeepSeek API key (optional)",
+      "description": "Only used if you turn on AI brief and pick DeepSeek. Sent only to api.deepseek.com.",
+      "required": false
+    },
+    {
+      "id": "customKey",
+      "label": "Custom endpoint API key (optional)",
+      "description": "Only used if you pick Custom. Sent only to the base URL you enter. Not needed for local models.",
+      "required": false
+    }
+  ],
+  "notch": {
+    "background": true,
+    "tabs": [
+      {
+        "id": "today",
+        "title": "Today",
+        "systemImage": "sun.max.fill"
+      }
+    ],
+    "activities": [
+      {
+        "id": "next-event",
+        "title": "Next meeting"
+      }
+    ]
+  }
+}
