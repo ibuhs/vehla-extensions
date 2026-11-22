@@ -1,0 +1,28 @@
+{
+  "apiVersion": 4,
+  "id": "com.michaelwiseman.vehla.wallhaven-notch",
+  "name": "Wallhaven Notch",
+  "version": "1.0.0",
+  "description": "Browse Wallhaven wallpapers from a tab in the Notch and set one as your desktop.",
+  "author": "Michael Wiseman",
+  "runtime": "notch",
+  "entrypoint": "bin/WallhavenNotch.bundle",
+  "capabilities": ["persistentStorage", "networkAccess", "clipboardWrite", "openURL"],
+  "secrets": [
+    {
+      "id": "apiKey",
+      "label": "Wallhaven API key (optional)",
+      "description": "Raises rate limits. Sent only to wallhaven.cc as the X-API-Key header.",
+      "required": false
+    }
+  ],
+  "notch": {
+    "background": false,
+    "tabs": [
+      { "id": "wallhaven", "title": "Wallhaven", "systemImage": "photo.on.rectangle.angled" }
+    ],
+    "activities": [
+      { "id": "wallpaper", "title": "Wallpaper" }
+    ]
+  }
+}
