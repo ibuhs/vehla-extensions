@@ -1,0 +1,21 @@
+{
+  "apiVersion": 4,
+  "id": "com.michaelwiseman.vehla.wellbeing",
+  "name": "Wellbeing",
+  "version": "1.0.0",
+  "description": "Track water and breathe from the Notch, with gentle reminders that respect quiet hours.",
+  "author": "Michael Wiseman",
+  "runtime": "notch",
+  "entrypoint": "bin/Wellbeing.bundle",
+  "capabilities": ["persistentStorage"],
+  "notch": {
+    "background": true,
+    "tabs": [
+      { "id": "wellbeing", "title": "Wellbeing", "systemImage": "heart.fill" }
+    ],
+    "activities": [
+      { "id": "water", "title": "Water reminder" },
+      { "id": "breathe", "title": "Breathing session" }
+    ]
+  }
+}
