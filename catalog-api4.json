@@ -195,6 +195,48 @@
     {
       "manifest": {
         "apiVersion": 4,
+        "id": "com.michaelwiseman.vehla.mini-terminal",
+        "name": "Mini Terminal",
+        "version": "1.0.0",
+        "description": "A real shell in the Notch: searchable history, quick commands, sessions, and a live Notch activity while a command runs.",
+        "author": "Michael Wiseman",
+        "runtime": "notch",
+        "entrypoint": "bin/MiniTerminal.bundle",
+        "capabilities": [
+          "persistentStorage",
+          "clipboardWrite"
+        ],
+        "notch": {
+          "background": false,
+          "tabs": [
+            {
+              "id": "terminal",
+              "title": "Terminal",
+              "systemImage": "terminal.fill"
+            }
+          ],
+          "activities": [
+            {
+              "id": "run",
+              "title": "Running command"
+            }
+          ]
+        }
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/mini-terminal-1.0.0.zip",
+      "sha256": "90bce962ad9a7301df325eb45172b201f8c9b4ff6dd1b5e9d3465339259564dd",
+      "archiveRoot": "mini-terminal",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "N1ij/hbsYHgD4oKyWpEBqZS7X/VSTq4sKJ+EOA8WKaAZHy7Wt/wCv+1t/LHCXjbRZyJq/l4J7GYcXuXkXck6Cg=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 4,
         "id": "com.michaelwiseman.vehla.today",
         "name": "Today",
         "version": "1.0.0",
