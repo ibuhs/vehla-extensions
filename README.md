@@ -1337,6 +1337,13 @@ Build or update one package while preserving every other catalog entry:
 python3 scripts/build-catalog.py --only toolbox-native
 ```
 
+Packages for Store API 4 and up (Notch extensions) are listed in
+`catalog-api4.json`, never in `catalog.json`: versions of Vehla from before
+API 4 read `catalog.json` as a whole and refuse it when one entry names a
+runtime or API they don't know, which would empty their Store. Newer versions
+read both files. The build script sorts packages into the right file by
+`apiVersion`.
+
 The build script:
 
 1. Finds every directory under `extensions/` containing `extension.json`.

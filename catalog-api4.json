@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "manifest": {
+        "apiVersion": 4,
+        "id": "com.ibuhs.vehla.docker-notch",
+        "name": "Docker Containers",
+        "version": "1.0.0",
+        "description": "Your Docker containers in the Notch: start, stop and restart them, and see at once when one stops.",
+        "author": "ibuhs",
+        "runtime": "notch",
+        "entrypoint": "bin/DockerNotch.bundle",
+        "capabilities": [
+          "persistentStorage"
+        ],
+        "notch": {
+          "background": true,
+          "tabs": [
+            {
+              "id": "containers",
+              "title": "Docker",
+              "systemImage": "shippingbox.fill"
+            }
+          ],
+          "activities": [
+            {
+              "id": "stopped",
+              "title": "A container stopped"
+            },
+            {
+              "id": "unhealthy",
+              "title": "A container is unhealthy"
+            }
+          ]
+        }
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/docker-notch-1.0.0.zip",
+      "sha256": "00ac985f08aca5efb200bc1fb6b04870d305c30e41ebc252d3b762554151b929",
+      "archiveRoot": "docker-notch",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "eAwIo7kFFrgCz55zq7Di5l9pyxTTtKRuE017MyTT37hGeTekBZLQoPZd6zcwVb12zWR513aJ3XUT7YIdxhgFDQ=="
+    }
+  ]
+}

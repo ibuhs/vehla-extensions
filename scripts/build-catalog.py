@@ -45,6 +45,10 @@ def package_digest(root: pathlib.Path) -> str:
     return digest.hexdigest()
 
 
+NEWER_CATALOG_NAME = "catalog-api4.json"
+NEWER_CATALOG_API = 4
+
+
 def signing_publisher() -> dict[str, str] | None:
     environment = {
         "id": os.environ.get("VEHLA_PUBLISHER_ID"),
@@ -176,10 +180,19 @@ def main() -> None:
     PACKAGES.mkdir(exist_ok=True)
     publisher = signing_publisher()
     catalog_path = ROOT / "catalog.json"
+    # Packages for Store API 4 and up (Notch extensions) are listed in their own file. Released
+    # versions of Vehla decode catalog.json as a whole and refuse it when one entry names a runtime
+    # or an API they don't know, so a newer package in catalog.json would empty everyone's Store.
+    newer_catalog_path = ROOT / NEWER_CATALOG_NAME
     existing_catalog = {"packages": []}
     existing_packages = {}
     if catalog_path.is_file():
         existing_catalog = json.loads(catalog_path.read_text())
+    if newer_catalog_path.is_file():
+        existing_catalog["packages"] = list(existing_catalog.get("packages", [])) + json.loads(
+            newer_catalog_path.read_text()
+        ).get("packages", [])
+    if existing_catalog.get("packages"):
         existing_packages = {
             (
                 package["manifest"]["id"],
@@ -374,12 +387,25 @@ def main() -> None:
         catalog_packages.append(catalog_package)
 
     catalog_packages.sort(key=lambda package: package["archiveRoot"])
-    catalog = {
-        "schemaVersion": 1,
-        "packages": catalog_packages,
-    }
-    catalog_path.write_text(json.dumps(catalog, indent=2) + "\n")
-    print(f"Built {len(catalog_packages)} Store packages.")
+    newer = [
+        package for package in catalog_packages
+        if package["manifest"].get("apiVersion", 1) >= NEWER_CATALOG_API
+    ]
+    classic = [
+        package for package in catalog_packages
+        if package["manifest"].get("apiVersion", 1) < NEWER_CATALOG_API
+    ]
+    catalog_path.write_text(
+        json.dumps({"schemaVersion": 1, "packages": classic}, indent=2) + "\n"
+    )
+    if newer or newer_catalog_path.is_file():
+        newer_catalog_path.write_text(
+            json.dumps({"schemaVersion": 1, "packages": newer}, indent=2) + "\n"
+        )
+    print(
+        f"Built {len(classic)} Store packages in catalog.json"
+        f" and {len(newer)} in {NEWER_CATALOG_NAME}."
+    )
 
 
 if __name__ == "__main__":

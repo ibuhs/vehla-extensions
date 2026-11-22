@@ -59,7 +59,12 @@ A Notch extension adds either or both of:
   ring and up to two buttons. They are data (`VehlaNotchActivity`); Vehla draws
   them, so every activity looks at home and costs the extension no views.
 - **Tabs** in the open Notch / Island, drawn by the extension's own
-  `NSViewController` (SwiftUI through `NSHostingController` is fine).
+  `NSViewController` (SwiftUI through `NSHostingController` is fine). Each tab
+  gets its own icon in the Notch's tab bar, the manifest's `systemImage` (a
+  puzzle piece when omitted), with `title` as its tooltip, and the whole
+  content area below the bar. That area is small (about 160 points high in the
+  Notch, a little taller in the floating Island), so lay out for it, fill the
+  size you are given and scroll anything longer.
 
 ```json
 {
