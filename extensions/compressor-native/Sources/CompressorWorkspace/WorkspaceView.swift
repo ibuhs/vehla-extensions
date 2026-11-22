@@ -26,10 +26,12 @@ struct CompressorWorkspaceView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             model.refreshDependencies()
         }
-        .dropDestination(for: URL.self) { urls, _ in
-            model.addFiles(urls.filter(\.isFileURL))
+        // Not dropDestination(for: URL.self): that keeps the address of content
+        // dropped from apps like Photos, which macOS empties right after the drop.
+        .onDrop(of: [.fileURL, .item], isTargeted: $dropTargeted) { providers in
+            model.receive(providers)
             return true
-        } isTargeted: { dropTargeted = $0 }
+        }
     }
 
     private var content: some View {

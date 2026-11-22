@@ -284,6 +284,12 @@ struct CompressionEngine: Sendable {
             if isDirectory, Self.isInside(destination, source) {
                 throw EngineError(message: "The destination folder is inside the folder being compressed.")
             }
+            // A dropped file that the sending app never finished handing over
+            // arrives empty. There is nothing to compress, and copying it would
+            // put an empty "original" in the destination.
+            if !isDirectory, result.before == 0 {
+                throw EngineError(message: "This file is empty (0 bytes), so there's nothing to compress. If you dragged it in from another app such as Photos, add it again.")
+            }
             if kind == .skip {
                 _ = try copyOriginal(source)
                 result.status = .alreadyCompressed
@@ -328,10 +334,19 @@ struct CompressionEngine: Sendable {
             }
             try Task.checkCancellation()
 
+            let tool = URL(fileURLWithPath: plan.executable).lastPathComponent
+            // Tool messages name files by their staging path; show the file's own name instead.
+            let detail = output.stderr
+                .replacingOccurrences(of: stagedIn.path, with: source.lastPathComponent)
+                .replacingOccurrences(of: stage.path + "/", with: "")
+                .split(separator: "\n").suffix(3).joined(separator: " | ")
             guard output.status == 0 else {
-                let detail = output.stderr
-                    .split(separator: "\n").suffix(3).joined(separator: " | ")
-                throw EngineError(message: "\(URL(fileURLWithPath: plan.executable).lastPathComponent) failed: \(detail.isEmpty ? "exit \(output.status)" : detail)")
+                throw EngineError(message: "\(tool) failed: \(detail.isEmpty ? "exit \(output.status)" : detail)")
+            }
+            // Some tools (sips) report success after skipping a file they can't
+            // read. No output means failure, whatever the exit status says.
+            guard fm.fileExists(atPath: stagedOut.path), Self.size(of: stagedOut) > 0 else {
+                throw EngineError(message: "\(tool) couldn't read this file\(detail.isEmpty ? "." : ": \(detail)")")
             }
 
             let after = Self.size(of: stagedOut)

@@ -133,7 +133,7 @@
         "apiVersion": 2,
         "id": "com.ahmadjerow.compressor-glass",
         "name": "Compressor Glass",
-        "version": "1.4.3",
+        "version": "1.4.4",
         "description": "Compress images, videos, PDFs and files without visible quality loss, in a tinted Liquid Glass window.",
         "author": "Ahmad Jerow",
         "runtime": "nativeUI",
@@ -173,8 +173,8 @@
           }
         ]
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/compressor-native-1.4.3.zip",
-      "sha256": "af54256ba6dd72f5f5f30499053406b263b9fbf4263f1408395be35efb4f48b4",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/compressor-native-1.4.4.zip",
+      "sha256": "6964259f6e8641d836a7f0ccd98a94407fa5279d8a2263f6fd8552a043df6bec",
       "archiveRoot": "compressor-native",
       "publisher": {
         "id": "com.ibuhs.publisher",
@@ -182,7 +182,7 @@
         "keyID": "release-2026-07",
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
-      "signature": "AHclk5AseT4d8/IJzD5Pfiu+XVqxSv/NgqRXhmspxiqTmhMyW7f3caRDHrPxrYk3m3vzDQJjL9gwGyFq9eXBCQ=="
+      "signature": "V+99rj3rjqXYk1rjvvLAaqT42C7CvR+GsBMP4nHM+ox/OIHISQfgmMps7Se82G6mTroolFMpQ2FFJtll1f5OAQ=="
     },
     {
       "manifest": {

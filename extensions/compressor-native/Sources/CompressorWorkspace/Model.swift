@@ -18,13 +18,16 @@ struct FileItem: Identifiable {
     var fileCount = 1
     var largestFile: Int64 = 0
     var folderMode: FolderMode = .zip
+    /// Compressor's own copy of content dropped from another app (such as Photos).
+    var isImported = false
     var state: State = .pending
 
     var name: String { url.lastPathComponent }
     var compressesContents: Bool { isDirectory && folderMode == .contents }
 
     var typeLabel: String {
-        isDirectory ? "Folder · \(fileCount) file\(fileCount == 1 ? "" : "s")" : kind.label
+        isDirectory ? "Folder · \(fileCount) file\(fileCount == 1 ? "" : "s")"
+            : isImported ? "\(kind.label) · copied from another app" : kind.label
     }
 
     var fraction: Double {
@@ -141,7 +144,39 @@ final class CompressorModel: ObservableObject {
         self.confirmTrash = confirmTrash
         self.trashAction = trash
         settings = Settings.load(from: context.dataDirectory)
+        // Copies of dropped items from an earlier session have no row any more.
+        try? FileManager.default.removeItem(at: importsDirectory)
         refreshDependencies()
+    }
+
+    private var importsDirectory: URL { DropImporter.importsDirectory(in: context.dataDirectory) }
+
+    // MARK: Drops
+
+    /// Accepts anything dropped on the window, copying content from other apps
+    /// into Compressor's storage before macOS cleans it up.
+    func receive(_ providers: [NSItemProvider]) {
+        guard phase != .running else { return }
+        let imports = importsDirectory
+        for provider in providers {
+            DropImporter.receive(provider, into: imports) { outcome in
+                Task { @MainActor [weak self] in
+                    switch outcome {
+                    case .success(let received): self?.addFiles([received.url], imported: received.imported)
+                    case .failure(let failure): self?.notice = failure.message
+                    }
+                }
+            }
+        }
+    }
+
+    /// Deletes Compressor's copy of a dropped item, never anything outside its storage.
+    private func discardImport(_ item: FileItem) {
+        guard item.isImported else { return }
+        let folder = item.url.deletingLastPathComponent().standardizedFileURL
+        guard CompressionEngine.isInside(folder, importsDirectory.standardizedFileURL),
+              folder != importsDirectory.standardizedFileURL else { return }
+        try? FileManager.default.removeItem(at: folder)
     }
 
     // MARK: Tools
@@ -193,7 +228,7 @@ final class CompressorModel: ObservableObject {
 
     // MARK: Picking
 
-    func addFiles(_ urls: [URL]) {
+    func addFiles(_ urls: [URL], imported: Bool = false) {
         guard phase != .running else { return }
         notice = nil
         if phase == .finished { items.removeAll(); phase = .idle }
@@ -204,6 +239,7 @@ final class CompressorModel: ObservableObject {
             var item = FileItem(url: url, isDirectory: isDir.boolValue,
                                 kind: MediaKind.classify(url, isDirectory: isDir.boolValue), size: size)
             item.largestFile = size
+            item.isImported = imported
             if item.isDirectory {
                 let stats = FolderExpansion.stats(of: url)
                 item.fileCount = stats.files
@@ -222,6 +258,7 @@ final class CompressorModel: ObservableObject {
             control.stop(id)
             runIDs.removeAll { $0 == id }
         }
+        if let item = items.first(where: { $0.id == id }) { discardImport(item) }
         items.removeAll { $0.id == id }
         if items.isEmpty, phase == .finished { phase = .idle }
     }
@@ -296,6 +333,7 @@ final class CompressorModel: ObservableObject {
 
     func newBatch() {
         guard phase != .running else { return }
+        items.forEach(discardImport)
         items.removeAll()
         runIDs = []
         phase = .idle
@@ -343,7 +381,7 @@ final class CompressorModel: ObservableObject {
         let options = EngineOptions(quality: quality, fastVideo: fastVideo,
                                     trashOriginals: trashOriginals, trash: trashAction)
         let jobs = work.map { (id: $0.id, url: $0.url, isDirectory: $0.isDirectory,
-                               size: $0.size, contents: $0.compressesContents) }
+                               size: $0.size, contents: $0.compressesContents, imported: $0.isImported) }
 
         task = Task { [weak self] in
             // Listing big folders can take a moment, so do it off the main thread.
@@ -351,7 +389,7 @@ final class CompressorModel: ObservableObject {
                 jobs.map { job in
                     guard job.contents else {
                         return (job.id, .success([WorkUnit(owner: job.id, source: job.url, isDirectory: job.isDirectory,
-                                                           destination: destination, size: job.size)]))
+                                                           destination: destination, size: job.size, imported: job.imported)]))
                     }
                     return (job.id, Result { try FolderExpansion.units(for: job.url, owner: job.id, into: destination) })
                 }
@@ -427,7 +465,11 @@ final class CompressorModel: ObservableObject {
         let indices = ownerUnits[owner, default: []]
         let results = indices.compactMap { unitResults[$0] }
         guard item.compressesContents else {
-            if let result = results.first { setState(owner, .done(result)) }
+            if let result = results.first {
+                setState(owner, .done(result))
+                // The original is now saved in the destination; our copy has done its job.
+                discardImport(item)
+            }
             return
         }
         var combined = FolderExpansion.aggregate(results, fileCount: indices.count)

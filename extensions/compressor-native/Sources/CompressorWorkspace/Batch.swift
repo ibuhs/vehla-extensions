@@ -24,6 +24,8 @@ struct WorkUnit: Sendable {
     let isDirectory: Bool
     let destination: URL
     let size: Int64
+    /// The source is Compressor's own copy of something dropped from another app.
+    var imported = false
 
     var isVideo: Bool { MediaKind.classify(source, isDirectory: isDirectory) == .video }
 }
@@ -89,7 +91,9 @@ enum BatchRunner {
             let unit = units[index]
             guard !control.isStopped(unit.owner) else { return }
             progress(index, 0)
-            let engine = options.engine(for: unit.destination)
+            var engine = options.engine(for: unit.destination)
+            // Never send Compressor's private copy of a dropped item to the user's Trash.
+            if unit.imported { engine.trashOriginal = false }
             let job = Task { await engine.compress(unit.source, isDirectory: unit.isDirectory) { progress(index, $0) } }
             control.register(index, owner: unit.owner, task: job)
             let result = await withTaskCancellationHandler { await job.value } onCancel: { job.cancel() }
