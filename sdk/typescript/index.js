@@ -20,6 +20,14 @@ export const Store = {
   view(value) {
     return { view: value };
   },
+
+  notchActivity(id, activity) {
+    return { action: { type: "notchActivity", value: id, activity } };
+  },
+
+  endNotchActivity(id) {
+    return { action: { type: "notchActivity", value: id, activity: { end: true } } };
+  },
 };
 
 export function runStoreExtension(handler) {

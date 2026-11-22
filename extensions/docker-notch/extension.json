@@ -2,7 +2,7 @@
   "apiVersion": 4,
   "id": "com.ibuhs.vehla.docker-notch",
   "name": "Docker Containers",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Your Docker containers in the Notch: start, stop and restart them, and see at once when one stops.",
   "author": "ibuhs",
   "runtime": "notch",
@@ -13,11 +13,22 @@
   "notch": {
     "background": true,
     "tabs": [
-      { "id": "containers", "title": "Docker", "systemImage": "shippingbox.fill" }
+      {
+        "id": "containers",
+        "title": "Docker",
+        "systemImage": "shippingbox.fill",
+        "height": 260
+      }
     ],
     "activities": [
-      { "id": "stopped", "title": "A container stopped" },
-      { "id": "unhealthy", "title": "A container is unhealthy" }
+      {
+        "id": "stopped",
+        "title": "A container stopped"
+      },
+      {
+        "id": "unhealthy",
+        "title": "A container is unhealthy"
+      }
     ]
   }
 }

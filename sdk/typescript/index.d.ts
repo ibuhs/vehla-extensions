@@ -77,7 +77,37 @@ export type StoreAction =
       title?: string;
       label?: string;
       systemImage?: string;
+    }
+  | {
+      /** Store API 4. `value` is an activity id declared under `notch.activities`. */
+      type: "notchActivity";
+      value: string;
+      activity: StoreNotchActivity;
+      label?: string;
+      systemImage?: string;
     };
+
+/** A live activity in the closed Notch, drawn by Vehla. Nothing of the extension keeps running for it. */
+export interface StoreNotchActivity {
+  title?: string;
+  detail?: string;
+  systemImage?: string;
+  /** "#RRGGBB" */
+  tint?: string;
+  /** 0 to 1 */
+  progress?: number;
+  /** How long it stays: 2 seconds to 8 hours (8 hours when omitted). */
+  seconds?: number;
+  /** Shows a clock counting down this many seconds in place of `detail`. */
+  countdown?: number;
+  /** true takes the activity away. */
+  end?: boolean;
+  /** One of this package's commands, run when the activity is clicked. */
+  command?: string;
+  query?: string;
+  /** At most two. Each runs one of this package's commands. */
+  buttons?: { title: string; systemImage?: string; command: string; query?: string }[];
+}
 
 export type StoreRichItem =
   | { type: "text" | "markdown" | "code"; text: string; language?: string }
@@ -111,6 +141,8 @@ export declare const Store: {
   showMessage(value: string): StoreResult;
   notify(title: string, body: string): StoreResult;
   view(value: StoreRichView): StoreResult;
+  notchActivity(id: string, activity: StoreNotchActivity): StoreResult;
+  endNotchActivity(id: string): StoreResult;
 };
 
 export declare function runStoreExtension(handler: StoreCommandHandler): void;

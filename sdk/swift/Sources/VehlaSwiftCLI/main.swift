@@ -374,11 +374,20 @@ private struct VehlaSwiftCLI {
                     "Notch packages require API 4, persistentStorage, no commands or workspaces, and up to 3 tabs and 8 activities with unique valid IDs and titles."
                 )
             }
-        } else if manifest.notch != nil {
-            throw CLIError.invalidPackage("Only notch packages may declare notch.")
+        } else if let notch = manifest.notch {
+            let activities = notch.activities ?? []
+            let ids = activities.map(\.id)
+            guard runtime != "dockWidget", manifest.apiVersion == 4,
+                  notch.tabs?.isEmpty != false, notch.background != true,
+                  !ids.isEmpty, ids.count <= 8, Set(ids).count == ids.count,
+                  ids.allSatisfy(validIdentifier), activities.allSatisfy({ !$0.title.isEmpty }) else {
+                throw CLIError.invalidPackage(
+                    "Extensions other than notch packages may only declare notch activities (up to 8, unique valid IDs and titles) and need Store API 4."
+                )
+            }
         }
         if runtime == "nativeUI" {
-            guard manifest.apiVersion == 2,
+            guard manifest.apiVersion == 2 || (manifest.apiVersion == 4 && manifest.notch != nil),
                   let workspaces = manifest.workspaces,
                   !workspaces.isEmpty,
                   (manifest.capabilities ?? []).contains(.persistentStorage),

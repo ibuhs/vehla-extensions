@@ -1,8 +1,15 @@
+// Dock Widget SDK, from Vehla Extensions: https://github.com/ibuhs/vehla-extensions
+// Copyright (c) 2026 Shubham Kaila. Used under the MIT License; see THIRD_PARTY_NOTICES.md.
+
 import AppKit
 import Foundation
 
 /// The plugin contract version implemented by this SDK.
-public let VehlaDockWidgetAPIVersion = 2
+///
+/// Version 3 is additive: everything from version 2 is unchanged, so widgets built against version 2 keep
+/// working. It adds declarative settings, tile badges, context-menu actions, host-managed scheduling, popup
+/// control, logging and enforced capabilities. See docs/dock-widget-sdk.md.
+public let VehlaDockWidgetAPIVersion = 3
 
 @objc(VehlaDockWidgetSurface)
 public enum VehlaDockWidgetSurface: Int, CaseIterable, Sendable {
@@ -82,6 +89,178 @@ public final class VehlaDockWidgetDescriptor: NSObject {
         supportedSurfaceValues.contains {
             $0.intValue == surface.rawValue
         }
+    }
+
+    // Added in API 3. New stored properties stay last so the layout widgets built earlier rely on is unchanged.
+    /// Settings the host shows for this widget under Settings → Dock Bar.
+    public internal(set) var settingDescriptors: [VehlaDockWidgetSettingDescriptor] = []
+    /// Entries in the tile's right-click menu.
+    public internal(set) var menuActions: [VehlaDockWidgetMenuAction] = []
+    /// The width of the wide (inline) tile, in points.
+    public internal(set) var preferredInlineWidth: Double = 240
+}
+
+extension VehlaDockWidgetDescriptor {
+    /// A descriptor with settings, menu actions and a wide-tile width (API 3).
+    @nonobjc
+    public convenience init(
+        id: String,
+        title: String,
+        subtitle: String? = nil,
+        systemImage: String = "shippingbox",
+        preferredPopupWidth: Double = 420,
+        preferredPopupHeight: Double = 520,
+        supportedSurfaces: [VehlaDockWidgetSurface] = [.compact],
+        settings: [VehlaDockWidgetSettingDescriptor],
+        menuActions: [VehlaDockWidgetMenuAction] = [],
+        preferredInlineWidth: Double = 240
+    ) {
+        self.init(
+            id: id, title: title, subtitle: subtitle, systemImage: systemImage,
+            preferredPopupWidth: preferredPopupWidth, preferredPopupHeight: preferredPopupHeight,
+            supportedSurfaces: supportedSurfaces
+        )
+        settingDescriptors = settings
+        self.menuActions = menuActions
+        self.preferredInlineWidth = preferredInlineWidth
+    }
+}
+
+// MARK: - API 3: settings, menu actions, scheduling
+
+@objc(VehlaDockWidgetSettingKind)
+public enum VehlaDockWidgetSettingKind: Int, Sendable {
+    case toggle
+    case choice
+    case text
+    case number
+}
+
+/// One setting a widget declares. The host draws the control, stores the value, and passes it back
+/// through ``VehlaDockWidgetContext/settings``.
+@objc(VehlaDockWidgetSettingDescriptor)
+@objcMembers
+public final class VehlaDockWidgetSettingDescriptor: NSObject {
+    public let key: String
+    public let title: String
+    public let detail: String?
+    public let kindRawValue: Int
+    /// The default, as text: "true"/"false", a choice id, a string, or a number.
+    public let defaultValue: String
+    public let choiceIDs: [String]
+    public let choiceTitles: [String]
+    public let minimum: Double
+    public let maximum: Double
+
+    @nonobjc
+    public var kind: VehlaDockWidgetSettingKind { VehlaDockWidgetSettingKind(rawValue: kindRawValue) ?? .text }
+
+    private init(key: String, title: String, detail: String?, kind: VehlaDockWidgetSettingKind, defaultValue: String,
+                 choiceIDs: [String] = [], choiceTitles: [String] = [], minimum: Double = 0, maximum: Double = 100) {
+        self.key = key
+        self.title = title
+        self.detail = detail
+        kindRawValue = kind.rawValue
+        self.defaultValue = defaultValue
+        self.choiceIDs = choiceIDs
+        self.choiceTitles = choiceTitles
+        self.minimum = minimum
+        self.maximum = maximum
+    }
+
+    @nonobjc
+    public static func toggle(key: String, title: String, detail: String? = nil, defaultValue: Bool = false) -> VehlaDockWidgetSettingDescriptor {
+        .init(key: key, title: title, detail: detail, kind: .toggle, defaultValue: defaultValue ? "true" : "false")
+    }
+
+    @nonobjc
+    public static func choice(key: String, title: String, detail: String? = nil, choices: [(id: String, title: String)],
+                              defaultID: String) -> VehlaDockWidgetSettingDescriptor {
+        .init(key: key, title: title, detail: detail, kind: .choice, defaultValue: defaultID,
+              choiceIDs: choices.map(\.id), choiceTitles: choices.map(\.title))
+    }
+
+    @nonobjc
+    public static func text(key: String, title: String, detail: String? = nil, defaultValue: String = "") -> VehlaDockWidgetSettingDescriptor {
+        .init(key: key, title: title, detail: detail, kind: .text, defaultValue: defaultValue)
+    }
+
+    @nonobjc
+    public static func number(key: String, title: String, detail: String? = nil, range: ClosedRange<Double>,
+                              defaultValue: Double) -> VehlaDockWidgetSettingDescriptor {
+        .init(key: key, title: title, detail: detail, kind: .number, defaultValue: String(defaultValue),
+              minimum: range.lowerBound, maximum: range.upperBound)
+    }
+}
+
+/// The current values of a widget's settings.
+@objc(VehlaDockWidgetSettings)
+@objcMembers
+public final class VehlaDockWidgetSettings: NSObject {
+    private var values: [String: String]
+    private let defaults: [String: String]
+
+    public override init() {
+        values = [:]
+        defaults = [:]
+    }
+
+    @nonobjc
+    public init(descriptors: [VehlaDockWidgetSettingDescriptor], stored: [String: String]) {
+        defaults = Dictionary(descriptors.map { ($0.key, $0.defaultValue) }, uniquingKeysWith: { first, _ in first })
+        values = stored
+    }
+
+    public func string(_ key: String) -> String? { values[key] ?? defaults[key] }
+    public func bool(_ key: String) -> Bool { string(key) == "true" }
+    public func double(_ key: String) -> Double { string(key).flatMap(Double.init) ?? 0 }
+
+    /// Called by the host when a value changes.
+    public func update(_ key: String, to value: String) { values[key] = value }
+}
+
+@objc(VehlaDockWidgetMenuAction)
+@objcMembers
+public final class VehlaDockWidgetMenuAction: NSObject {
+    public let id: String
+    public let title: String
+    public let systemImage: String?
+
+    public init(id: String, title: String, systemImage: String? = nil) {
+        self.id = id
+        self.title = title
+        self.systemImage = systemImage
+    }
+}
+
+@objc(VehlaDockWidgetLogLevel)
+public enum VehlaDockWidgetLogLevel: Int, Sendable {
+    case info
+    case warning
+    case error
+}
+
+/// A repeating task owned by the host's visibility rules.
+@objc(VehlaDockWidgetScheduledTask)
+@objcMembers
+@MainActor
+public final class VehlaDockWidgetScheduledTask: NSObject {
+    fileprivate let interval: TimeInterval
+    fileprivate let runWhileHidden: Bool
+    fileprivate let handler: @MainActor () -> Void
+    fileprivate var timer: Timer?
+    fileprivate var cancelled = false
+
+    fileprivate init(interval: TimeInterval, runWhileHidden: Bool, handler: @escaping @MainActor () -> Void) {
+        self.interval = interval
+        self.runWhileHidden = runWhileHidden
+        self.handler = handler
+    }
+
+    public func cancel() {
+        cancelled = true
+        timer?.invalidate()
+        timer = nil
     }
 }
 
@@ -456,6 +635,17 @@ public final class VehlaDockWidgetContext: NSObject {
     private let invalidationHandler: () -> Void
     private let actionHandler: (VehlaDockWidgetAction) -> Void
 
+    // Added in API 3, last, so the layout widgets built earlier rely on is unchanged.
+    /// The widget's settings and their current values (API 3).
+    public private(set) var settings = VehlaDockWidgetSettings()
+    /// What the host allows this widget to do, from its manifest (API 3).
+    public private(set) var capabilities: Set<String> = []
+    @MainActor private var tasks: [VehlaDockWidgetScheduledTask] = []
+    @MainActor private var isVisible = false
+    private var badgeHandler: ((String?, NSColor?) -> Void)?
+    private var popupHandler: ((Bool) -> Void)?
+    private var logHandler: ((String, VehlaDockWidgetLogLevel) -> Void)?
+
     @nonobjc
     public init(
         packageID: String,
@@ -483,6 +673,78 @@ public final class VehlaDockWidgetContext: NSObject {
         self.secretRemove = secretRemove
         self.invalidationHandler = invalidationHandler
         self.actionHandler = actionHandler
+    }
+
+    /// Called by the host after creating the context (API 3).
+    @nonobjc
+    public func attachHost(
+        settings: VehlaDockWidgetSettings,
+        capabilities: Set<String>,
+        badge: @escaping (String?, NSColor?) -> Void,
+        popup: @escaping (Bool) -> Void,
+        log: @escaping (String, VehlaDockWidgetLogLevel) -> Void
+    ) {
+        self.settings = settings
+        self.capabilities = capabilities
+        badgeHandler = badge
+        popupHandler = popup
+        logHandler = log
+    }
+
+    /// Whether this widget's manifest declared the capability (API 3).
+    public func hasCapability(_ name: String) -> Bool { capabilities.contains(name) }
+
+    /// Shows a short badge on the widget's tile, such as an unread count; nil clears it (API 3).
+    public func setBadge(_ text: String?, tint: NSColor? = nil) { badgeHandler?(text, tint) }
+
+    /// Opens the widget's popup, for example to show an alert (API 3).
+    public func showPopup() { popupHandler?(true) }
+
+    /// Closes the widget's popup (API 3).
+    public func closePopup() { popupHandler?(false) }
+
+    /// Writes to the host's log under the widget's name (API 3).
+    public func log(_ message: String, level: VehlaDockWidgetLogLevel = .info) { logHandler?(message, level) }
+
+    /// Runs `handler` every `interval` seconds while the widget is visible, and pauses it while hidden, so widgets
+    /// do no background work nobody can see (API 3). Cancel the returned task, or let the widget close, to stop it.
+    @MainActor
+    @discardableResult
+    public func schedule(
+        every interval: TimeInterval,
+        runWhileHidden: Bool = false,
+        _ handler: @escaping @MainActor () -> Void
+    ) -> VehlaDockWidgetScheduledTask {
+        let task = VehlaDockWidgetScheduledTask(interval: max(0.05, interval), runWhileHidden: runWhileHidden, handler: handler)
+        tasks.append(task)
+        if isVisible || runWhileHidden { start(task) }
+        return task
+    }
+
+    @MainActor
+    private func start(_ task: VehlaDockWidgetScheduledTask) {
+        guard task.timer == nil, !task.cancelled else { return }
+        task.timer = Timer.scheduledTimer(withTimeInterval: task.interval, repeats: true) { _ in
+            MainActor.assumeIsolated { task.handler() }
+        }
+        task.timer?.tolerance = task.interval * 0.1
+    }
+
+    /// Called by the host when the widget becomes visible or hidden (API 3).
+    @MainActor
+    public func hostVisibilityChanged(_ visible: Bool) {
+        isVisible = visible
+        tasks.removeAll { $0.cancelled }
+        for task in tasks {
+            if visible || task.runWhileHidden { start(task) } else { task.timer?.invalidate(); task.timer = nil }
+        }
+    }
+
+    /// Stops every scheduled task (API 3). The host calls this when the widget closes.
+    @MainActor
+    public func hostStopScheduledTasks() {
+        tasks.forEach { $0.cancel() }
+        tasks.removeAll()
     }
 
     /// Returns a Keychain-backed value declared by this package's manifest.
@@ -562,4 +824,12 @@ public protocol VehlaDockWidgetPlugin: NSObjectProtocol {
     /// The final nonblocking notification for this widget instance.
     @MainActor
     @objc optional func widgetWillClose(_ widgetID: String)
+
+    /// A setting declared in the descriptor changed (API 3). Read the new value from `context.settings`.
+    @MainActor
+    @objc optional func widget(_ widgetID: String, settingDidChange key: String)
+
+    /// The user chose one of the descriptor's menu actions on the tile (API 3).
+    @MainActor
+    @objc optional func widget(_ widgetID: String, performAction actionID: String)
 }

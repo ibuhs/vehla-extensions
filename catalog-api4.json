@@ -6,7 +6,7 @@
         "apiVersion": 4,
         "id": "com.ibuhs.vehla.docker-notch",
         "name": "Docker Containers",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "Your Docker containers in the Notch: start, stop and restart them, and see at once when one stops.",
         "author": "ibuhs",
         "runtime": "notch",
@@ -20,7 +20,8 @@
             {
               "id": "containers",
               "title": "Docker",
-              "systemImage": "shippingbox.fill"
+              "systemImage": "shippingbox.fill",
+              "height": 260
             }
           ],
           "activities": [
@@ -35,8 +36,8 @@
           ]
         }
       },
-      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/docker-notch-1.0.0.zip",
-      "sha256": "00ac985f08aca5efb200bc1fb6b04870d305c30e41ebc252d3b762554151b929",
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/docker-notch-1.1.0.zip",
+      "sha256": "4ee45128ca30498916d90f14b0fb01b9606da249b773f65e9d000201b2c05037",
       "archiveRoot": "docker-notch",
       "publisher": {
         "id": "com.ibuhs.publisher",
@@ -44,7 +45,61 @@
         "keyID": "release-2026-07",
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
-      "signature": "eAwIo7kFFrgCz55zq7Di5l9pyxTTtKRuE017MyTT37hGeTekBZLQoPZd6zcwVb12zWR513aJ3XUT7YIdxhgFDQ=="
+      "signature": "2zRQ2sWeIDseJriQuHoH61KWqJEWnCkuy+NR3CNbDvKLBS5Ca0m1qIftNjRfb2KyrFe0AZSENuWEd8BJ3e3QBQ=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 4,
+        "id": "com.ibuhs.vehla.focus-timer",
+        "name": "Focus Timer",
+        "version": "1.0.0",
+        "description": "Start a focus timer from the palette and watch it count down in the Notch.",
+        "author": "ibuhs",
+        "entrypoint": "index.js",
+        "commands": [
+          {
+            "id": "start",
+            "title": "Start Focus Timer",
+            "subtitle": "Type the minutes, or leave empty for 25",
+            "keywords": [
+              "focus",
+              "pomodoro",
+              "timer"
+            ],
+            "systemImage": "timer"
+          },
+          {
+            "id": "stop",
+            "title": "Stop Focus Timer",
+            "subtitle": "Take the timer out of the Notch",
+            "keywords": [
+              "focus",
+              "pomodoro",
+              "stop"
+            ],
+            "systemImage": "stop.circle"
+          }
+        ],
+        "capabilities": [],
+        "notch": {
+          "activities": [
+            {
+              "id": "focus",
+              "title": "Focus timer"
+            }
+          ]
+        }
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/focus-timer-1.0.0.zip",
+      "sha256": "d30b37dd9d8860faf6e8d133492bdb63034498e58bcf062927fd13784285b2a8",
+      "archiveRoot": "focus-timer",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "rowZn/IMUwIVbGBChixZX0aE6M6yb+gJBIW3ukhtJ4j4Tib5d9aSBHtaxUeKMEHgKkAn0ZrwI2HMi0hf+MRpDw=="
     }
   ]
 }

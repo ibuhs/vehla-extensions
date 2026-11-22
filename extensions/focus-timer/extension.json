@@ -1,0 +1,31 @@
+{
+  "apiVersion": 4,
+  "id": "com.ibuhs.vehla.focus-timer",
+  "name": "Focus Timer",
+  "version": "1.0.0",
+  "description": "Start a focus timer from the palette and watch it count down in the Notch.",
+  "author": "ibuhs",
+  "entrypoint": "index.js",
+  "commands": [
+    {
+      "id": "start",
+      "title": "Start Focus Timer",
+      "subtitle": "Type the minutes, or leave empty for 25",
+      "keywords": ["focus", "pomodoro", "timer"],
+      "systemImage": "timer"
+    },
+    {
+      "id": "stop",
+      "title": "Stop Focus Timer",
+      "subtitle": "Take the timer out of the Notch",
+      "keywords": ["focus", "pomodoro", "stop"],
+      "systemImage": "stop.circle"
+    }
+  ],
+  "capabilities": [],
+  "notch": {
+    "activities": [
+      { "id": "focus", "title": "Focus timer" }
+    ]
+  }
+}

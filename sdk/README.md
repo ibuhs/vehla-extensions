@@ -50,6 +50,50 @@ Vehla. They are plugin contracts, not standalone application frameworks.
 and Vehla embeds no framework for it. The two sides meet through the
 Objective-C protocols `VehlaNotchHost` and `VehlaNotchPlugin`.
 
+## Live activities from any extension (Store API 4)
+
+A live activity is plain data that Vehla draws, so an extension doesn't have to
+be a Notch extension to show one. Palette, QuickGlass and native workspace
+extensions can post activities too, with none of their code loaded into or
+kept running in Vehla.
+
+Declare the ids in `extension.json` and set `"apiVersion": 4`:
+
+```json
+"notch": { "activities": [ { "id": "focus", "title": "Focus timer" } ] }
+```
+
+Only Notch packages may declare tabs or `background`.
+
+**Node / executable commands** answer with the activity and exit:
+
+```js
+return Store.notchActivity("focus", {
+  title: "Focus", systemImage: "timer", tint: "#FF9F0A",
+  countdown: 25 * 60,            // a clock instead of `detail`
+  command: "start",              // run when the activity is clicked
+  buttons: [{ title: "Stop", systemImage: "stop.fill", command: "stop" }],
+});
+// later: return Store.endNotchActivity("focus");
+```
+
+Fields: `title`, `detail`, `systemImage`, `tint` ("#RRGGBB"), `progress` (0–1),
+`seconds` (how long it stays, 2 s to 8 h), `countdown`, `end`, `command` /
+`query`, and up to two `buttons`, each running one of the package's own
+commands. Swift commands use `Store.notchActivity(_:_:)` with
+`StoreNotchActivity`. See `extensions/focus-timer`.
+
+**Native workspaces** call the context:
+
+```swift
+context.showNotchActivity(.init(id: "export", title: "Exporting", progress: 0.4,
+                                workspaceID: "main"))   // a click opens the workspace
+context.endNotchActivity(id: "export")
+```
+
+Packages using this are API 4, so they are listed in `catalog-api4.json` and
+only install on Vehla versions that know API 4.
+
 ## Notch / Island extensions
 
 A Notch extension adds either or both of:
@@ -65,6 +109,8 @@ A Notch extension adds either or both of:
   content area below the bar. That area is small (about 160 points high in the
   Notch, a little taller in the floating Island), so lay out for it, fill the
   size you are given and scroll anything longer.
+  A tab that needs more room can ask for it with `"height"` (points of content,
+  160 to 320) in its manifest entry; the Notch grows while that tab shows.
 
 ```json
 {

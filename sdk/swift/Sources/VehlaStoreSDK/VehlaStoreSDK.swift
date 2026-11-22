@@ -181,6 +181,69 @@ public enum StoreActionKind: String, Codable, Sendable {
     case openURL
     case showMessage
     case notify
+    /// Store API 4: a live activity in the closed Notch.
+    case notchActivity
+}
+
+/// A live activity in the closed Notch, drawn by Vehla. The extension keeps nothing running for it.
+public struct StoreNotchActivity: Codable, Hashable, Sendable {
+    public struct Button: Codable, Hashable, Sendable {
+        public var title: String
+        public var systemImage: String?
+        /// One of this package's own commands, run with `query` when the button is pressed.
+        public var command: String
+        public var query: String?
+
+        public init(title: String, systemImage: String? = nil, command: String, query: String? = nil) {
+            self.title = title
+            self.systemImage = systemImage
+            self.command = command
+            self.query = query
+        }
+    }
+
+    public var title: String?
+    public var detail: String?
+    public var systemImage: String?
+    /// "#RRGGBB".
+    public var tint: String?
+    public var progress: Double?
+    /// How long it stays (2 s to 8 h; 8 h when nil).
+    public var seconds: Double?
+    /// Shows a clock counting down this many seconds in place of `detail`.
+    public var countdown: Double?
+    public var end: Bool?
+    /// The command a click on the activity runs.
+    public var command: String?
+    public var query: String?
+    /// At most two.
+    public var buttons: [Button]?
+
+    public init(
+        title: String? = nil,
+        detail: String? = nil,
+        systemImage: String? = nil,
+        tint: String? = nil,
+        progress: Double? = nil,
+        seconds: Double? = nil,
+        countdown: Double? = nil,
+        end: Bool? = nil,
+        command: String? = nil,
+        query: String? = nil,
+        buttons: [Button]? = nil
+    ) {
+        self.title = title
+        self.detail = detail
+        self.systemImage = systemImage
+        self.tint = tint
+        self.progress = progress
+        self.seconds = seconds
+        self.countdown = countdown
+        self.end = end
+        self.command = command
+        self.query = query
+        self.buttons = buttons
+    }
 }
 
 public struct StoreAction: Codable, Hashable, Sendable {
@@ -189,19 +252,22 @@ public struct StoreAction: Codable, Hashable, Sendable {
     public let title: String?
     public let label: String?
     public let systemImage: String?
+    public let activity: StoreNotchActivity?
 
     public init(
         type: StoreActionKind,
         value: String,
         title: String? = nil,
         label: String? = nil,
-        systemImage: String? = nil
+        systemImage: String? = nil,
+        activity: StoreNotchActivity? = nil
     ) {
         self.type = type
         self.value = value
         self.title = title
         self.label = label
         self.systemImage = systemImage
+        self.activity = activity
     }
 }
 
@@ -316,6 +382,15 @@ public enum Store {
 
     public static func view(_ value: StoreRichView) -> StoreResult {
         StoreResult(view: value)
+    }
+
+    /// Shows or updates the live activity `id` (declared under `notch.activities`, Store API 4).
+    public static func notchActivity(_ id: String, _ activity: StoreNotchActivity) -> StoreResult {
+        StoreResult(action: StoreAction(type: .notchActivity, value: id, activity: activity))
+    }
+
+    public static func endNotchActivity(_ id: String) -> StoreResult {
+        StoreResult(action: StoreAction(type: .notchActivity, value: id, activity: StoreNotchActivity(end: true)))
     }
 }
 

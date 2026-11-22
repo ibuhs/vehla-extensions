@@ -229,6 +229,50 @@ public enum VehlaWorkspaceAction: Sendable {
     case showMessage(String)
     case notify(title: String, body: String)
     case openWorkspace(id: String, query: String)
+    case notchActivity(VehlaWorkspaceNotchActivity)
+    case endNotchActivity(id: String)
+}
+
+/// A live activity in the closed Notch, drawn by Vehla (Store API 4). `id` must be declared under
+/// `notch.activities` in extension.json. A click opens `workspaceID` (with `query`) when given.
+public struct VehlaWorkspaceNotchActivity: Sendable {
+    public var id: String
+    public var title: String
+    public var detail: String?
+    public var systemImage: String?
+    /// "#RRGGBB".
+    public var tintHex: String?
+    public var progress: Double?
+    /// How long it stays (2 s to 8 h; 8 h when nil).
+    public var duration: TimeInterval?
+    /// Shows a clock counting down to this date in place of `detail`.
+    public var countdownTo: Date?
+    public var workspaceID: String?
+    public var query: String
+
+    public init(
+        id: String,
+        title: String,
+        detail: String? = nil,
+        systemImage: String? = nil,
+        tintHex: String? = nil,
+        progress: Double? = nil,
+        duration: TimeInterval? = nil,
+        countdownTo: Date? = nil,
+        workspaceID: String? = nil,
+        query: String = ""
+    ) {
+        self.id = id
+        self.title = title
+        self.detail = detail
+        self.systemImage = systemImage
+        self.tintHex = tintHex
+        self.progress = progress
+        self.duration = duration
+        self.countdownTo = countdownTo
+        self.workspaceID = workspaceID
+        self.query = query
+    }
 }
 
 @objc(VehlaWorkspaceContext)
@@ -320,6 +364,17 @@ public final class VehlaWorkspaceContext: NSObject {
 
     public func openWorkspace(id: String, query: String = "") {
         actionHandler(.openWorkspace(id: id, query: query))
+    }
+
+    /// Shows or updates a live activity in the closed Notch. Needs Store API 4 in extension.json and the
+    /// activity's id declared under `notch.activities`; older versions of Vehla don't have this call.
+    @nonobjc
+    public func showNotchActivity(_ activity: VehlaWorkspaceNotchActivity) {
+        actionHandler(.notchActivity(activity))
+    }
+
+    public func endNotchActivity(id: String) {
+        actionHandler(.endNotchActivity(id: id))
     }
 }
 
