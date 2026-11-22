@@ -1,0 +1,21 @@
+{
+  "apiVersion": 4,
+  "id": "com.michaelwiseman.vehla.actions-hub",
+  "name": "Actions Hub",
+  "version": "1.0.0",
+  "description": "Shortcuts, scenes, app launchers, system toggles and at-a-glance stats in one Notch tab.",
+  "author": "Michael Wiseman",
+  "runtime": "notch",
+  "entrypoint": "bin/ActionsHub.bundle",
+  "capabilities": ["persistentStorage"],
+  "notch": {
+    "background": false,
+    "tabs": [
+      { "id": "actions", "title": "Actions", "systemImage": "square.grid.2x2.fill" }
+    ],
+    "activities": [
+      { "id": "scene", "title": "Scene" },
+      { "id": "awake", "title": "Keeping awake" }
+    ]
+  }
+}

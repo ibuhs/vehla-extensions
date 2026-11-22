@@ -4,6 +4,97 @@
     {
       "manifest": {
         "apiVersion": 4,
+        "id": "com.michaelwiseman.vehla.actions-hub",
+        "name": "Actions Hub",
+        "version": "1.0.0",
+        "description": "Shortcuts, scenes, app launchers, system toggles and at-a-glance stats in one Notch tab.",
+        "author": "Michael Wiseman",
+        "runtime": "notch",
+        "entrypoint": "bin/ActionsHub.bundle",
+        "capabilities": [
+          "persistentStorage"
+        ],
+        "notch": {
+          "background": false,
+          "tabs": [
+            {
+              "id": "actions",
+              "title": "Actions",
+              "systemImage": "square.grid.2x2.fill"
+            }
+          ],
+          "activities": [
+            {
+              "id": "scene",
+              "title": "Scene"
+            },
+            {
+              "id": "awake",
+              "title": "Keeping awake"
+            }
+          ]
+        }
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/actions-hub-1.0.0.zip",
+      "sha256": "feaaf98930e83fe72d1a16e5a401f1cd3ed4b0f3afa7aac52fc4337a036a1064",
+      "archiveRoot": "actions-hub",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "dnPnpmzC1zm6exU/82GkDQl+dh6fWTBtT1JayHnUkflRbV4d3rstvxM53Pgr8ppblyeq9jeRxt1wNPJ4Z42QDA=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 4,
+        "id": "com.michaelwiseman.vehla.agent-approvals",
+        "name": "Agent Approvals",
+        "version": "1.0.0",
+        "description": "Monitor live Claude Code agents from the Notch and approve or deny their permission requests without leaving what you are doing.",
+        "author": "Michael Wiseman",
+        "runtime": "notch",
+        "entrypoint": "bin/AgentApprovals.bundle",
+        "capabilities": [
+          "persistentStorage",
+          "clipboardWrite"
+        ],
+        "notch": {
+          "background": true,
+          "tabs": [
+            {
+              "id": "agents",
+              "title": "Agents",
+              "systemImage": "person.badge.shield.checkmark.fill"
+            }
+          ],
+          "activities": [
+            {
+              "id": "approval",
+              "title": "Approval needed"
+            },
+            {
+              "id": "agents",
+              "title": "Agent finished"
+            }
+          ]
+        }
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/agent-approvals-1.0.0.zip",
+      "sha256": "7abee19fa18cb83704b83813f8177e3195131ec8abc1cb6f76f169180d9a82e1",
+      "archiveRoot": "agent-approvals",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "Sagdoft8qyH8uyCAzSIbm3+xQagdsl2+SKWbpyBvZEgDBcvhaunjpN0NRd194LdkD8MbySkL86kmoyK2BVYADw=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 4,
         "id": "com.ibuhs.vehla.docker-notch",
         "name": "Docker Containers",
         "version": "1.1.0",
@@ -100,6 +191,178 @@
         "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
       },
       "signature": "rowZn/IMUwIVbGBChixZX0aE6M6yb+gJBIW3ukhtJ4j4Tib5d9aSBHtaxUeKMEHgKkAn0ZrwI2HMi0hf+MRpDw=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 4,
+        "id": "com.michaelwiseman.vehla.today",
+        "name": "Today",
+        "version": "1.0.0",
+        "description": "Your day at a glance: a short brief of your schedule, reminders and weather, with an optional AI summary from Anthropic, OpenAI, Gemini, DeepSeek or any compatible endpoint, plus a meeting countdown with a Join button.",
+        "author": "Michael Wiseman",
+        "runtime": "notch",
+        "entrypoint": "bin/Today.bundle",
+        "capabilities": [
+          "persistentStorage",
+          "networkAccess",
+          "openURL"
+        ],
+        "secrets": [
+          {
+            "id": "anthropicKey",
+            "label": "Anthropic API key (optional)",
+            "description": "Only used if you turn on AI brief and pick Anthropic. Sent only to api.anthropic.com.",
+            "required": false
+          },
+          {
+            "id": "openaiKey",
+            "label": "OpenAI API key (optional)",
+            "description": "Only used if you turn on AI brief and pick OpenAI. Sent only to api.openai.com.",
+            "required": false
+          },
+          {
+            "id": "geminiKey",
+            "label": "Google Gemini API key (optional)",
+            "description": "Only used if you turn on AI brief and pick Gemini. Sent only to generativelanguage.googleapis.com.",
+            "required": false
+          },
+          {
+            "id": "deepseekKey",
+            "label": "DeepSeek API key (optional)",
+            "description": "Only used if you turn on AI brief and pick DeepSeek. Sent only to api.deepseek.com.",
+            "required": false
+          },
+          {
+            "id": "customKey",
+            "label": "Custom endpoint API key (optional)",
+            "description": "Only used if you pick Custom. Sent only to the base URL you enter. Not needed for local models.",
+            "required": false
+          }
+        ],
+        "notch": {
+          "background": true,
+          "tabs": [
+            {
+              "id": "today",
+              "title": "Today",
+              "systemImage": "sun.max.fill"
+            }
+          ],
+          "activities": [
+            {
+              "id": "next-event",
+              "title": "Next meeting"
+            }
+          ]
+        }
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/today-1.0.0.zip",
+      "sha256": "3db982145baac65477466035b20ab6d549700b74ac394be7c4853e3671f809e3",
+      "archiveRoot": "today",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "zAbt58R/MZagcomhTO4RzqcAPJzNGSdV/bdinIzRXtBXOl9yM8Y6B8oqxJrWdg2WQfrmfU7YF1kFRUZHW2ihDw=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 4,
+        "id": "com.michaelwiseman.vehla.wallhaven-notch",
+        "name": "Wallhaven Notch",
+        "version": "1.0.0",
+        "description": "Browse Wallhaven wallpapers from a tab in the Notch and set one as your desktop. With an API key you can also choose Sketchy or NSFW.",
+        "author": "Michael Wiseman",
+        "runtime": "notch",
+        "entrypoint": "bin/WallhavenNotch.bundle",
+        "capabilities": [
+          "persistentStorage",
+          "networkAccess",
+          "clipboardWrite",
+          "openURL"
+        ],
+        "secrets": [
+          {
+            "id": "apiKey",
+            "label": "Wallhaven API key (optional)",
+            "description": "Raises rate limits and unlocks the Sketchy and NSFW content filter. Sent only to wallhaven.cc as the X-API-Key header.",
+            "required": false
+          }
+        ],
+        "notch": {
+          "background": false,
+          "tabs": [
+            {
+              "id": "wallhaven",
+              "title": "Wallhaven",
+              "systemImage": "photo.on.rectangle.angled"
+            }
+          ],
+          "activities": [
+            {
+              "id": "wallpaper",
+              "title": "Wallpaper"
+            }
+          ]
+        }
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/wallhaven-notch-1.0.0.zip",
+      "sha256": "e7aaaf1f7fda35b817db6a57bee52c03c76aa503cee707dfca0fa7f7c1063e18",
+      "archiveRoot": "wallhaven-notch",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "WH3viZJxqb6A9+v2Ep9zx+KR7OSV9XCEniQLodQqhU2/SgBOW0Zla9X6aIvSnAQrx9eK7v2h+hvP6vqaJicOBQ=="
+    },
+    {
+      "manifest": {
+        "apiVersion": 4,
+        "id": "com.michaelwiseman.vehla.wellbeing",
+        "name": "Wellbeing",
+        "version": "1.0.0",
+        "description": "Track water and breathe from the Notch, with gentle reminders that respect quiet hours.",
+        "author": "Michael Wiseman",
+        "runtime": "notch",
+        "entrypoint": "bin/Wellbeing.bundle",
+        "capabilities": [
+          "persistentStorage"
+        ],
+        "notch": {
+          "background": true,
+          "tabs": [
+            {
+              "id": "wellbeing",
+              "title": "Wellbeing",
+              "systemImage": "heart.fill"
+            }
+          ],
+          "activities": [
+            {
+              "id": "water",
+              "title": "Water reminder"
+            },
+            {
+              "id": "breathe",
+              "title": "Breathing session"
+            }
+          ]
+        }
+      },
+      "archiveURL": "https://raw.githubusercontent.com/ibuhs/vehla-extensions/main/packages/wellbeing-1.0.0.zip",
+      "sha256": "22b75da753d9c5e9f20655533109223531b113fbc7373493b13ac32576a1cbcd",
+      "archiveRoot": "wellbeing",
+      "publisher": {
+        "id": "com.ibuhs.publisher",
+        "name": "ibuhs",
+        "keyID": "release-2026-07",
+        "publicKey": "PiJ1hO4qXMtj59USYH3BHV6M1DZrAqRdEgxQgAFJQdk="
+      },
+      "signature": "eqv2UWEiIgQPxm8J0aBiAfiqyR8Kr2l68Xs75qO6s1S/urhFDvKrn3U1lqtPYk5PNJ/WIWsahYejTEU8N3jqCQ=="
     }
   ]
 }
