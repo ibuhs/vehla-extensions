@@ -1,0 +1,21 @@
+{
+  "apiVersion": 4,
+  "id": "com.michaelwiseman.vehla.agent-approvals",
+  "name": "Agent Approvals",
+  "version": "1.0.0",
+  "description": "Monitor live Claude Code agents from the Notch and approve or deny their permission requests without leaving what you are doing.",
+  "author": "Michael Wiseman",
+  "runtime": "notch",
+  "entrypoint": "bin/AgentApprovals.bundle",
+  "capabilities": ["persistentStorage", "clipboardWrite"],
+  "notch": {
+    "background": true,
+    "tabs": [
+      { "id": "agents", "title": "Agents", "systemImage": "terminal.fill" }
+    ],
+    "activities": [
+      { "id": "approval", "title": "Approval needed" },
+      { "id": "agents", "title": "Agent finished" }
+    ]
+  }
+}
